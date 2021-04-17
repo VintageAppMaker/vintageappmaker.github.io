@@ -1,6 +1,7 @@
 ---
 layout: post
 title: WritingWithKotlin
+categories: kotlin
 ---
 
 Kotlin과 글쓰기를 같이하는 철저한 잉여력 테스트.

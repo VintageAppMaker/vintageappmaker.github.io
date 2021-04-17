@@ -1,6 +1,7 @@
 ---
 layout: post
 title: Kotlin OnePoint Lesson
+categories: kotlin
 ---
 
 First Kotlin의 개발자버전

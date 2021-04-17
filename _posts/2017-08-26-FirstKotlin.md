@@ -10,4 +10,6 @@ Android의 두번째 공식언어는 kotlin이다.
 
 [kotlin guide](https://github.com/VintageAppMaker/FirstKotlin)
 
+[youtube link](https://www.youtube.com/watch?v=6CcMQW6iFEw&list=PLRMWteUGYj2WsOL8hwaN_qgM3VohfaVY3)
+
 <iframe width="560" height="315" src="https://www.youtube.com/embed/ktJhBjvin2Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
