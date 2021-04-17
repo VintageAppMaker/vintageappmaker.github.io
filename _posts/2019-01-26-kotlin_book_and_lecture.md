@@ -2,6 +2,7 @@
 layout: post
 title: Kotlin Book과 강의 
 categories: kotlin
+tags: [kotlin, book]
 ---
 
 Kotlin 개발서적 및 온라인 강의예제 

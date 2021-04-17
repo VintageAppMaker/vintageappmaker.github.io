@@ -2,6 +2,7 @@
 layout: post
 title: Java To Kotlin
 categories: kotlin
+tags: [kotlin, tip]
 ---
 
 Android 프로그래밍에서 Java에서 Kotlin 사용시 경험.

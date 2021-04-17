@@ -2,6 +2,7 @@
 layout: post
 title: Github Searcher Example 
 categories: kotlin
+tags: [kotlin, github api]
 image: githubsearcher_1.gif
 ---
 
