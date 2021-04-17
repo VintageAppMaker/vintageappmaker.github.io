@@ -2,6 +2,7 @@
 layout: post
 title: Github Searcher Example 
 categories: kotlin
+image: githubsearcher_1.gif
 ---
 
 Github Searcher 예제 
