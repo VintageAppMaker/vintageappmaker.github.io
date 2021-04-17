@@ -1,6 +1,7 @@
 ---
 layout: post
 title: First Kotlin
+categories: kotlin
 ---
 
 Android의 두번째 공식언어는 kotlin이다.
@@ -8,3 +9,5 @@ Android의 두번째 공식언어는 kotlin이다.
 구현해보았다. Java 개발자들에게는 쉽고 빠르게 적용할 수 있는 내용이 될 것이다. 
 
 [kotlin guide](https://github.com/VintageAppMaker/FirstKotlin)
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/ktJhBjvin2Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
