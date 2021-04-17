@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Github Searcher Example 
-categories: kotlin
+categories: [kotlin, backborne]
 tags: [kotlin, github api]
 image: githubsearcher_1.gif
 ---

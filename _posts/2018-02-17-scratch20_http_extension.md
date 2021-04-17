@@ -1,6 +1,8 @@
 ---
 layout: post
 title: scratch 2.0 http extension example 
+categories: python
+tags: [ education, scratch ]
 ---
 
 스크래치2.0 offline http extension의 예제

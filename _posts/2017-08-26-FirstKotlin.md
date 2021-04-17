@@ -2,6 +2,7 @@
 layout: post
 title: First Kotlin
 categories: kotlin
+tags: tutorial
 ---
 
 Android의 두번째 공식언어는 kotlin이다.

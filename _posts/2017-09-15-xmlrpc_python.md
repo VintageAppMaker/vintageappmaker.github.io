@@ -1,6 +1,8 @@
 ---
 layout: post
 title: xmlrpc_python 
+categories: python
+tags: [xmlrpc, RPC]
 ---
 
 python xmlrpc 예제

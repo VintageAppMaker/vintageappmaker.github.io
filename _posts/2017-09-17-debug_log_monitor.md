@@ -1,6 +1,8 @@
 ---
 layout: post
 title: debug log monitor 
+categories: CPLUSPLUS
+tags: [windows Programming]
 ---
 
 윈도우 디버그출력 API를 이용한 서버로그관리

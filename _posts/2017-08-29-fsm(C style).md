@@ -1,6 +1,8 @@
 ---
 layout: post
 title: FSM C Style
+categories: [CPLUSPLUS]
+tags: [FSM, tip]
 ---
 
 >FSM은 유한상태기계(Finite State Machine)의 약자이다. 

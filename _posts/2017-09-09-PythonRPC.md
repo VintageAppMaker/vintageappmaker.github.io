@@ -1,12 +1,14 @@
 ---
 layout: post
 title: PythonRPC
+categories: [python]
+tags: [RPC]
 ---
 
 python으로 rpc 구현하기.
 
 보편화된 서버개발 순서는 일반적으로 다음과 같다. 
- 
+
   1. 패킷정의
   2. flow 작성
   2. 서버 적용, 클라이언트 적용
