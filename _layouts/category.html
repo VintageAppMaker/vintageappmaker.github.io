@@ -13,9 +13,9 @@ layout: default
   {% assign category = page.category | default: page.title %}
   {% for post in site.categories[category] %}
     <li>
-      <h3 style= "color: grey; font-size: 12;">
-        <a href="{{ site.baseurl }}{{ post.url }}" style= "color: grey; font-size: 14;">
-          {{ post.title }}
+      <h3 style= "color: Gray; font-size: 12;">
+        <a href="{{ site.baseurl }}{{ post.url }}" style= "color: black; font-size: 14;">
+          ▢ {{ post.title }}
         </a>
         <small>{{ post.date | date_to_string }}</small>
       </h3>
