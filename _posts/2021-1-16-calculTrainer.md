@@ -14,3 +14,4 @@ image: calcultrainer_1.webp
 
 [이동하기](https://github.com/VintageAppMaker/CalculTrainer)
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/BURRJx9qUSQ" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
