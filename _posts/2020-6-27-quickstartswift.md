@@ -3,7 +3,7 @@ layout: post
 title: 빠르게 swift와 swiftUI를 학습하기  
 categories: [other]
 tags: [swift, swiftui]
-image: quickswift_1.gif
+image: quickswift_1.png
 ---
 
 ## Quick Start Swift
@@ -13,7 +13,7 @@ image: quickswift_1.gif
 1. 최소한의 필수 swift 문법
 2. 현업에서 사용하는 필수 코딩스타일 위주정리
 
-![](/images/quickswift_1.gif)
+![](/images/quickswift_1.png)
 
 [이동하기](https://github.com/VintageAppMaker/UltraQuickStartSwift)
 
