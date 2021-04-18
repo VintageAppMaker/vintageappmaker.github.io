@@ -8,10 +8,13 @@ layout: default
   <br>
   <br>
 <center>
+  <h2>{{ page.title }}</h2> 
+  <hr>
 <ul class="posts-list">
   
   {% assign category = page.category | default: page.title %}
   {% for post in site.categories[category] %}
+
     <li>
       <h3 style= "color: Gray; font-size: 12;">
         <a href="{{ site.baseurl }}{{ post.url }}" style= "color: black; font-size: 14;">
