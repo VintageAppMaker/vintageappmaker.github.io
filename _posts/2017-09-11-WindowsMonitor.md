@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Windows Monitor 
-categories: [CPLUSPLUS]
+categories: cplusplus
 tags: [windows Programming, debugging]
 ---
 

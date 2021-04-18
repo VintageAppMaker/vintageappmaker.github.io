@@ -1,7 +1,7 @@
 ---
 layout: post
 title: debug log monitor 
-categories: CPLUSPLUS
+categories: cplusplus
 tags: [windows Programming]
 ---
 

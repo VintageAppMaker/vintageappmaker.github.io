@@ -2,7 +2,7 @@
 layout: post
 title: logcat GUI 
 image: logcat_gui_1.gif
-categories: [Other, python]
+categories: [other, python]
 tags: [windows Programming, logcat, Delphi]
 ---
 
