@@ -1,7 +1,7 @@
 ---
 layout: post
 title: MakePythonModule
-categories: [cplusplus, python]
+categories: [other, python]
 tags: [windows Programming]
 ---
 

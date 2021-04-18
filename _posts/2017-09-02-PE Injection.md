@@ -1,7 +1,7 @@
 ---
 layout: post
 title: PE Injection
-categories: cplusplus
+categories: other
 tags: [windows Programming, reverse engineering]
 ---
 

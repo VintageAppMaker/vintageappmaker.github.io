@@ -2,7 +2,7 @@
 layout: post
 title: HTML_UI_Application 
 image: HTMLUI_1.png
-categories: cplusplus
+categories: other
 tags: [windows Programming]
 ---
 
