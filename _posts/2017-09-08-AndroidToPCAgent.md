@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Android To PC Agent
-categories: [CPLUSPLUS, java, linux]
+categories: [cplusplus, java, linux]
 tags: [ADB]
 ---
 

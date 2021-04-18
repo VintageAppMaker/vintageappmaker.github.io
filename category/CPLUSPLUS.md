@@ -1,6 +1,6 @@
 ---
 
 layout: category
-title: CPLUSPLUS
+title: cplusplus
 
 ---

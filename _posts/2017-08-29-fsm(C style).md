@@ -1,7 +1,7 @@
 ---
 layout: post
 title: FSM C Style
-categories: [CPLUSPLUS]
+categories: cplusplus
 tags: [FSM, tip]
 ---
 
