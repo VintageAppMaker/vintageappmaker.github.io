@@ -2,7 +2,7 @@
 layout: post
 title: 빠르게 swift와 swiftUI를 학습하기  
 categories: [other]
-tags: [swift, swiftui]
+tags: [swift, swiftui, tutorial]
 image: quickswift_1.png
 ---
 

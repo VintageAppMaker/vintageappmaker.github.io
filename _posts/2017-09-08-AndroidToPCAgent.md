@@ -13,13 +13,12 @@ tags: [ADB]
 - 단말기에 대용량데이터(파일, phonebook, 기타 등등)를 전송해야 할 경우
   
 
-연동환경:  Android에서 PC와 연동하기 위해서는 다음과 같은 환경이 필요하다.
-![image](http://postfiles3.naver.net/20120215_18/adsloader_1329304117916Fdxhf_JPEG/1.JPG?type=w2) 
+연동환경:  Android에서 PC와 연동하기 위해서는 다음과 같은 환경이 필요하다. 
 
-단말기에서는 반드시 **[설정-응용프로그램-개발-USB 디버깅]** 이 체크되어 있어야 한다.
-PC에서는 USB Driver가 설치되어 있어야 하며, ADB도 설치가 되어 있어야 한다.
+- 단말기에서는 반드시 **[설정-응용프로그램-개발-USB 디버깅]** 이 체크되어 있어야 한다.
+- PC에서는 USB Driver가 설치되어 있어야 하며, ADB도 설치가 되어 있어야 한다.
 
 연동방법:  pc에서 adb를 이용하여 linux App를 실행한다. Linux App는 단말기 내의 APK와 소켓 통신을 한 후, 그 결과값을 printf로 출력한다. PC에서는 그 결과값을 분석하여 처리한다.
-![image](http://postfiles14.naver.net/20120215_189/adsloader_13293041171767kEkS_JPEG/2.JPG?type=w2) 
+
 
 [AndroidToPCAgent](https://github.com/VintageAppMaker/AndroidToPCAgent)
