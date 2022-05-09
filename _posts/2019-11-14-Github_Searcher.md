@@ -16,4 +16,5 @@ Github Searcher 예제
 
 ![](https://raw.githubusercontent.com/VintageAppMaker/GithubSearcher/master/githubsearch.gif)
 
-[이동하기](https://github.com/VintageAppMaker/GithubSearcher)
+- [repository 이동하기](https://github.com/VintageAppMaker/GithubSearcher)
+- [compose로 구현한 github api 예제](https://github.com/VintageAppMaker/Github_compose)
