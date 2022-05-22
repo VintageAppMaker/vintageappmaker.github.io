@@ -18,3 +18,4 @@ Github Searcher 예제
 
 - [repository 이동하기](https://github.com/VintageAppMaker/GithubSearcher)
 - [compose로 구현한 github api 예제](https://github.com/VintageAppMaker/Github_compose)
+- [Flutter로 구현한 github api 예제](https://github.com/VintageAppMaker/githubflutter)
