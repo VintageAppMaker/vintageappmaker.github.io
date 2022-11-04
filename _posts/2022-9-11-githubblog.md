@@ -3,7 +3,7 @@ layout: post
 title: Flutter 통신 & 스크래핑 예제  
 categories: [other]
 tags: [tutorial, flutter]
-image: flutter_1.gif
+image: githubblog.jpg
 ---
 
 
