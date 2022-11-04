@@ -3,7 +3,7 @@ layout: post
 title: Jetpack compose 예제  
 categories: [other]
 tags: [android, kotlin, jetpackcompose]
-image: https://github.com/VintageAppMaker/FlutterTutorial
+image: https://github.com/VintageAppMaker/QuickComposeTutorial/raw/master/run.gif
 ---
 
 
