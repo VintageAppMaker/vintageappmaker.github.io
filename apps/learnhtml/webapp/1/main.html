@@ -1,0 +1,261 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>오늘의 질문</title>
+    <style>
+        html, body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #236106;
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .chat-container {
+            background-color: black;
+            width: 80%;
+            height: 90%;
+            border: 1px solid rgb(41, 41, 41);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .chat-container {
+                width: 100vw;
+                height: 100dvh;
+                border-radius: 0;
+            }
+            .chat-input {
+                flex-wrap: wrap;
+            }
+            .chat-input input[type="text"] {
+                flex: 100%;
+                margin-bottom: 5px;
+            }
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .message {
+            max-width: 70%;
+            min-width: 80px;
+            margin: 5px 0;
+            padding: 8px 12px 20px 12px;
+            border-radius: 16px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .timestamp {
+            font-size: 0.7rem;
+            color: #888;
+            position: absolute;
+            bottom: 4px;
+            right: 12px;
+            white-space: nowrap;
+        }
+
+        .message-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .message.you {
+            background: #fbfd7d;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message.other {
+            background: white;
+            margin-right: auto;
+            text-align: left;
+        }
+
+        .chat-input {
+            display: flex;
+            flex-wrap: nowrap;
+            border-top: 1px solid #ccc;
+            padding: 5px;
+            background: #fafafa;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chat-input input[type="text"] {
+            flex: 1;
+            padding: 8px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 16px;
+            outline: none;
+        }
+
+        .chat-input button, .chat-input label {
+            padding: 6px 10px;
+            font-size: 1.2rem;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            cursor: pointer;
+        }
+
+        .chat-input .icon-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .chat-input .toggle-btn {
+            background: #eee;
+            color: #333;
+        }
+
+        .download-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .hidden-file {
+            display: none;
+        }
+    </style>
+    
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." onkeypress="handleKeyPress(event)">
+            <button id="toggleSender" class="toggle-btn" onclick="toggleSender()">👤</button>
+            <button class="icon-btn" onclick="sendMessage()">📩</button>
+            <button class="download-btn" onclick="downloadChat()">💾</button>
+            <label class="download-btn">
+                📂<input type="file" class="hidden-file" id="fileInput" accept=".json" onchange="loadChat(event)">
+            </label>
+        </div>
+    </div>
+
+    <script>
+        const chatData = [];
+        let currentSender = 'you';
+
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function toggleSender() {
+            currentSender = currentSender === 'you' ? 'other' : 'you';
+            const btn = document.getElementById('toggleSender');
+            btn.textContent = currentSender === 'you' ? '👤' : '🧑';
+        }
+
+        function sendMessage(fromFile = false, data = null) {
+            const input = document.getElementById('chatInput');
+            const sender = fromFile ? data.sender : currentSender;
+            const message = fromFile ? data.message : input.value.trim();
+            const timestamp = fromFile ? data.timestamp : getCurrentTime();
+            if (!message) return;
+
+            const messageRow = document.createElement('div');
+            messageRow.classList.add('message-row');
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', sender);
+            messageDiv.innerHTML = message;
+
+            const timeDiv = document.createElement('div');
+            timeDiv.classList.add('timestamp');
+            timeDiv.textContent = timestamp;
+            messageDiv.appendChild(timeDiv);
+
+            messageRow.appendChild(messageDiv);
+            document.getElementById('chatMessages').appendChild(messageRow);
+
+            if (!fromFile) {
+                chatData.push({ sender, message, timestamp });
+                input.value = '';
+            }
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function downloadChat() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(chatData, null, 2));
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", "chat_data.json");
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+        }
+
+        function loadChat(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    document.getElementById('chatMessages').innerHTML = '';
+                    chatData.length = 0;
+                    data.forEach(entry => {
+                        sendMessage(true, entry);
+                        chatData.push(entry);
+                    });
+                } catch (err) {
+                    alert('잘못된 JSON 형식입니다.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 모바일에서 height 재설정
+        function setFullHeight() {
+            document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+        }
+
+        window.addEventListener('resize', setFullHeight);
+        window.addEventListener('load', setFullHeight);
+    </script>
+</body>
+
+</html>

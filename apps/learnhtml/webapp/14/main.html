@@ -1,0 +1,1316 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BMI 기록 대시보드</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: \"Segoe UI\", system-ui, sans-serif;
+            --md-surface: #ffffff;
+            --md-surface-variant: #f2f5f8;
+            --md-primary: #006a6a;
+            --md-on-primary: #ffffff;
+            --md-outline: #d1d7dc;
+            --md-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.24);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #eef2f5;
+            color: #1f3333;
+            min-height: 100vh;
+        }
+
+        main {
+            display: grid;
+            gap: 24px;
+            padding: 112px 24px 128px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        section {
+            display: grid;
+            gap: 16px;
+        }
+
+        section>h2 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .app-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 72px;
+            background: var(--md-surface);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 0 24px;
+            box-shadow: var(--md-shadow);
+            z-index: 20;
+        }
+
+        .app-bar-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .app-bar-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 12px;
+        }
+
+        .icon-button {
+            width: 44px;
+            height: 44px;
+            border-radius: 22px;
+            border: none;
+            background: transparent;
+            color: #1f3333;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+        }
+
+        .icon-button svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        .icon-button:hover {
+            background: rgba(0, 0, 0, 0.06);
+        }
+
+        .icon-button:active {
+            transform: scale(0.96);
+        }
+
+        .nav-drawer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 280px;
+            background: var(--md-surface);
+            box-shadow: var(--md-shadow);
+            transform: translateX(-100%);
+            transition: transform 200ms ease;
+            padding: 96px 24px 24px;
+            display: grid;
+            gap: 16px;
+            z-index: 30;
+        }
+
+        .nav-drawer.open {
+            transform: translateX(0);
+        }
+
+        .nav-drawer-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--md-outline);
+        }
+
+        .nav-drawer-title {
+            font-weight: 600;
+        }
+
+        .nav-drawer-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .nav-drawer-list button {
+            justify-self: stretch;
+            text-align: left;
+            padding: 12px 16px;
+            border-radius: 20px;
+            background: transparent;
+            border: none;
+            font-size: 16px;
+            color: inherit;
+            cursor: pointer;
+            transition: background 120ms ease, transform 120ms ease;
+        }
+
+        .nav-drawer-list button:hover {
+            background: var(--md-surface-variant);
+        }
+
+        .nav-scrim {
+            position: fixed;
+            inset: 0;
+            background: rgba(17, 17, 17, 0.32);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 150ms ease;
+            z-index: 25;
+        }
+
+        .nav-scrim.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .md-card {
+            background: var(--md-surface);
+            border-radius: 16px;
+            box-shadow: var(--md-shadow);
+            padding: 20px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .md-card h3 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .md-card-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .md-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            background: var(--md-primary);
+            color: var(--md-on-primary);
+            box-shadow: var(--md-shadow);
+            cursor: pointer;
+            transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease, color 120ms ease;
+        }
+
+        .md-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.18);
+        }
+
+        .md-button:active {
+            transform: scale(0.98);
+        }
+
+        .md-button--tonal {
+            background: #4fb0b0;
+            color: #063131;
+        }
+
+        .md-button--text {
+            background: transparent;
+            color: var(--md-primary);
+            box-shadow: none;
+        }
+
+        .md-button--text:hover {
+            background: rgba(0, 106, 106, 0.08);
+            box-shadow: none;
+            transform: none;
+        }
+
+        .md-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 18px;
+            font-size: 14px;
+            background: var(--md-surface-variant);
+            color: #1f3333;
+            border: 1px solid var(--md-outline);
+        }
+
+        .chip-icon {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--md-primary);
+        }
+
+        .md-form-card {
+            padding: 28px;
+        }
+
+        .md-form {
+            display: grid;
+            gap: 20px;
+        }
+
+        .md-form-row {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+        .md-text-field {
+            display: grid;
+            gap: 6px;
+        }
+
+        .md-text-field label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #2b4040;
+        }
+
+        .md-text-field input,
+        .md-text-field select,
+        .md-text-field textarea {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--md-outline);
+            background: var(--md-surface);
+            padding: 14px 16px;
+            font: inherit;
+            color: inherit;
+            transition: border-color 160ms ease, box-shadow 160ms ease;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+        }
+
+        .md-text-field select {
+            appearance: none;
+            padding-right: 40px;
+            background-image: linear-gradient(45deg, transparent 50%, #1f3333 50%), linear-gradient(135deg, #1f3333 50%, transparent 50%);
+            background-position: calc(100% - 24px) calc(50% - 3px), calc(100% - 19px) calc(50% - 3px);
+            background-size: 6px 6px;
+            background-repeat: no-repeat;
+        }
+
+        .md-text-field textarea {
+            resize: vertical;
+            min-height: 112px;
+        }
+
+        .md-text-field input:focus,
+        .md-text-field select:focus,
+        .md-text-field textarea:focus {
+            outline: none;
+            border-color: var(--md-primary);
+            box-shadow: 0 0 0 3px rgba(0, 106, 106, 0.14);
+        }
+
+        .md-text-field--focused label {
+            color: var(--md-primary);
+        }
+
+        .md-text-field--filled label {
+            color: #425151;
+        }
+
+        .md-text-field--invalid label {
+            color: #b3261e;
+        }
+
+        .md-text-field--invalid input,
+        .md-text-field--invalid select,
+        .md-text-field--invalid textarea {
+            border-color: #b3261e;
+            box-shadow: 0 0 0 3px rgba(179, 38, 30, 0.16);
+        }
+
+        .md-field-helper {
+            font-size: 12px;
+            color: #5a6b6b;
+        }
+
+        .md-field-helper--error {
+            color: #b3261e;
+        }
+
+        .md-form-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .md-form-feedback {
+            margin: 0;
+            font-size: 14px;
+            color: #2b4040;
+        }
+
+        .md-form-feedback--error {
+            color: #b3261e;
+        }
+
+        .md-radio-card {
+            gap: 20px;
+        }
+
+        .md-radio-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .md-radio-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .md-radio-caption {
+            font-size: 14px;
+            color: #5a6b6b;
+        }
+
+        .md-radio-group {
+            display: grid;
+            gap: 12px;
+        }
+
+        .md-radio {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 28px;
+            cursor: pointer;
+            transition: background 160ms ease, box-shadow 160ms ease;
+        }
+
+        .md-radio--checked {
+            background: rgba(0, 106, 106, 0.14);
+            box-shadow: inset 0 0 0 1px rgba(0, 106, 106, 0.24);
+        }
+
+        .md-radio:hover {
+            background: rgba(0, 106, 106, 0.08);
+        }
+
+        .md-radio input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .md-radio-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--md-primary);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 160ms ease, background 160ms ease;
+        }
+
+        .md-radio-icon::after {
+            content: "";
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: transparent;
+            transition: transform 160ms ease, background 160ms ease;
+            transform: scale(0);
+        }
+
+        .md-radio input:checked+.md-radio-icon::after {
+            background: var(--md-primary);
+            transform: scale(1);
+        }
+
+        .md-radio input:focus-visible+.md-radio-icon {
+            outline: 3px solid rgba(0, 106, 106, 0.24);
+            outline-offset: 2px;
+        }
+
+        .md-radio-label {
+            font-size: 16px;
+        }
+
+        .md-radio-feedback {
+            margin: 0;
+            font-size: 14px;
+            color: #2b4040;
+        }
+
+        .progress-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .md-progress-card {
+            gap: 8px;
+        }
+
+        .md-progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+        }
+
+        .md-progress-description {
+            margin: 0;
+            font-size: 14px;
+            color: #425151;
+        }
+
+        .md-linear-progress {
+            position: relative;
+            height: 6px;
+            border-radius: 999px;
+            background: var(--md-surface-variant);
+            overflow: hidden;
+        }
+
+        .md-linear-progress__indicator {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: var(--md-primary);
+            transform-origin: left center;
+            transform: scaleX(0);
+            transition: transform 160ms cubic-bezier(0.4, 0, 0.2, 1);
+            will-change: transform;
+        }
+
+        .md-linear-progress[data-indeterminate="true"] .md-linear-progress__indicator {
+            transform: translateX(-105%) scaleX(0.5);
+            animation: md-linear-progress-indeterminate 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .md-progress-meta {
+            font-size: 14px;
+            color: #1f3333;
+        }
+
+        @keyframes md-linear-progress-indeterminate {
+            0% {
+                transform: translateX(-105%) scaleX(0.4);
+            }
+
+            50% {
+                transform: translateX(-15%) scaleX(0.9);
+            }
+
+            100% {
+                transform: translateX(120%) scaleX(0.5);
+            }
+        }
+
+        dialog {
+            border: none;
+            border-radius: 28px;
+            padding: 0;
+            box-shadow: var(--md-shadow);
+            max-width: 360px;
+        }
+
+        dialog::backdrop {
+            background: rgba(33, 33, 33, 0.32);
+            backdrop-filter: blur(3px);
+        }
+
+        .dialog-form {
+            display: grid;
+            gap: 16px;
+            padding: 24px;
+        }
+
+        .dialog-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .dialog-title {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .dialog-body {
+            margin: 0;
+            line-height: 1.5;
+            color: #2b4040;
+        }
+
+        .dialog-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .dialog-actions .md-button {
+            min-width: 96px;
+        }
+
+        .carousel {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            background: var(--md-surface);
+            box-shadow: var(--md-shadow);
+            min-height: 220px;
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 300ms ease;
+            height: 100%;
+        }
+
+        .carousel-slide {
+            flex: 0 0 100%;
+            padding: 32px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .carousel-slide h3 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .carousel-slide p {
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .carousel-controls {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 12px;
+            pointer-events: none;
+        }
+
+        .carousel-controls .icon-button {
+            pointer-events: auto;
+            background: rgba(255, 255, 255, 0.82);
+            box-shadow: var(--md-shadow);
+        }
+
+        .carousel-indicators {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .carousel-indicators button {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(16, 32, 32, 0.3);
+            cursor: pointer;
+            transition: transform 120ms ease, background 120ms ease;
+        }
+
+        .carousel-indicators button.active {
+            background: var(--md-primary);
+            transform: scale(1.1);
+        }
+
+        .bottom-app-bar {
+            position: fixed;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            width: min(560px, calc(100% - 32px));
+            height: 72px;
+            background: var(--md-surface);
+            box-shadow: var(--md-shadow);
+            border-radius: 24px 24px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 15;
+        }
+
+        .bottom-actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .bottom-app-bar-title {
+            font-weight: 600;
+        }
+
+        .fab {
+            position: fixed;
+            right: 32px;
+            bottom: 96px;
+            width: 64px;
+            height: 64px;
+            border-radius: 32px;
+            border: none;
+            background: var(--md-primary);
+            color: var(--md-on-primary);
+            box-shadow: var(--md-shadow);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 150ms ease, box-shadow 150ms ease;
+        }
+
+        .fab svg {
+            width: 28px;
+            height: 28px;
+            fill: currentColor;
+        }
+
+        .fab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+        }
+
+        .fab:active {
+            transform: scale(0.96);
+        }
+
+        @media (max-width: 720px) {
+            main {
+                padding: 104px 16px 144px;
+            }
+
+            .app-bar {
+                height: 64px;
+                padding: 0 16px;
+            }
+
+            .nav-drawer {
+                width: min(320px, 80vw);
+            }
+
+            .bottom-app-bar {
+                width: calc(100% - 16px);
+                padding: 0 16px;
+            }
+
+            .fab {
+                right: 16px;
+                bottom: 104px;
+            }
+        }
+    </style>
+    <style>
+        :root {
+            --bmi-underweight: #5376ff;
+            --bmi-normal: #1b9c85;
+            --bmi-overweight: #f6b343;
+            --bmi-obese: #e3575c;
+        }
+
+        .app-bar {
+            justify-content: center;
+        }
+
+        main.app-layout {
+            grid-template-columns: minmax(320px, 380px) minmax(0, 1fr);
+            gap: 32px;
+        }
+
+        @media (max-width: 960px) {
+            main.app-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-pane,
+        .result-pane {
+            gap: 24px;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .result-header h3 {
+            margin: 0;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .result-summary p {
+            margin: 0;
+            font-size: 15px;
+            color: #425151;
+        }
+
+        .result-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .empty-state {
+            text-align: center;
+            border-radius: 16px;
+            padding: 32px 24px;
+            border: 1px dashed var(--md-outline);
+            background: rgba(255, 255, 255, 0.74);
+            color: #425151;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .entry-card .md-card-body {
+            display: grid;
+            gap: 12px;
+            margin: 0;
+        }
+
+        .entry-chip-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .md-linear-progress__indicator[data-state="underweight"] {
+            background: var(--bmi-underweight);
+        }
+
+        .md-linear-progress__indicator[data-state="normal"] {
+            background: var(--bmi-normal);
+        }
+
+        .md-linear-progress__indicator[data-state="overweight"] {
+            background: var(--bmi-overweight);
+        }
+
+        .md-linear-progress__indicator[data-state="obese"] {
+            background: var(--bmi-obese);
+        }
+
+        .entry-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .entry-memo {
+            margin: 0;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: var(--md-surface-variant);
+            color: #2b4040;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .entry-bmi-value {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .md-form-feedback {
+            min-height: 20px;
+        }
+
+        @media (max-width: 720px) {
+            main.app-layout {
+                padding: 104px 16px 96px;
+                gap: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="app-bar">
+        <span class="app-bar-title">BMI 기록 대시보드</span>
+    </header>
+    <main class="app-layout">
+        <section class="input-pane">
+            <article class="md-card md-form-card">
+                <h3 class="md-card-title">BMI 기록 추가</h3>
+                <form class="md-form" id="bmi-form" novalidate>
+                    <div class="md-form-row">
+                        <label class="md-text-field">
+                            <span>이름</span>
+                            <input type="text" name="name" placeholder="홍길동" autocomplete="name" />
+                        </label>
+                        <label class="md-text-field">
+                            <span>측정 날짜</span>
+                            <input type="date" name="date" required />
+                        </label>
+                    </div>
+                    <div class="md-form-row">
+                        <label class="md-text-field">
+                            <span>키 (cm)</span>
+                            <input type="number" name="height" min="80" max="250" step="0.1" placeholder="170"
+                                required />
+                        </label>
+                        <label class="md-text-field">
+                            <span>몸무게 (kg)</span>
+                            <input type="number" name="weight" min="25" max="250" step="0.1" placeholder="65"
+                                required />
+                        </label>
+                    </div>
+                    <label class="md-text-field">
+                        <span>메모</span>
+                        <textarea name="memo" rows="3" placeholder="식단, 운동, 컨디션 등의 메모를 남겨보세요."></textarea>
+                    </label>
+                    <p class="md-form-feedback md-form-feedback--error" id="form-error" hidden></p>
+                    <div class="md-form-actions">
+                        <button type="submit" class="md-button">기록 저장</button>
+                    </div>
+                </form>
+            </article>
+        </section>
+        <section class="result-pane" aria-live="polite">
+            <header class="result-header">
+                <h3 class="md-card-title">저장된 BMI</h3>
+                <div class="result-actions">
+                    <button type="button" class="md-button md-button--tonal" id="reset-button" disabled>전체 삭제</button>
+                </div>
+            </header>
+            <div class="result-summary">
+                <p id="result-summary-text">기록이 없습니다. 좌측에서 새로운 BMI를 입력해 보세요.</p>
+            </div>
+            <div id="entry-list" class="result-list"></div>
+        </section>
+    </main>
+
+    <template id="card-template">
+        <article class="md-card">
+            <h3 class="md-card-title"></h3>
+            <div class="md-card-body"></div>
+            <footer class="md-card-actions">
+                <button class="md-button">Primary Action</button>
+            </footer>
+        </article>
+    </template>
+
+    <template id="button-template">
+        <button class="md-button">
+            <span class="label"></span>
+        </button>
+    </template>
+
+    <template id="chip-template">
+        <span class="md-chip">
+            <span class="chip-icon"></span>
+            <span class="chip-label"></span>
+        </span>
+    </template>
+
+    <script>
+        (function () {
+            const STORAGE_KEY = "bmi-entries";
+            const bmiCategories = [
+                { id: "underweight", label: "저체중", description: "체중 증량이 필요할 수 있습니다.", min: 0, max: 18.5, color: "var(--bmi-underweight)" },
+                { id: "normal", label: "정상", description: "표준 범위를 유지하고 있습니다.", min: 18.5, max: 23, color: "var(--bmi-normal)" },
+                { id: "overweight", label: "과체중", description: "생활 습관 점검이 필요합니다.", min: 23, max: 25, color: "var(--bmi-overweight)" },
+                { id: "obese", label: "비만", description: "전문가 상담을 고려해 보세요.", min: 25, max: Infinity, color: "var(--bmi-obese)" }
+            ];
+
+            const form = document.getElementById("bmi-form");
+            const errorBox = document.getElementById("form-error");
+            const entryList = document.getElementById("entry-list");
+            const summaryText = document.getElementById("result-summary-text");
+            const resetButton = document.getElementById("reset-button");
+
+            if (!form || !entryList || !summaryText || !resetButton) {
+                console.error("필수 요소를 찾을 수 없습니다.");
+                return;
+            }
+
+            const fieldContainers = Array.from(form.querySelectorAll(".md-text-field"));
+            fieldContainers.forEach(bindFieldInteractions);
+
+            let entries = [];
+
+            init();
+
+            function init() {
+                const dateInput = form.elements["date"];
+                if (dateInput && !dateInput.value) {
+                    dateInput.value = new Date().toISOString().slice(0, 10);
+                }
+                entries = loadEntries();
+                renderEntries();
+                form.addEventListener("submit", handleSubmit);
+                entryList.addEventListener("click", handleEntryActions);
+                resetButton.addEventListener("click", handleReset);
+            }
+
+            function bindFieldInteractions(container) {
+                const control = container.querySelector("input, textarea, select");
+                if (!control) {
+                    return;
+                }
+
+                updateFilledState();
+
+                control.addEventListener("input", updateFilledState);
+                control.addEventListener("focus", function () {
+                    container.classList.add("md-text-field--focused");
+                });
+                control.addEventListener("blur", function () {
+                    container.classList.remove("md-text-field--focused");
+                });
+
+                function updateFilledState() {
+                    const hasValue = control.value && control.value.trim() !== "";
+                    container.classList.toggle("md-text-field--filled", hasValue);
+                    if (hasValue) {
+                        container.classList.remove("md-text-field--invalid");
+                    }
+                    hideFormError();
+                }
+            }
+
+            function handleSubmit(event) {
+                event.preventDefault();
+                const formData = new FormData(form);
+                const name = (formData.get("name") || "").trim();
+                const date = formData.get("date");
+                const height = Number(formData.get("height"));
+                const weight = Number(formData.get("weight"));
+                const memo = (formData.get("memo") || "").trim();
+
+                const invalidFields = [];
+
+                if (!Number.isFinite(height) || height < 80 || height > 250) {
+                    invalidFields.push("height");
+                }
+
+                if (!Number.isFinite(weight) || weight < 25 || weight > 250) {
+                    invalidFields.push("weight");
+                }
+
+                if (!date) {
+                    invalidFields.push("date");
+                }
+
+                if (invalidFields.length) {
+                    markInvalidFields(invalidFields);
+                    showFormError("입력값을 다시 확인해 주세요.");
+                    return;
+                }
+
+                const entry = {
+                    id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "entry-" + Date.now(),
+                    name: name,
+                    date: date,
+                    height: height,
+                    weight: weight,
+                    memo: memo,
+                    createdAt: Date.now()
+                };
+
+                entries = insertEntry(entries, entry);
+                persistEntries(entries);
+                renderEntries();
+
+                form.reset();
+                const dateInput = form.elements["date"];
+                if (dateInput) {
+                    dateInput.value = entry.date;
+                }
+                refreshFieldStates();
+            }
+
+            function handleEntryActions(event) {
+                const actionButton = event.target.closest("button[data-entry-id]");
+                if (!actionButton) {
+                    return;
+                }
+                const entryId = actionButton.getAttribute("data-entry-id");
+                entries = entries.filter(function (item) {
+                    return item.id !== entryId;
+                });
+                persistEntries(entries);
+                renderEntries();
+            }
+
+            function handleReset() {
+                if (!entries.length) {
+                    return;
+                }
+                const confirmed = window.confirm("저장된 BMI 기록을 모두 삭제할까요?");
+                if (!confirmed) {
+                    return;
+                }
+                entries = [];
+                persistEntries(entries);
+                renderEntries();
+            }
+
+            function refreshFieldStates() {
+                fieldContainers.forEach(function (container) {
+                    const control = container.querySelector("input, textarea, select");
+                    if (!control) {
+                        return;
+                    }
+                    const hasValue = control.value && control.value.trim() !== "";
+                    container.classList.toggle("md-text-field--filled", hasValue);
+                    container.classList.remove("md-text-field--invalid", "md-text-field--focused");
+                });
+                hideFormError();
+            }
+
+            function markInvalidFields(names) {
+                fieldContainers.forEach(function (container) {
+                    const control = container.querySelector("input, textarea, select");
+                    if (control && names.indexOf(control.name) !== -1) {
+                        container.classList.add("md-text-field--invalid");
+                    }
+                });
+            }
+
+            function showFormError(message) {
+                errorBox.textContent = message;
+                errorBox.hidden = false;
+            }
+
+            function hideFormError() {
+                if (!errorBox.hidden) {
+                    errorBox.hidden = true;
+                    errorBox.textContent = "";
+                }
+            }
+
+            function calculateBmi(weightKg, heightCm) {
+                const heightM = heightCm / 100;
+                if (!heightM) {
+                    return 0;
+                }
+                const raw = weightKg / (heightM * heightM);
+                return Math.round(raw * 10) / 10;
+            }
+
+            function resolveCategory(bmi) {
+                for (var i = 0; i < bmiCategories.length; i += 1) {
+                    var item = bmiCategories[i];
+                    if (bmi >= item.min && bmi < item.max) {
+                        return item;
+                    }
+                }
+                return bmiCategories[bmiCategories.length - 1];
+            }
+
+            function normalizeProgress(bmi) {
+                const normalized = Math.min(Math.max(bmi, 0), 40);
+                return normalized / 40;
+            }
+
+            function insertEntry(list, entry) {
+                const next = list.concat(entry);
+                next.sort(function (a, b) {
+                    if (a.date === b.date) {
+                        return b.createdAt - a.createdAt;
+                    }
+                    return new Date(b.date) - new Date(a.date);
+                });
+                return next;
+            }
+
+            function loadEntries() {
+                try {
+                    const raw = window.localStorage.getItem(STORAGE_KEY);
+                    if (!raw) {
+                        return [];
+                    }
+                    const parsed = JSON.parse(raw);
+                    if (!Array.isArray(parsed)) {
+                        return [];
+                    }
+                    return parsed.filter(function (item) {
+                        return item && item.id && item.date;
+                    });
+                } catch (error) {
+                    console.error("BMI 기록을 불러오는 중 문제가 발생했습니다.", error);
+                    return [];
+                }
+            }
+
+            function persistEntries(list) {
+                try {
+                    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+                } catch (error) {
+                    console.error("BMI 기록을 저장하는 중 문제가 발생했습니다.", error);
+                }
+            }
+
+            function renderEntries() {
+                entryList.innerHTML = "";
+                if (!entries.length) {
+                    summaryText.textContent = "기록이 없습니다. 좌측에서 새로운 BMI를 입력해 보세요.";
+                    resetButton.disabled = true;
+                    entryList.appendChild(createEmptyState());
+                    return;
+                }
+
+                resetButton.disabled = false;
+
+                const latest = entries[0];
+                const latestBmi = calculateBmi(latest.weight, latest.height);
+                const latestCategory = resolveCategory(latestBmi);
+                summaryText.textContent = entries.length + "건의 기록 · 최근 BMI " + latestBmi + " (" + latestCategory.label + ")";
+
+                const fragments = document.createDocumentFragment();
+                entries.forEach(function (entry) {
+                    fragments.appendChild(createEntryCard(entry));
+                });
+                entryList.appendChild(fragments);
+            }
+
+            function createEmptyState() {
+                const placeholder = document.createElement("div");
+                placeholder.className = "empty-state";
+                placeholder.innerHTML = "<strong>BMI 기록이 없습니다.</strong><br />좌측 폼에서 첫 번째 기록을 추가해 주세요.";
+                return placeholder;
+            }
+
+            function createEntryCard(entry) {
+                const bmiValue = calculateBmi(entry.weight, entry.height);
+                const category = resolveCategory(bmiValue);
+                const progress = normalizeProgress(bmiValue);
+                const fragment = renderTemplate("card-template", function (clone) {
+                    const article = clone.querySelector("article");
+                    article.classList.add("entry-card", "md-progress-card");
+
+                    const title = clone.querySelector(".md-card-title");
+                    title.textContent = entry.name ? entry.name + "님의 BMI" : "BMI 기록";
+
+                    const body = clone.querySelector(".md-card-body");
+                    body.textContent = "";
+
+                    const header = document.createElement("div");
+                    header.className = "md-progress-header";
+
+                    const bmiLabel = document.createElement("span");
+                    bmiLabel.className = "entry-bmi-value";
+                    bmiLabel.textContent = "BMI " + bmiValue;
+
+                    const date = document.createElement("time");
+                    date.className = "md-progress-meta";
+                    date.dateTime = entry.date;
+                    date.textContent = formatDate(entry.date);
+
+                    header.appendChild(bmiLabel);
+                    header.appendChild(date);
+                    body.appendChild(header);
+
+                    const chipRow = document.createElement("div");
+                    chipRow.className = "entry-chip-row";
+                    const chipFragment = renderTemplate("chip-template", function (chipClone) {
+                        const chip = chipClone.querySelector(".md-chip");
+                        chip.querySelector(".chip-label").textContent = category.label;
+                        const icon = chipClone.querySelector(".chip-icon");
+                        icon.style.backgroundColor = category.color;
+                    });
+                    chipRow.appendChild(chipFragment);
+                    body.appendChild(chipRow);
+
+                    const description = document.createElement("p");
+                    description.className = "md-progress-description";
+                    description.textContent = category.description;
+                    body.appendChild(description);
+
+                    const metrics = document.createElement("div");
+                    metrics.className = "md-progress-meta entry-metrics";
+                    metrics.innerHTML = "<span>신장 " + entry.height + "cm</span><span>체중 " + entry.weight + "kg</span>";
+                    body.appendChild(metrics);
+
+                    const progressBar = document.createElement("div");
+                    progressBar.className = "md-linear-progress";
+                    progressBar.setAttribute("role", "progressbar");
+                    progressBar.setAttribute("aria-valuemin", "0");
+                    progressBar.setAttribute("aria-valuemax", "100");
+                    progressBar.setAttribute("aria-valuenow", String(Math.round(progress * 100)));
+                    progressBar.setAttribute("aria-valuetext", "BMI " + bmiValue + " (" + category.label + ")");
+
+                    const indicator = document.createElement("div");
+                    indicator.className = "md-linear-progress__indicator";
+                    indicator.dataset.state = category.id;
+                    indicator.style.transform = "scaleX(" + progress + ")";
+                    progressBar.appendChild(indicator);
+                    body.appendChild(progressBar);
+
+                    const memo = document.createElement("p");
+                    memo.className = "entry-memo";
+                    memo.textContent = entry.memo ? entry.memo : "메모가 없습니다.";
+                    body.appendChild(memo);
+
+                    const actionButton = clone.querySelector(".md-card-actions .md-button");
+                    actionButton.textContent = "기록 삭제";
+                    actionButton.type = "button";
+                    actionButton.classList.add("md-button--text");
+                    actionButton.setAttribute("data-entry-id", entry.id);
+                });
+                return fragment;
+            }
+
+            function formatDate(value) {
+                if (!value) {
+                    return "";
+                }
+                const parsed = new Date(value);
+                if (Number.isNaN(parsed.getTime())) {
+                    return value;
+                }
+                return new Intl.DateTimeFormat("ko-KR", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit"
+                }).format(parsed);
+            }
+
+            function renderTemplate(id, setupFn) {
+                const template = document.getElementById(id);
+                if (!template) {
+                    throw new Error("템플릿을 찾을 수 없습니다: " + id);
+                }
+                const fragment = template.content.cloneNode(true);
+                if (typeof setupFn === "function") {
+                    setupFn(fragment);
+                }
+                return fragment;
+            }
+        })();
+    </script>
+</body>
+
+</html>

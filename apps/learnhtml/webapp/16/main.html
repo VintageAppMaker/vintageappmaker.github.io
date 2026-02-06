@@ -1,0 +1,963 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>지출관리 템플릿</title>
+    <style>
+        :root {
+            --bg: #0b1020;
+            --panel: #0f172a;
+            --panel2: #0b1226;
+            --line: #1f2a44;
+            --line2: #223055;
+            --text: #e5e7eb;
+            --muted: #94a3b8;
+            --good: #22c55e;
+            --warn: #f59e0b;
+            --bad: #ef4444;
+            --chip: #111c36;
+            --chip2: #0d1630;
+            --shadow: 0 12px 30px rgba(0, 0, 0, .35);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans KR, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            background: radial-gradient(1200px 700px at 20% 0%, rgba(59, 130, 246, .15), transparent 55%),
+                radial-gradient(900px 600px at 100% 10%, rgba(16, 185, 129, .12), transparent 50%),
+                var(--bg);
+            color: var(--text);
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: 28px auto 64px;
+            padding: 0 16px;
+        }
+
+        header {
+            background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .02));
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 18px 18px 14px;
+            box-shadow: var(--shadow);
+        }
+
+        .titleRow {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: .2px;
+        }
+
+        .sub {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .field {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--line);
+            padding: 8px 10px;
+            border-radius: 12px;
+        }
+
+        .field label {
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        input[type="month"],
+        input[type="number"],
+        input[type="text"],
+        select {
+            background: transparent;
+            border: 0;
+            outline: none;
+            color: var(--text);
+            font-size: 13px;
+            min-width: 120px;
+        }
+
+        input[type="number"] {
+            min-width: 110px;
+        }
+
+        .btn {
+            border: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .02));
+            color: var(--text);
+            padding: 9px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .btn:hover {
+            border-color: var(--line2);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.25fr 1fr;
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        @media (max-width: 920px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            border: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .02));
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: var(--shadow);
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        @media (max-width: 560px) {
+            .metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .metric {
+            background: rgba(0, 0, 0, .18);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 12px;
+        }
+
+        .metric .k {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .metric .v {
+            font-size: 18px;
+            margin-top: 6px;
+            font-weight: 800;
+        }
+
+        .metric .v small {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, .03);
+            border-radius: 999px;
+            padding: 6px 10px;
+            color: var(--muted);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .status {
+            font-weight: 800;
+        }
+
+        .status.good {
+            color: var(--good);
+        }
+
+        .status.warn {
+            color: var(--warn);
+        }
+
+        .status.bad {
+            color: var(--bad);
+        }
+
+        .weekly {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .weekRow {
+            display: grid;
+            grid-template-columns: 72px 1fr 1fr;
+            gap: 10px;
+            background: rgba(0, 0, 0, .18);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 10px 12px;
+            align-items: center;
+        }
+
+        .weekRow .wk {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .weekRow .amt {
+            font-weight: 800;
+        }
+
+        .weekRow .note {
+            color: var(--muted);
+            font-size: 12px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .tableCard {
+            margin-top: 14px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            background: rgba(0, 0, 0, .18);
+        }
+
+        thead th {
+            font-size: 12px;
+            color: var(--muted);
+            text-align: left;
+            padding: 10px 10px;
+            border-bottom: 1px solid var(--line);
+            background: linear-gradient(180deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .02));
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        tbody td {
+            padding: 9px 10px;
+            border-bottom: 1px solid rgba(31, 42, 68, .75);
+            vertical-align: middle;
+            font-size: 13px;
+        }
+
+        tbody tr:hover td {
+            background: rgba(255, 255, 255, .02);
+        }
+
+        .cell-date {
+            width: 120px;
+        }
+
+        .cell-flag {
+            width: 88px;
+        }
+
+        .cell-note {
+            width: 360px;
+        }
+
+        .cell-amt {
+            width: 140px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-weight: 800;
+        }
+
+        .miniSelect {
+            width: 100%;
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 6px 8px;
+            color: var(--text);
+            font-weight: 700;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .inlineInput {
+            width: 100%;
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 6px 8px;
+            color: var(--text);
+            outline: none;
+            font-size: 13px;
+        }
+
+        .amtInput {
+            text-align: right;
+            font-weight: 800;
+        }
+
+        .rowBtns {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .iconBtn {
+            background: rgba(255, 255, 255, .03);
+            border: 1px solid var(--line);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 7px 10px;
+            cursor: pointer;
+            font-weight: 800;
+            font-size: 12px;
+        }
+
+        .iconBtn:hover {
+            border-color: var(--line2);
+        }
+
+        .footerNote {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        details {
+            margin-top: 12px;
+            border: 1px dashed rgba(148, 163, 184, .35);
+            border-radius: 14px;
+            padding: 10px 12px;
+            background: rgba(0, 0, 0, .15);
+        }
+
+        details summary {
+            cursor: pointer;
+            font-weight: 800;
+        }
+
+        pre {
+            margin: 10px 0 0;
+            overflow: auto;
+            background: rgba(0, 0, 0, .25);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 10px;
+        }
+
+        code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <header>
+            <div class="titleRow">
+                <div>
+                    <h1><span id="monthTitle">2025.12월</span> 지출관리</h1>
+                    <div class="sub">엑셀/시트 스타일을 HTML로 재현한 로컬 지출관리 템플릿 (데이터는 브라우저 LocalStorage에 저장)</div>
+                </div>
+                <div class="controls">
+                    <div class="field">
+                        <label for="month">월</label>
+                        <input id="month" type="month" value="2025-12" />
+                    </div>
+                    <div class="field">
+                        <label for="goal">목표금액(원)</label>
+                        <input id="goal" type="number" min="0" step="1000" value="600000" />
+                    </div>
+                    <button class="btn" id="btnAdd">+ 오늘 행 추가</button>
+                    <button class="btn" id="btnSeed">샘플데이터</button>
+                    <button class="btn" id="btnReset">초기화</button>
+                </div>
+            </div>
+        </header>
+
+        <section class="grid">
+            <div class="card">
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="k">지출금액</div>
+                        <div class="v" id="spent">₩0</div>
+                    </div>
+                    <div class="metric">
+                        <div class="k">허용금액</div>
+                        <div class="v" id="remain">₩0 <small id="riskTag">(안전)</small></div>
+                    </div>
+                    <div class="metric">
+                        <div class="k">사용률</div>
+                        <div class="v" id="ratio">0.0% <small id="ratioHint">(여유)</small></div>
+                    </div>
+                </div>
+
+                <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+                    <span class="badge">팁: 금액은 숫자만 입력 (자동으로 ₩ 포맷)</span>
+                    <span class="badge">필터: 아래에서 O/X로 집계 조건을 바꿀 수 있음</span>
+                </div>
+
+                <div class="footerNote">
+                    집계 룰(기본): 모든 행의 <b>금액</b>을 합산합니다.
+                    원하면 “집계 대상” 체크(식비/구매/고정비/대외) 중 하나라도 <b>O</b>인 행만 합산하도록 바꿀 수 있습니다.
+                </div>
+            </div>
+
+            <div class="card">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                    <div style="font-weight:900;">주차별 합계</div>
+                    <div class="field" title="O인 항목이 하나라도 있는 행만 합산">
+                        <label for="onlyFlagged">O 항목만 합산</label>
+                        <select id="onlyFlagged">
+                            <option value="0">아니오</option>
+                            <option value="1">예</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="weekly" id="weekly"></div>
+            </div>
+        </section>
+
+        <section class="card tableCard">
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                <div style="font-weight:900;">일자별 입력</div>
+                <div class="controls" style="gap:8px;">
+                    <div class="field">
+                        <label for="search">검색</label>
+                        <input id="search" type="text" placeholder="예: 쿠팡, 외부미팅, 넷플릭스" />
+                    </div>
+                    <div class="field">
+                        <label for="sort">정렬</label>
+                        <select id="sort">
+                            <option value="dateAsc">날짜 ↑</option>
+                            <option value="dateDesc">날짜 ↓</option>
+                            <option value="amtDesc">금액 ↓</option>
+                            <option value="amtAsc">금액 ↑</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:12px; overflow:auto; max-height:540px; border-radius:14px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="cell-date">날짜</th>
+                            <th class="cell-flag">식비</th>
+                            <th class="cell-flag">구매</th>
+                            <th class="cell-flag">고정비</th>
+                            <th class="cell-flag">대외</th>
+                            <th class="cell-note">부가설명</th>
+                            <th class="cell-amt">금액</th>
+                            <th style="width:120px; text-align:right;">관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody"></tbody>
+                </table>
+            </div>
+
+            <details>
+                <summary>ES5 vs ES6 예시 (동일 기능)</summary>
+                <pre><code>// ES5 (function + for)
+function sumAmounts(rows) {
+  var total = 0;
+  for (var i = 0; i &lt; rows.length; i++) {
+    total += Number(rows[i].amount || 0);
+  }
+  return total;
+}
+
+// ES6 (arrow + reduce)
+const sumAmounts2 = (rows) =&gt;
+  rows.reduce((acc, r) =&gt; acc + Number(r.amount || 0), 0);
+</code></pre>
+            </details>
+
+            <div class="footerNote">
+                저장키: <code>expense-tracker:v1</code>
+                · 월/목표/행데이터가 자동 저장됩니다.
+            </div>
+        </section>
+    </div>
+
+    <script>
+        /*
+          데이터 모델
+          {
+            month: "2025-12",
+            goal: 600000,
+            onlyFlagged: 0|1,
+            rows: [
+              { id: "...", date: "2025-12-01", meal:"O|X", buy:"O|X", fixed:"O|X", ext:"O|X", note:"...", amount: 1700 }
+            ]
+          }
+        */
+
+        const STORAGE_KEY = 'expense-tracker:v1';
+
+        const $ = (sel) => document.querySelector(sel);
+        const elMonthTitle = $('#monthTitle');
+        const elMonth = $('#month');
+        const elGoal = $('#goal');
+        const elOnlyFlagged = $('#onlyFlagged');
+        const elSpent = $('#spent');
+        const elRemain = $('#remain');
+        const elRatio = $('#ratio');
+        const elRiskTag = $('#riskTag');
+        const elRatioHint = $('#ratioHint');
+        const elWeekly = $('#weekly');
+        const elTbody = $('#tbody');
+        const elSearch = $('#search');
+        const elSort = $('#sort');
+
+        const nowISODate = () => {
+            const d = new Date();
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        };
+
+        const fmtKRW = (n) => {
+            const num = Number(n || 0);
+            return '₩' + num.toLocaleString('ko-KR');
+        };
+
+        const safeNum = (v) => {
+            const n = Number(String(v || '').replace(/[^0-9.-]/g, ''));
+            return Number.isFinite(n) ? n : 0;
+        };
+
+        const uid = () => 'r_' + Math.random().toString(16).slice(2) + '_' + Date.now().toString(16);
+
+        function weekIndexInMonth(dateStr) {
+            // 1~7: 1주차, 8~14: 2주차, 15~21: 3주차, 22~28: 4주차, 29~말일: 5주차
+            const d = Number(dateStr.slice(8, 10));
+            if (d <= 7) return 1;
+            if (d <= 14) return 2;
+            if (d <= 21) return 3;
+            if (d <= 28) return 4;
+            return 5;
+        }
+
+        function monthTitle(monthStr) {
+            // "2025-12" => "2025.12월"
+            const y = monthStr.slice(0, 4);
+            const m = monthStr.slice(5, 7);
+            return `${y}.${m}월`;
+        }
+
+        function isSameMonth(dateStr, monthStr) {
+            return dateStr && monthStr && dateStr.slice(0, 7) === monthStr;
+        }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return null;
+                return JSON.parse(raw);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function saveState(state) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function defaultState() {
+            return {
+                month: '2025-12',
+                goal: 600000,
+                onlyFlagged: 0,
+                rows: []
+            };
+        }
+
+        function seedRows(monthStr) {
+            // 스크린샷을 참고한 느낌의 샘플 데이터 (원하면 마음대로 수정)
+            const y = monthStr.slice(0, 4);
+            const m = monthStr.slice(5, 7);
+            const mk = (dd, flags, note, amount) => ({
+                id: uid(),
+                date: `${y}-${m}-${String(dd).padStart(2, '0')}`,
+                meal: flags.meal || 'O',
+                buy: flags.buy || 'X',
+                fixed: flags.fixed || 'X',
+                ext: flags.ext || 'X',
+                note: note || '',
+                amount: amount || 0
+            });
+
+            return [
+                mk(1, { meal: 'O' }, '', 1700),
+                mk(2, { meal: 'O' }, '', 1700),
+                mk(3, { meal: 'O' }, '', 8200),
+                mk(4, { meal: 'O' }, '', 6200),
+                mk(5, { meal: 'O', buy: 'O' }, '외부미팅(응원)', 20600),
+                mk(6, { meal: 'O' }, '', 1700),
+                mk(7, { meal: 'O' }, '', 1700),
+                mk(8, { meal: 'O' }, '', 1700),
+                mk(9, { meal: 'O' }, '', 2000),
+                mk(10, { meal: 'O' }, '', 6700),
+                mk(11, { meal: 'O', fixed: 'O' }, '쿠팡와우,전화비용', 93580),
+                mk(12, { meal: 'O', ext: 'O' }, '병훈,성원이형', 19250),
+                mk(13, { meal: 'O' }, '', 33700),
+                mk(14, { meal: 'O' }, '', 2000),
+                mk(15, { meal: 'O' }, '', 10400),
+                mk(16, { meal: 'O' }, '', 1700),
+                mk(18, { meal: 'O', ext: 'O' }, '성원이형 회사방문', 9400),
+                mk(19, { meal: 'X', ext: 'O' }, '서아콜라', 2100),
+                mk(20, { meal: 'O', ext: 'O' }, '호석이점심,서아간식', 19200),
+                mk(23, { meal: 'O' }, '', 2000),
+                mk(24, { meal: 'O', buy: 'O', fixed: 'O' }, '넷플릭스,서아용품', 22900),
+                mk(25, { meal: 'O', buy: 'O' }, '감자사료', 8570),
+                mk(26, { meal: 'O', buy: 'O' }, '', 13400),
+                mk(28, { meal: 'X', buy: 'O' }, '서아햇반', 2900)
+            ];
+        }
+
+        function deriveVisibleRows(state) {
+            const q = (elSearch.value || '').trim().toLowerCase();
+            let rows = state.rows.filter(r => isSameMonth(r.date, state.month));
+            if (q) {
+                rows = rows.filter(r =>
+                    (r.date || '').toLowerCase().includes(q) ||
+                    (r.note || '').toLowerCase().includes(q)
+                );
+            }
+
+            const s = elSort.value;
+            rows.sort((a, b) => {
+                if (s === 'dateAsc') return String(a.date).localeCompare(String(b.date));
+                if (s === 'dateDesc') return String(b.date).localeCompare(String(a.date));
+                if (s === 'amtDesc') return (safeNum(b.amount) - safeNum(a.amount));
+                if (s === 'amtAsc') return (safeNum(a.amount) - safeNum(b.amount));
+                return 0;
+            });
+
+            return rows;
+        }
+
+        function isFlaggedRow(r) {
+            return (r.meal === 'O') || (r.buy === 'O') || (r.fixed === 'O') || (r.ext === 'O');
+        }
+
+        function sumForState(state) {
+            const rows = state.rows.filter(r => isSameMonth(r.date, state.month));
+            const useFlagFilter = Number(state.onlyFlagged) === 1;
+            const base = useFlagFilter ? rows.filter(isFlaggedRow) : rows;
+            return base.reduce((acc, r) => acc + safeNum(r.amount), 0);
+        }
+
+        function weeklyStats(state) {
+            const rows = state.rows.filter(r => isSameMonth(r.date, state.month));
+            const useFlagFilter = Number(state.onlyFlagged) === 1;
+            const base = useFlagFilter ? rows.filter(isFlaggedRow) : rows;
+
+            const byWeek = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+            base.forEach(r => {
+                const w = weekIndexInMonth(r.date);
+                byWeek[w].push(r);
+            });
+
+            const result = [];
+            for (let w = 1; w <= 5; w++) {
+                const list = byWeek[w];
+                const sum = list.reduce((acc, r) => acc + safeNum(r.amount), 0);
+                // 주차 대표 메모: 빈도 높은 키워드 1~2개 추출(간단히)
+                const joined = list.map(r => (r.note || '').trim()).filter(Boolean).join(' · ');
+                result.push({ week: w, sum, note: joined || '' });
+            }
+            return result;
+        }
+
+        function riskLabel(goal, remain) {
+            // 매우 단순 룰: 남은 금액 비율로 상태 표시
+            if (goal <= 0) return { cls: 'warn', text: '(목표없음)' };
+            const r = remain / goal;
+            if (r >= 0.35) return { cls: 'good', text: '(안전)' };
+            if (r >= 0.10) return { cls: 'warn', text: '(주의)' };
+            return { cls: 'bad', text: '(위험)' };
+        }
+
+        function ratioHintText(r) {
+            if (r < 40) return '(여유)';
+            if (r < 70) return '(보통)';
+            if (r < 90) return '(주의)';
+            return '(한계)';
+        }
+
+        function render(state) {
+            elMonthTitle.textContent = monthTitle(state.month);
+            elMonth.value = state.month;
+            elGoal.value = state.goal;
+            elOnlyFlagged.value = String(state.onlyFlagged);
+
+            const total = sumForState(state);
+            const remain = Math.max(0, safeNum(state.goal) - total);
+            const ratio = state.goal > 0 ? (total / state.goal) * 100 : 0;
+
+            elSpent.textContent = fmtKRW(total);
+            elRemain.childNodes[0].nodeValue = fmtKRW(remain) + ' ';
+            const rk = riskLabel(state.goal, remain);
+            elRiskTag.textContent = rk.text;
+            elRiskTag.className = 'status ' + rk.cls;
+
+            elRatio.childNodes[0].nodeValue = ratio.toFixed(1) + '% ';
+            elRatioHint.textContent = ratioHintText(ratio);
+
+            // weekly
+            const ws = weeklyStats(state);
+            elWeekly.innerHTML = '';
+            ws.forEach(w => {
+                const row = document.createElement('div');
+                row.className = 'weekRow';
+                row.innerHTML = `
+          <div class="wk">${w.week}주차</div>
+          <div class="amt">${fmtKRW(w.sum)}</div>
+          <div class="note" title="${escapeHtml(w.note)}">${escapeHtml(w.note)}</div>
+        `;
+                elWeekly.appendChild(row);
+            });
+
+            // table
+            const rows = deriveVisibleRows(state);
+            elTbody.innerHTML = '';
+            rows.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.dataset.id = r.id;
+
+                tr.innerHTML = `
+          <td class="cell-date"><input class="inlineInput" type="date" value="${r.date || ''}" data-k="date"></td>
+          <td class="cell-flag">${flagSelect('meal', r.meal)}</td>
+          <td class="cell-flag">${flagSelect('buy', r.buy)}</td>
+          <td class="cell-flag">${flagSelect('fixed', r.fixed)}</td>
+          <td class="cell-flag">${flagSelect('ext', r.ext)}</td>
+          <td class="cell-note"><input class="inlineInput" type="text" value="${escapeAttr(r.note || '')}" placeholder="예: 쿠팡와우, 전화비용" data-k="note"></td>
+          <td class="cell-amt"><input class="inlineInput amtInput" type="text" inputmode="numeric" value="${escapeAttr(String(r.amount ?? ''))}" placeholder="0" data-k="amount"></td>
+          <td>
+            <div class="rowBtns">
+              <button class="iconBtn" data-act="dup">복제</button>
+              <button class="iconBtn" data-act="del">삭제</button>
+            </div>
+          </td>
+        `;
+
+                elTbody.appendChild(tr);
+            });
+
+            // 액션 바인딩 (이벤트 위임)
+            // - 입력 변경
+            // - 복제/삭제
+        }
+
+        function flagSelect(key, val) {
+            const v = (val === 'O') ? 'O' : 'X';
+            return `
+        <select class="miniSelect" data-k="${key}">
+          <option value="O" ${v === 'O' ? 'selected' : ''}>O</option>
+          <option value="X" ${v === 'X' ? 'selected' : ''}>X</option>
+        </select>
+      `;
+        }
+
+        function escapeHtml(s) {
+            return String(s || '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+        function escapeAttr(s) {
+            return escapeHtml(s).replaceAll('\n', ' ');
+        }
+
+        function getState() {
+            if (!window.__STATE) window.__STATE = defaultState();
+            return window.__STATE;
+        }
+
+        function setState(next) {
+            window.__STATE = next;
+            saveState(next);
+            render(next);
+        }
+
+        function upsertRow(state, id, patch) {
+            const idx = state.rows.findIndex(r => r.id === id);
+            if (idx < 0) return state;
+            const nextRows = state.rows.slice();
+            nextRows[idx] = { ...nextRows[idx], ...patch };
+            return { ...state, rows: nextRows };
+        }
+
+        function deleteRow(state, id) {
+            return { ...state, rows: state.rows.filter(r => r.id !== id) };
+        }
+
+        function duplicateRow(state, id) {
+            const r = state.rows.find(x => x.id === id);
+            if (!r) return state;
+            const copy = { ...r, id: uid() };
+            return { ...state, rows: [copy, ...state.rows] };
+        }
+
+        function addTodayRow(state) {
+            const today = nowISODate();
+            const monthStr = state.month;
+            const date = isSameMonth(today, monthStr) ? today : (monthStr + '-01');
+            const row = { id: uid(), date, meal: 'O', buy: 'X', fixed: 'X', ext: 'X', note: '', amount: 0 };
+            return { ...state, rows: [row, ...state.rows] };
+        }
+
+        // ---------- 이벤트 ----------
+        $('#btnAdd').addEventListener('click', () => setState(addTodayRow(getState())));
+
+        $('#btnSeed').addEventListener('click', () => {
+            const s = getState();
+            const rows = seedRows(s.month);
+            setState({ ...s, rows });
+        });
+
+        $('#btnReset').addEventListener('click', () => {
+            const s = getState();
+            if (!confirm('정말 초기화할까요? (현재 월/목표/데이터가 삭제됩니다)')) return;
+            setState({ ...defaultState(), month: s.month });
+        });
+
+        elMonth.addEventListener('change', (e) => {
+            const nextMonth = e.target.value || '2025-12';
+            const s = getState();
+            setState({ ...s, month: nextMonth });
+        });
+
+        elGoal.addEventListener('input', (e) => {
+            const s = getState();
+            setState({ ...s, goal: safeNum(e.target.value) });
+        });
+
+        elOnlyFlagged.addEventListener('change', (e) => {
+            const s = getState();
+            setState({ ...s, onlyFlagged: Number(e.target.value) });
+        });
+
+        elSearch.addEventListener('input', () => render(getState()));
+        elSort.addEventListener('change', () => render(getState()));
+
+        // 테이블 이벤트 위임
+        elTbody.addEventListener('input', (e) => {
+            const tr = e.target.closest('tr');
+            if (!tr) return;
+            const id = tr.dataset.id;
+            const k = e.target.dataset.k;
+            if (!k) return;
+
+            let v = e.target.value;
+            if (k === 'amount') {
+                v = safeNum(v);
+                // 화면에는 숫자만 유지(원하면 여기서 1,000 포맷 적용도 가능)
+                e.target.value = String(v);
+            }
+
+            const s = getState();
+            setState(upsertRow(s, id, { [k]: v }));
+        });
+
+        elTbody.addEventListener('change', (e) => {
+            // select 변경
+            const tr = e.target.closest('tr');
+            if (!tr) return;
+            const id = tr.dataset.id;
+            const k = e.target.dataset.k;
+            if (!k) return;
+            const v = e.target.value;
+            const s = getState();
+            setState(upsertRow(s, id, { [k]: v }));
+        });
+
+        elTbody.addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            const tr = btn.closest('tr');
+            if (!tr) return;
+            const id = tr.dataset.id;
+            const act = btn.dataset.act;
+            const s = getState();
+
+            if (act === 'del') {
+                if (!confirm('이 행을 삭제할까요?')) return;
+                setState(deleteRow(s, id));
+            }
+            if (act === 'dup') {
+                setState(duplicateRow(s, id));
+            }
+        });
+
+        // ---------- 초기 로드 ----------
+        (function init() {
+            const saved = loadState();
+            const base = saved && typeof saved === 'object' ? saved : defaultState();
+
+            // month input이 비어있거나 이상하면 기본값
+            if (!base.month || String(base.month).length !== 7) base.month = '2025-12';
+            if (!Array.isArray(base.rows)) base.rows = [];
+
+            // 첫 실행이면 현재 월로 맞춰줄 수도 있음
+            // 여기서는 스크린샷 목적상 2025-12를 기본 유지
+
+            window.__STATE = base;
+            render(base);
+            saveState(base);
+        })();
+
+        /*
+          ---- 활용 아이디어 (초급자용) ----
+          1) “대외”가 O인 항목만 따로 보고 싶다
+             - deriveVisibleRows에서 r.ext === 'O' 조건을 추가
+    
+          2) 카테고리별 합계를 상단에 추가
+             - rows.reduce로 meal/buy/fixed/ext별로 amount 합산
+    
+          3) 구글시트/엑셀로 내보내기
+             - rows를 CSV로 만들어 download 링크 생성 (Blob)
+    
+          원하면 2)~3)까지 확장 버전도 만들어줄 수 있다.
+        */
+    </script>
+</body>
+
+</html>

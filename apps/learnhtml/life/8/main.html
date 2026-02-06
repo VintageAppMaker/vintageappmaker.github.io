@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>손끝으로 새긴 글자 – 전시패널</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f5f5f3;
+            --ink: #222;
+            --muted: #6b7280;
+            --accent: #de3d57;
+            --chip: #ff6b57;
+            --card1: #e76f51;
+            --card1b: #f4a261;
+            --card2: #94a3b8;
+            --card2b: #cbd5e1;
+            --radius: 20px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, .10);
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: "Noto Sans KR", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+            line-height: 1.6;
+            padding: clamp(16px, 3vw, 40px);
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: auto
+        }
+
+        .title-row {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: start;
+            gap: 16px;
+            margin-bottom: 26px
+        }
+
+        .badge {
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            font-weight: 800;
+            background: #e11d48;
+            color: #fff;
+            box-shadow: 0 4px 0 #9f1239;
+            font-size: 1.25rem;
+        }
+
+        h1 {
+            margin: 0;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            font-size: clamp(24px, 3.4vw, 44px);
+            position: relative;
+            line-height: 1.15;
+            text-shadow: 0 2px 0 rgba(0, 0, 0, .10);
+        }
+
+        .h1-en {
+            margin: 2px 0 0 0;
+            font: 800 clamp(14px, 1.6vw, 18px)/1.2 Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            color: #6b7280;
+            letter-spacing: .02em;
+            text-transform: none;
+        }
+
+        .h1-accent {
+            color: var(--accent);
+            font-weight: 900;
+            margin-top: 6px;
+            font-size: clamp(18px, 2.2vw, 26px)
+        }
+
+        .desc {
+            margin-top: 14px;
+            color: #374151;
+        }
+
+        .desc small {
+            display: block;
+            color: #6b7280;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 24px;
+            margin-top: 18px
+        }
+
+        @media (max-width:840px) {
+            .cards {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .card {
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover,
+        .card:active {
+            transform: translate(-4px, -4px);
+            box-shadow: 2px 2px 5px black;
+        }
+
+        .card-head {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+            padding: 18px 20px 8px 20px;
+            background: #fff
+        }
+
+        .chip {
+            background: var(--chip);
+            color: #fff;
+            font-weight: 800;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: .9rem;
+            box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .15)
+        }
+
+        .k-title {
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: -.02em
+        }
+
+        .e-title {
+            background: #fff;
+            color: #6b7280;
+            font-weight: 600;
+            margin: 0;
+            padding: 0 20px 12px 20px
+        }
+
+        .thumb {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            object-fit: cover;
+            display: block
+        }
+
+        .body {
+            padding: 18px 20px 26px 20px;
+            font-weight: 500;
+            flex-grow: 1
+        }
+
+        .body p {
+            margin: 0
+        }
+
+        .card.step1 .body {
+            background: linear-gradient(180deg, var(--card1), var(--card1b));
+            color: #fff
+        }
+
+        .card.step2 .body {
+            background: linear-gradient(180deg, var(--card2), var(--card2b));
+            color: #0f172a
+        }
+
+        .note {
+            font-size: .95rem;
+            color: var(--muted);
+            margin-top: 2px
+        }
+    </style>
+</head>
+
+<body>
+    <main class="wrap">
+        <section class="title-row" aria-labelledby="main-title">
+            <div class="badge" aria-hidden="true">人生</div>
+            <div>
+                <h1 id="main-title">인생공부</h1>
+                <div class="h1-en">Life is what people make of it. </div>
+                <div class="h1-accent">"인생은 사람들이 만드는 것이다."</div>
+            </div>
+        </section>
+
+        <p class="desc">
+            인생을 따지려면 주위사람들과의 관계부터 분석해야 한다. 
+            <small>※ 인생은 인간들이 모여 나와 우리의 삶의 방식을 만드는 과정이다. 결국 내 인생은 내 주위 사람들에 의해서 만들어진다.</small>
+        </p>
+
+        <section class="cards" aria-label="제작 단계">
+            <article class="card step1">
+                <header class="card-head">
+                    <span class="chip">첫 번째</span>
+                    <div class="k-title">환경을 선택하기</div>
+                </header>
+                <p class="e-title">당신이 자란 환경이 당신의 주위사람을 만든다.</p>
+                <img class="thumb"
+                    src="https://cdn.pixabay.com/photo/2019/09/06/17/02/roof-4456833_1280.jpg"
+                    alt="극동 아시아의 어딘가" />
+                <div class="body">
+                    <p>
+                        맹자삼천지교(孟母三遷之敎)라는 말이 있을 정도로 유년기의 환경은 매우 중요하다. 
+                        그러나 요즘같은 시기에는 지나친 사교육 부작용 때문에 공부를 위해서 동네를 옮기는 행동이
+                        언제나 올바른 선택이 아님을 알아야 한다. 
+                    </p>
+                </div>
+            </article>
+
+            <article class="card step2">
+                <header class="card-head">
+                    <span class="chip">두 번째</span>
+                    <div class="k-title">행동을 선택하기</div>
+                </header>
+                <p class="e-title">결국, 내 행동에 따라 사람들이 모이는 법</p>
+                <img class="thumb"
+                    src="https://cdn.pixabay.com/photo/2012/06/17/18/15/people-50164_1280.jpg"
+                    alt="인고를 쓰는 장인의 손" />
+                <div class="body">
+                    <p>
+                        아무리 좋은 환경에서 자랐을 지라도 행동에 문제가 있다면 좋은 사람들이 모여들지 않는다. 
+                        여기서 말하는 좋은 사람이란 권력과 부를 말하는 것이 아니다. 평범하면서 올바른 행동을 하는
+                        공동체를 생각하는 사람을 말한다. 
+                    </p>
+                </div>
+            </article>
+        </section>
+
+    </main>
+</body>
+
+</html>

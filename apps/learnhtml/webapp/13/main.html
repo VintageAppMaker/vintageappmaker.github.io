@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘의 명언 카드 뉴스</title>
+    <style>
+        :root {
+            --bg-1: #0f172a;
+            --bg-2: #1e293b;
+            --glow: rgba(94, 234, 212, 0.35);
+            --accent: #7dd3fc;
+            --text-strong: #e2e8f0;
+            --text-soft: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background: radial-gradient(circle at 20% 20%, rgba(125, 211, 252, 0.15), transparent 30%),
+                radial-gradient(circle at 80% 80%, rgba(45, 212, 191, 0.2), transparent 32%),
+                linear-gradient(145deg, var(--bg-1), var(--bg-2));
+            color: var(--text-strong);
+            font-family: "Didot", "Bodoni MT", "Baskerville", "Times New Roman", serif;
+            padding: 30px 16px;
+        }
+
+        .frame {
+            width: min(420px, 100%);
+            position: relative;
+        }
+
+        .title {
+            text-align: center;
+            letter-spacing: 0.06em;
+            font-size: 1.1rem;
+            color: var(--text-soft);
+            margin-bottom: 14px;
+        }
+
+        .carousel {
+            position: relative;
+            overflow: hidden;
+            border-radius: 18px;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 30px var(--glow);
+            backdrop-filter: blur(10px);
+        }
+
+        .slides {
+            display: flex;
+            transition: transform 0.6s ease;
+            will-change: transform;
+        }
+
+        .slide {
+            min-width: 100%;
+            padding: 18px 18px 26px;
+        }
+
+        .card {
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 22px;
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            inset: -30%;
+            background: radial-gradient(circle, rgba(125, 211, 252, 0.15), transparent 60%);
+            transform: rotate(22deg);
+            z-index: -1;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(125, 211, 252, 0.1);
+            color: var(--accent);
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .quote {
+            margin: 18px 0 14px;
+            font-size: 1.15rem;
+            line-height: 1.6;
+            color: var(--text-strong);
+        }
+
+        .author {
+            color: var(--text-soft);
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            gap: 10px;
+        }
+
+        .dots {
+            display: flex;
+            gap: 6px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        .dot.active {
+            background: var(--accent);
+            transform: scale(1.08);
+            box-shadow: 0 0 10px rgba(125, 211, 252, 0.6);
+        }
+
+        .nav-btn {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-strong);
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+            backdrop-filter: blur(6px);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            border-color: rgba(125, 211, 252, 0.6);
+            background: rgba(125, 211, 252, 0.1);
+        }
+
+        @media (max-width: 480px) {
+            .quote {
+                font-size: 1.05rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="frame">
+        <div class="title">오늘의 명언 카드 뉴스</div>
+        <div class="carousel">
+            <div class="slides" id="slides"></div>
+            <div class="controls">
+                <button class="nav-btn" id="prev" aria-label="이전 카드">←</button>
+                <div class="dots" id="dots"></div>
+                <button class="nav-btn" id="next" aria-label="다음 카드">→</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const slidesEl = document.getElementById('slides');
+        const dotsEl = document.getElementById('dots');
+        const prevBtn = document.getElementById('prev');
+        const nextBtn = document.getElementById('next');
+
+        const cards = [
+            {
+                tag: "Focus",
+                quote: "거대한 목표는 한 번에 이루어지지 않는다. 작은 승리를 꾸준히 쌓아 올리는 시간이 결국 도약을 만든다.",
+                author: "세라 블레이클리"
+            },
+            {
+                tag: "Courage",
+                quote: "두려움을 없애려 하지 말고, 두려움을 데리고 움직여라. 멈춤은 안전하지만, 전진만이 답을 준다.",
+                author: "넬슨 만델라"
+            },
+            {
+                tag: "Clarity",
+                quote: "잡음이 많은 세상에서 중요한 것은 선택이다. 소중한 것만 남길 때 비로소 삶이 또렷해진다.",
+                author: "마리 콘도"
+            },
+            {
+                tag: "Momentum",
+                quote: "완벽한 계획보다 빠른 첫걸음이 더 많은 것을 가르친다. 움직임 속에서 길이 열린다.",
+                author: "리드 호프먼"
+            }
+        ];
+
+        let index = 0;
+
+        function renderSlides() {
+            slidesEl.innerHTML = '';
+            dotsEl.innerHTML = '';
+
+            cards.forEach((card, i) => {
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                slide.innerHTML = `
+          <div class="card">
+            <div class="badge">${card.tag}</div>
+            <div class="quote">“${card.quote}”</div>
+            <div class="author">— ${card.author}</div>
+          </div>
+        `;
+                slidesEl.appendChild(slide);
+
+                const dot = document.createElement('div');
+                dot.className = 'dot' + (i === index ? ' active' : '');
+                dot.addEventListener('click', () => goTo(i));
+                dotsEl.appendChild(dot);
+            });
+
+            updateSlide();
+        }
+
+        function updateSlide() {
+            const offset = -index * 100;
+            slidesEl.style.transform = `translateX(${offset}%)`;
+            dotsEl.querySelectorAll('.dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+
+        function goTo(newIndex) {
+            index = (newIndex + cards.length) % cards.length;
+            updateSlide();
+        }
+
+        function next() { goTo(index + 1); }
+        function prev() { goTo(index - 1); }
+
+        prevBtn.addEventListener('click', prev);
+        nextBtn.addEventListener('click', next);
+
+        let autoPlay = setInterval(next, 5200);
+        [prevBtn, nextBtn, slidesEl, dotsEl].forEach(el => {
+            el.addEventListener('mouseenter', () => clearInterval(autoPlay));
+            el.addEventListener('mouseleave', () => autoPlay = setInterval(next, 5200));
+        });
+
+        renderSlides();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1186 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>2026년 1월 캘린더 (CRUD + 저장)</title>
+    <style>
+        :root {
+            --page: #ffffff;
+            --bg: #f4f4f5;
+            --text: #111827;
+            --muted: #6b7280;
+            --line: #e5e7eb;
+            --soft: #f9fafb;
+            --sun: #dc2626;
+            --accent: #2563eb;
+            --shadow: 0 12px 40px rgba(0, 0, 0, .10);
+            --radius: 18px;
+            --radius2: 12px;
+            --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", Arial, "Apple SD Gothic Neo", sans-serif;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .wrap {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 18px;
+        }
+
+        .page {
+            background: var(--page);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .hero {
+            height: 280px;
+            background:
+                linear-gradient(0deg, rgba(0, 0, 0, .12), rgba(0, 0, 0, .12)),
+                radial-gradient(900px 300px at 20% 10%, rgba(0, 0, 0, .18), transparent 60%),
+                url('') center/cover no-repeat;
+            background-color: #e5e7eb;
+            position: relative;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: auto 0 0 0;
+            height: 64px;
+            background: linear-gradient(180deg, transparent, rgba(0, 0, 0, .30));
+            pointer-events: none;
+        }
+
+        .topbar {
+            padding: 18px 18px 12px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .monthline {
+            display: flex;
+            gap: 12px;
+            align-items: baseline;
+            flex: 1;
+            min-width: 260px;
+        }
+
+        .year {
+            font-size: 14px;
+            letter-spacing: .08em;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .month {
+            font-size: 14px;
+            letter-spacing: .14em;
+            color: var(--muted);
+            text-transform: uppercase;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .monthNo {
+            font-size: 44px;
+            font-weight: 800;
+            letter-spacing: .02em;
+            color: #111827;
+            opacity: .75;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--text);
+            padding: 10px 12px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 13px;
+            line-height: 1;
+            transition: transform .06s ease, background .12s ease, border-color .12s ease;
+            user-select: none;
+            box-shadow: 0 1px 0 rgba(0, 0, 0, .03);
+        }
+
+        .btn:hover {
+            background: var(--soft);
+            border-color: #d1d5db
+        }
+
+        .btn:active {
+            transform: translateY(1px)
+        }
+
+        .btn.danger {
+            color: #991b1b;
+            border-color: #fecaca;
+            background: #fff
+        }
+
+        .btn.ghost {
+            background: transparent
+        }
+
+        .btn.primary {
+            border-color: rgba(37, 99, 235, .25);
+            background: rgba(37, 99, 235, .08)
+        }
+
+        .content {
+            padding: 0 18px 18px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.15fr .85fr;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .panel {
+            border-top: 1px solid var(--line);
+            padding-top: 16px;
+            min-width: 0;
+        }
+
+        .panelTitle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .panelTitle .left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0
+        }
+
+        .panelTitle .h {
+            font-weight: 700;
+            letter-spacing: -.01em
+        }
+
+        .panelTitle .sub {
+            color: var(--muted);
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis
+        }
+
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0;
+            border-top: 1px solid var(--line);
+            padding-top: 10px;
+        }
+
+        .dow {
+            color: var(--muted);
+            font-size: 11px;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            text-align: center;
+            padding: 10px 0 12px;
+        }
+
+        .dow.sun {
+            color: var(--sun)
+        }
+
+        .day {
+            min-height: 86px;
+            padding: 12px 10px;
+            cursor: pointer;
+            position: relative;
+            transition: background .12s ease;
+            border-radius: 12px;
+        }
+
+        .day:hover {
+            background: var(--soft)
+        }
+
+        .day:active {
+            background: #f3f4f6
+        }
+
+        .day.disabled {
+            opacity: 0;
+            cursor: default;
+            pointer-events: none;
+        }
+
+        .day .top {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px
+        }
+
+        .date {
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: -.01em;
+            color: #111827;
+        }
+
+        .day.sun .date {
+            color: var(--sun)
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: #111827;
+            opacity: 0;
+        }
+
+        .dot.has {
+            opacity: .7
+        }
+
+        .preview {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            word-break: break-word;
+        }
+
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+        label {
+            font-size: 12px;
+            color: var(--muted)
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+            background: #fff;
+            color: var(--text);
+            padding: 10px 12px;
+            outline: none;
+            font-size: 13px;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            border-color: #cbd5e1;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, .10)
+        }
+
+        textarea {
+            min-height: 110px;
+            resize: vertical
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        .row .btn {
+            flex: 1
+        }
+
+        .hint {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .listWrap {
+            margin-top: 18px;
+            border-top: 1px solid var(--line);
+            padding-top: 16px;
+            margin-left: 12px;
+            margin-right: 12px;
+        }
+
+        .list {
+            padding: 0 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item {
+            border: 1px solid var(--line);
+            background: #fff;
+            border-radius: 14px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            cursor: pointer;
+            transition: background .12s ease, transform .06s ease;
+        }
+
+        .item:hover {
+            background: var(--soft)
+        }
+
+        .item:active {
+            transform: translateY(1px)
+        }
+
+        .item .meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px
+        }
+
+        .item .meta .d {
+            font-weight: 800;
+            font-size: 13px;
+            letter-spacing: -.02em
+        }
+
+        .item.sun .meta .d {
+            color: var(--sun)
+        }
+
+        .item .meta .hint2 {
+            color: var(--muted);
+            font-size: 12px;
+            white-space: nowrap
+        }
+
+        .item .txt {
+            color: var(--muted);
+            font-size: 12.5px;
+            line-height: 1.45;
+            white-space: pre-wrap;
+            word-break: break-word
+        }
+
+        .empty {
+            padding: 12px;
+            color: var(--muted);
+            border: 1px dashed var(--line);
+            border-radius: 14px;
+            background: var(--soft);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
+        @keyframes blinkFocus {
+            0% {
+                box-shadow: 0 0 0 0 rgba(37, 99, 235, .0)
+            }
+
+            20% {
+                box-shadow: 0 0 0 6px rgba(37, 99, 235, .18)
+            }
+
+            40% {
+                box-shadow: 0 0 0 0 rgba(37, 99, 235, .0)
+            }
+
+            60% {
+                box-shadow: 0 0 0 6px rgba(37, 99, 235, .18)
+            }
+
+            80% {
+                box-shadow: 0 0 0 0 rgba(37, 99, 235, .0)
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(37, 99, 235, .0)
+            }
+        }
+
+        .blink {
+            animation: blinkFocus .55s ease-in-out 1;
+            border-radius: 12px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(17, 24, 39, .45);
+            padding: 18px;
+            z-index: 50;
+        }
+
+        .modal.open {
+            display: flex;
+        }
+
+        .modal .box {
+            width: min(680px, 100%);
+            border-radius: 18px;
+            border: 1px solid var(--line);
+            background: #fff;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, .20);
+            overflow: hidden;
+        }
+
+        .modal .box .hd {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px
+        }
+
+        .modal .box .hd .t {
+            font-weight: 800;
+            letter-spacing: -.02em
+        }
+
+        .modal .box .bd {
+            padding: 16px
+        }
+
+        .kbd {
+            font-size: 11px;
+            color: var(--muted);
+            border: 1px solid var(--line);
+            padding: 3px 7px;
+            border-radius: 8px;
+            background: var(--soft)
+        }
+
+        @media (max-width: 980px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                height: 220px
+            }
+
+            .topbar {
+                align-items: flex-start
+            }
+
+            .toolbar {
+                justify-content: flex-start
+            }
+        }
+
+        @media (max-width: 560px) {
+            .wrap {
+                padding: 12px
+            }
+
+            .hero {
+                height: 190px
+            }
+
+            .content {
+                padding: 0 14px 14px
+            }
+
+            .topbar {
+                padding: 14px 14px 10px
+            }
+
+            .monthNo {
+                font-size: 40px
+            }
+
+            .day {
+                min-height: 78px
+            }
+
+            .listWrap {
+                margin-left: 8px;
+                margin-right: 8px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="page">
+            <div class="hero" aria-label="cover image (optional)"></div>
+
+            <div class="topbar">
+                <div class="monthline" aria-label="month header">
+                    <div class="year">2026</div>
+                    <div class="month">JANUARY</div>
+                    <div class="monthNo">01</div>
+                </div>
+
+                <div class="toolbar">
+                    <button class="btn ghost" id="btnToday" title="오늘 날짜로 이동 (해당 월이 아니면 선택만)">오늘 선택</button>
+                    <button class="btn" id="btnExport" title="JSON으로 내보내기">내보내기</button>
+                    <button class="btn" id="btnImport" title="로컬 JSON 파일을 선택하여 가져오기">가져오기</button>
+                    <button class="btn danger" id="btnReset" title="모든 저장 데이터를 삭제">전체 초기화</button>
+                    <input id="fileImport" type="file" accept="application/json" hidden />
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="grid" aria-label="layout">
+                    <section class="panel" aria-label="calendar">
+                        <div class="panelTitle">
+                            <div class="left">
+                                <div class="h">캘린더</div>
+                                <div class="sub">선택한 날짜: <span id="selectedLabel">-</span></div>
+                            </div>
+                            <div style="display:flex;gap:8px;align-items:center">
+                                <span class="kbd">Enter</span>
+                                <span class="sub" style="font-size:12px">저장</span>
+                            </div>
+                        </div>
+                        <div class="calendar" id="calendar" role="grid" aria-label="2026년 1월 달력"></div>
+                        <p class="hint">팁: 점(dot)이 표시된 날짜는 저장된 일정이 있다는 뜻입니다. 날짜를 누르면 편집 창이 뜹니다.</p>
+                    </section>
+
+                    <section class="panel" id="editorPanel" aria-label="editor">
+                        <div class="panelTitle">
+                            <div class="left">
+                                <div class="h">일정 편집</div>
+                                <div class="sub">선택한 날짜에 텍스트를 저장합니다 (localStorage).</div>
+                            </div>
+                        </div>
+                        <form class="form" id="editorForm">
+                            <div class="field">
+                                <label for="eventTitle">제목</label>
+                                <input id="eventTitle" type="text" placeholder="예: 팀 회의 / 병원 / 가족모임"
+                                    autocomplete="off" />
+                            </div>
+                            <div class="field">
+                                <label for="eventNote">내용</label>
+                                <textarea id="eventNote" placeholder="예: 14:00 / 준비물 / 메모"></textarea>
+                            </div>
+                            <div class="row">
+                                <button type="button" class="btn primary" id="btnSave">저장</button>
+                                <button type="button" class="btn" id="btnClear">입력값 지우기</button>
+                                <button type="button" class="btn danger" id="btnDelete">삭제</button>
+                            </div>
+                            <p class="hint" id="status">-</p>
+                        </form>
+                    </section>
+
+                    <section class="listWrap" style="grid-column: 1 / -1" aria-label="list">
+                        <div class="panelTitle">
+                            <div class="left">
+                                <div class="h">1월 일정 리스트</div>
+                                <div class="sub">저장된 일정만 날짜순으로 표시됩니다.</div>
+                            </div>
+                            <div style="display:flex;gap:8px;align-items:center">
+                                <button class="btn" id="btnSort">정렬: 날짜↑</button>
+                            </div>
+                        </div>
+                        <div class="list" id="list"></div>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal" aria-hidden="true">
+        <div class="box" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div class="hd">
+                <div class="t" id="modalTitle">일정 편집</div>
+                <button class="btn" id="btnCloseModal" aria-label="닫기">닫기</button>
+            </div>
+            <div class="bd">
+                <div class="hint" style="margin:0 0 12px">모바일/좁은 화면에서는 이 창에서 편집하는 편이 편합니다.</div>
+                <div class="field" style="margin-bottom:10px">
+                    <label for="mTitle">제목</label>
+                    <input id="mTitle" type="text" placeholder="예: 팀 회의" />
+                </div>
+                <div class="field" style="margin-bottom:12px">
+                    <label for="mNote">내용</label>
+                    <textarea id="mNote" placeholder="예: 14:00 / 메모"></textarea>
+                </div>
+                <div class="row">
+                    <button class="btn primary" id="mSave" type="button">저장</button>
+                    <button class="btn" id="mClear" type="button">지우기</button>
+                    <button class="btn danger" id="mDelete" type="button">삭제</button>
+                </div>
+                <p class="hint" id="mStatus">-</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'calendar_2026_01_events_v1';
+
+        const pad2 = (n) => String(n).padStart(2, '0');
+        const isoDate = (y, m, d) => `${y}-${pad2(m)}-${pad2(d)}`;
+
+        function loadStore() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return {};
+                const obj = JSON.parse(raw);
+                return (obj && typeof obj === 'object') ? obj : {};
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveStore(s) {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(s));
+        }
+
+        const calendarEl = document.getElementById('calendar');
+        const selectedLabelEl = document.getElementById('selectedLabel');
+        const listEl = document.getElementById('list');
+        const statusEl = document.getElementById('status');
+
+        const titleEl = document.getElementById('eventTitle');
+        const noteEl = document.getElementById('eventNote');
+
+        const btnSave = document.getElementById('btnSave');
+        const btnDelete = document.getElementById('btnDelete');
+        const btnClear = document.getElementById('btnClear');
+
+        const btnReset = document.getElementById('btnReset');
+        const btnExport = document.getElementById('btnExport');
+        const btnImport = document.getElementById('btnImport');
+        const fileImport = document.getElementById('fileImport');
+        const btnToday = document.getElementById('btnToday');
+        const btnSort = document.getElementById('btnSort');
+
+        const modal = document.getElementById('modal');
+        const btnCloseModal = document.getElementById('btnCloseModal');
+        const mTitle = document.getElementById('mTitle');
+        const mNote = document.getElementById('mNote');
+        const mSave = document.getElementById('mSave');
+        const mDelete = document.getElementById('mDelete');
+        const mClear = document.getElementById('mClear');
+        const mStatus = document.getElementById('mStatus');
+
+        let store = loadStore();
+        let selected = isoDate(2026, 1, 1);
+        let sortAsc = true;
+
+        // confirm 차단/무반응 환경 대비: 2-step 삭제(3.5초 내 2회 클릭)
+        let deleteArmed = false;
+        let deleteArmedAt = 0;
+        const DELETE_ARM_MS = 3500;
+
+        const DOW = ['일', '월', '화', '수', '목', '금', '토'];
+
+        function isInJan2026(key) {
+            return /^2026-01-\d\d$/.test(key);
+        }
+
+        function openModal() {
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+            setTimeout(() => mTitle.focus(), 0);
+        }
+
+        function closeModal() {
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        function scrollToEditor() {
+            const el = document.getElementById('editorPanel');
+            if (!el) return;
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function blinkEditor() {
+            const el = document.getElementById('editorPanel');
+            if (!el) return;
+            el.classList.remove('blink');
+            void el.offsetWidth;
+            el.classList.add('blink');
+            setTimeout(() => el.classList.remove('blink'), 700);
+        }
+
+        function syncEditorFromSelected() {
+            selectedLabelEl.textContent = selected;
+
+            const ev = store[selected] || null;
+            const title = ev && typeof ev.title === 'string' ? ev.title : '';
+            const note = ev && typeof ev.note === 'string' ? ev.note : '';
+
+            titleEl.value = title;
+            noteEl.value = note;
+            mTitle.value = title;
+            mNote.value = note;
+
+            const has = Boolean(ev && (ev.title || ev.note));
+            statusEl.textContent = has
+                ? `저장됨 (최근 수정: ${new Date(ev.updatedAt || new Date().toISOString()).toLocaleString()})`
+                : '저장된 일정이 없습니다.';
+            mStatus.textContent = statusEl.textContent;
+
+            highlightSelectedDay();
+        }
+
+        function highlightSelectedDay() {
+            const nodes = calendarEl.querySelectorAll('[data-date]');
+            nodes.forEach(n => {
+                if (n.dataset.date === selected) {
+                    n.style.outline = '2px solid rgba(37,99,235,.35)';
+                    n.style.outlineOffset = '2px';
+                } else {
+                    n.style.outline = 'none';
+                }
+            });
+        }
+
+        function renderCalendar() {
+            calendarEl.innerHTML = '';
+
+            for (const d of DOW) {
+                const el = document.createElement('div');
+                el.className = 'dow' + (d === '일' ? ' sun' : '');
+                el.textContent = d;
+                calendarEl.appendChild(el);
+            }
+
+            const year = 2026;
+            const monthIndex = 0;
+            const first = new Date(year, monthIndex, 1);
+            const startDow = first.getDay();
+            const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+
+            for (let i = 0; i < startDow; i++) {
+                const box = document.createElement('div');
+                box.className = 'day disabled';
+                box.setAttribute('aria-disabled', 'true');
+                calendarEl.appendChild(box);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateKey = isoDate(year, 1, day);
+                const ev = store[dateKey];
+                const has = Boolean(ev && (ev.title || ev.note));
+                const dow = new Date(year, 0, day).getDay();
+
+                const box = document.createElement('div');
+                box.className = 'day' + (dow === 0 ? ' sun' : '');
+                box.dataset.date = dateKey;
+                box.setAttribute('role', 'gridcell');
+                box.setAttribute('tabindex', '0');
+                box.setAttribute('aria-label', `${dateKey} 일정 ${has ? '있음' : '없음'}`);
+
+                const top = document.createElement('div');
+                top.className = 'top';
+
+                const dt = document.createElement('div');
+                dt.className = 'date';
+                dt.textContent = day;
+
+                const dot = document.createElement('div');
+                dot.className = 'dot' + (has ? ' has' : '');
+
+                top.appendChild(dt);
+                top.appendChild(dot);
+
+                const preview = document.createElement('div');
+                preview.className = 'preview';
+                preview.textContent = has ? (ev.title ? ev.title : ev.note) : '';
+
+                box.appendChild(top);
+                box.appendChild(preview);
+
+                box.addEventListener('click', () => {
+                    selected = dateKey;
+                    syncEditorFromSelected();
+                    if (window.matchMedia('(max-width: 980px)').matches) {
+                        openModal();
+                    }
+                });
+
+                box.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        selected = dateKey;
+                        syncEditorFromSelected();
+                        if (window.matchMedia('(max-width: 980px)').matches) {
+                            openModal();
+                        }
+                    }
+                });
+
+                calendarEl.appendChild(box);
+            }
+
+            highlightSelectedDay();
+        }
+
+        function entriesForJan() {
+            const keys = Object.keys(store).filter(isInJan2026);
+            keys.sort((a, b) => sortAsc ? a.localeCompare(b) : b.localeCompare(a));
+            return keys.map(k => ({ date: k, ...store[k] }));
+        }
+
+        function renderList() {
+            const items = entriesForJan();
+            listEl.innerHTML = '';
+
+            if (items.length === 0) {
+                const empty = document.createElement('div');
+                empty.className = 'empty';
+                empty.textContent = '저장된 일정이 없습니다. 캘린더에서 날짜를 클릭하여 일정을 추가해 보세요.';
+                listEl.appendChild(empty);
+                return;
+            }
+
+            for (const it of items) {
+                const card = document.createElement('div');
+                const dayNum = parseInt(it.date.slice(-2), 10);
+                const dow = new Date(2026, 0, dayNum).getDay();
+                card.className = 'item' + (dow === 0 ? ' sun' : '');
+
+                const meta = document.createElement('div');
+                meta.className = 'meta';
+
+                const d = document.createElement('div');
+                d.className = 'd';
+                d.textContent = it.date;
+
+                const hint2 = document.createElement('div');
+                hint2.className = 'hint2';
+                hint2.textContent = '클릭하여 편집';
+
+                meta.appendChild(d);
+                meta.appendChild(hint2);
+
+                const txt = document.createElement('div');
+                txt.className = 'txt';
+                const body = [String(it.title || '').trim(), String(it.note || '').trim()]
+                    .filter(Boolean)
+                    .join('\n');
+                txt.textContent = body || '(내용 없음)';
+
+                card.appendChild(meta);
+                card.appendChild(txt);
+
+                card.addEventListener('click', () => {
+                    selected = it.date;
+                    syncEditorFromSelected();
+                    scrollToEditor();
+                    blinkEditor();
+                    if (window.matchMedia('(max-width: 980px)').matches) {
+                        openModal();
+                    }
+                });
+
+                listEl.appendChild(card);
+            }
+        }
+
+        function upsert(dateKey, title, note) {
+            const cleanTitle = (title || '').trim();
+            const cleanNote = (note || '').trim();
+
+            if (!cleanTitle && !cleanNote) {
+                statusEl.textContent = '제목/내용이 비어 있어 저장하지 않았습니다.';
+                mStatus.textContent = statusEl.textContent;
+                return;
+            }
+
+            store[dateKey] = {
+                title: cleanTitle,
+                note: cleanNote,
+                updatedAt: new Date().toISOString(),
+            };
+            saveStore(store);
+
+            statusEl.textContent = `저장 완료: ${dateKey}`;
+            mStatus.textContent = statusEl.textContent;
+            renderCalendar();
+            renderList();
+            syncEditorFromSelected();
+        }
+
+        function remove(dateKey) {
+            if (!store[dateKey]) {
+                statusEl.textContent = '삭제할 일정이 없습니다.';
+                mStatus.textContent = statusEl.textContent;
+                return;
+            }
+            delete store[dateKey];
+            saveStore(store);
+            statusEl.textContent = `삭제 완료: ${dateKey}`;
+            mStatus.textContent = statusEl.textContent;
+            renderCalendar();
+            renderList();
+            syncEditorFromSelected();
+        }
+
+        function clearInputs() {
+            titleEl.value = '';
+            noteEl.value = '';
+            mTitle.value = '';
+            mNote.value = '';
+        }
+
+        btnSave.addEventListener('click', () => upsert(selected, titleEl.value, noteEl.value));
+
+        btnDelete.addEventListener('click', () => {
+            // 1) confirm 시도
+            let ok = true;
+            try { ok = confirm(`${selected} 일정을 삭제하시겠습니까?`); }
+            catch (e) { ok = false; }
+
+            if (ok) {
+                remove(selected);
+                deleteArmed = false;
+                scrollToEditor();
+                return;
+            }
+
+            // 2) confirm 취소/차단이면 2-step 삭제
+            const now = Date.now();
+            if (deleteArmed && (now - deleteArmedAt) <= DELETE_ARM_MS) {
+                remove(selected);
+                deleteArmed = false;
+                scrollToEditor();
+            } else {
+                deleteArmed = true;
+                deleteArmedAt = now;
+                statusEl.textContent = '삭제 확인: 3초 이내에 삭제를 한 번 더 누르면 삭제됩니다.';
+                mStatus.textContent = statusEl.textContent;
+            }
+        });
+
+        btnClear.addEventListener('click', () => {
+            clearInputs();
+            statusEl.textContent = '입력값을 지웠습니다.';
+            mStatus.textContent = statusEl.textContent;
+        });
+
+        document.getElementById('editorForm').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && (e.target === titleEl)) {
+                e.preventDefault();
+                upsert(selected, titleEl.value, noteEl.value);
+            }
+        });
+
+        btnCloseModal.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+        });
+
+        mSave.addEventListener('click', () => upsert(selected, mTitle.value, mNote.value));
+
+        mDelete.addEventListener('click', () => {
+            let ok = true;
+            try { ok = confirm(`${selected} 일정을 삭제하시겠습니까?`); }
+            catch (e) { ok = false; }
+
+            if (ok) {
+                remove(selected);
+                deleteArmed = false;
+                return;
+            }
+
+            const now = Date.now();
+            if (deleteArmed && (now - deleteArmedAt) <= DELETE_ARM_MS) {
+                remove(selected);
+                deleteArmed = false;
+            } else {
+                deleteArmed = true;
+                deleteArmedAt = now;
+                mStatus.textContent = '삭제 확인: 3초 이내에 삭제를 한 번 더 누르면 삭제됩니다.';
+                statusEl.textContent = mStatus.textContent;
+            }
+        });
+
+        mClear.addEventListener('click', () => {
+            mTitle.value = '';
+            mNote.value = '';
+            mStatus.textContent = '입력값을 지웠습니다.';
+            statusEl.textContent = mStatus.textContent;
+        });
+
+        function downloadText(filename, text) {
+            const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 500);
+        }
+
+        btnExport.addEventListener('click', () => {
+            const payload = {
+                version: 1,
+                scope: '2026-01',
+                exportedAt: new Date().toISOString(),
+                data: store
+            };
+            downloadText('calendar_2026_01_export.json', JSON.stringify(payload, null, 2));
+        });
+
+        btnImport.addEventListener('click', () => fileImport.click());
+
+        fileImport.addEventListener('change', () => {
+            const file = fileImport.files && fileImport.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const raw = String(reader.result || '');
+                    const payload = JSON.parse(raw);
+                    const data = payload && payload.data;
+                    if (!data || typeof data !== 'object') throw new Error('data가 없습니다.');
+
+                    const next = Object.assign({}, store);
+                    Object.entries(data).forEach(([k, v]) => {
+                        if (typeof k !== 'string') return;
+                        if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(k)) return;
+                        if (!v || typeof v !== 'object') return;
+                        const title = String(v.title || '').trim();
+                        const note = String(v.note || '').trim();
+                        if (!title && !note) return;
+                        next[k] = {
+                            title,
+                            note,
+                            updatedAt: String(v.updatedAt || new Date().toISOString())
+                        };
+                    });
+
+                    store = next;
+                    saveStore(store);
+                    renderCalendar();
+                    renderList();
+                    syncEditorFromSelected();
+                    alert('가져오기 완료');
+                } catch (e) {
+                    alert('가져오기 실패: 올바른 JSON 파일인지 확인하세요.');
+                } finally {
+                    fileImport.value = '';
+                }
+            };
+            reader.onerror = () => {
+                alert('파일을 읽는 중 오류가 발생했습니다.');
+                fileImport.value = '';
+            };
+            reader.readAsText(file, 'utf-8');
+        });
+
+        btnReset.addEventListener('click', () => {
+            if (confirm('정말로 모든 저장 데이터를 삭제하시겠습니까? (되돌릴 수 없음)')) {
+                store = {};
+                saveStore(store);
+                renderCalendar();
+                renderList();
+                syncEditorFromSelected();
+            }
+        });
+
+        btnSort.addEventListener('click', () => {
+            sortAsc = !sortAsc;
+            btnSort.textContent = sortAsc ? '정렬: 날짜↑' : '정렬: 날짜↓';
+            renderList();
+        });
+
+        btnToday.addEventListener('click', () => {
+            const now = new Date();
+            const key = isoDate(now.getFullYear(), now.getMonth() + 1, now.getDate());
+            if (isInJan2026(key)) {
+                selected = key;
+                syncEditorFromSelected();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                alert(`오늘은 ${key} 입니다. 이 페이지는 2026-01만 편집합니다.`);
+            }
+        });
+
+        function runSelfTests() {
+            try {
+                console.assert(typeof renderList === 'function', 'renderList must be a function');
+                console.assert(typeof renderCalendar === 'function', 'renderCalendar must be a function');
+                console.assert(document.body && document.body.tagName === 'BODY', 'body tag should exist');
+
+                const backup = store;
+                const temp = Object.assign({}, store);
+                temp['2026-01-02'] = { title: 'TEST', note: 'SELF TEST', updatedAt: new Date().toISOString() };
+                store = temp;
+                renderList();
+                console.assert(listEl.children.length >= 1, 'list should render at least one child');
+
+                // Ensure newline join is applied correctly (IMPORTANT: keep as escaped \n, not a literal newline)
+                const joined = ['A', 'B'].join('\\n');
+                console.assert(joined === 'A\\nB', 'newline join should be \\n');
+
+                deleteArmed = false;
+                deleteArmedAt = 0;
+                console.assert(DELETE_ARM_MS === 3500, 'DELETE_ARM_MS should be 3500');
+
+                store = backup;
+                renderList();
+            } catch (e) {
+                console.error('Self test failed:', e);
+            }
+        }
+
+        renderCalendar();
+        renderList();
+        syncEditorFromSelected();
+        runSelfTests();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>HTML로 정리한 노트</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #fcfcfc;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            /* 화면 전체 높이 사용 */
+            overflow: hidden;
+            /* 전체적으로 부모에 스크롤 막기 */
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            grid-template-rows: 1fr 56px;
+            grid-template-areas:
+                "menu content"
+                "menu nav";
+            height: calc(var(--vh, 1vh) * 100);
+        }
+
+        .menu {
+            grid-area: menu;
+            background: #f4f4f4;
+            border-right: 1px solid #ddd;
+            padding: 20px 0 0 0;
+            display: flex;
+            flex-direction: column;
+            min-width: 180px;
+            overflow: auto;
+        }
+
+        .accordion {
+            width: 100%;
+        }
+
+        .accordion-item {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .accordion-title {
+            cursor: pointer;
+            padding: 12px 20px;
+            font-weight: bold;
+            background: none;
+            border: none;
+            outline: none;
+            width: 100%;
+            text-align: left;
+            transition: background 0.2s;
+        }
+
+        .accordion-title:hover {
+            background: #e7f1ff;
+        }
+
+        .accordion-content {
+            display: none;
+            background: #fafbfc;
+            padding: 0 24px 10px 24px;
+        }
+
+        .accordion-content.active {
+            display: block;
+        }
+
+        .menu-link {
+            display: block;
+            padding: 8px 0;
+            color: #0074d9;
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .content {
+            grid-area: content;
+            background: #fff;
+            padding: 0;
+            display: flex;
+            align-items: stretch;
+            justify-content: stretch;
+        }
+
+        iframe {
+            border: none;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+        }
+
+        .nav {
+            grid-area: nav;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 0 24px;
+            background: #f6f8fa;
+            border-top: 1px solid #ddd;
+            gap: 16px;
+            height: 56px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:active,
+        .nav-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .nav-btn[disabled] {
+            color: #aaa;
+            cursor: default;
+        }
+
+        a:link {
+            text-decoration: none;
+            color: grey;
+        }
+
+        a:visited {
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layout">
+        <nav class="menu">
+            <div class="accordion" id="accordionMenu"></div>
+        </nav>
+        <main class="content">
+            <iframe id="contentFrame" src="about:blank"></iframe>
+        </main>
+        <div class="nav">
+            <button class="nav-btn" id="backBtn" title="뒤로가기">&#8592;</button>
+            <button class="nav-btn" id="forwardBtn" title="앞으로가기">&#8594;</button>
+            <button class="nav-btn" id="openBtn" title="새창으로 열기">&#9711;</button>
+        </div>
+    </div>
+    <script>
+        // 메뉴 JSON 예제 (html 위치는 샘플)
+        const menuData = [
+            {
+                title: "Think",
+                links: [
+                    { name: "수학적 사고", url: "think/1/main.html" },
+                    { name: "무인까페", url: "think/2/main.html" },
+                    { name: "금동불상", url: "think/3/main.html" },
+                    { name: "할일", url: "think/4/main.html" },
+                    { name: "일상의 루틴", url: "think/5/main.html" }
+                    
+                ]
+            },
+            {
+                title: "Life",
+                links: [
+                    { name: "삶에서 친구", url: "life/1/main.html" },
+                    { name: "공존", url: "life/2/main.html" },
+                    { name: "하루의 질문", url: "life/3/main.html" },
+                    { name: "게임의 추억", url: "life/4/main.html" },
+                    { name: "인간관계", url: "life/5/main.html" },
+                    { name: "상처를 주지말자", url: "life/6/main.html" },
+                    { name: "걱정", url: "life/7/main.html" },
+                    { name: "인생공부", url: "life/8/main.html" }                      
+                ]
+            },
+            {
+                title: "WebApp",
+                links: [
+                    { name: "chating", url: "webapp/1/main.html" },
+                    { name: "typing", url: "webapp/2/main.html" },
+                    { name: "flashcard", url: "webapp/3/main.html" },
+                    { name: "AES 암호", url: "webapp/4/main.html" },
+                    { name: "Excel", url: "webapp/5/main.html" },
+                    { name: "Card news", url: "webapp/6/main.html" },
+                    { name: "Markdown viewer", url: "webapp/7/main.html" },
+                    { name: "수학필산 1", url: "webapp/8/main.html" },
+                    { name: "수학필산 2", url: "webapp/9/main.html" },
+                    { name: "슬라이딩 퍼즐", url: "webapp/10/main.html" },
+                    { name: "계산기", url: "webapp/11/main.html" },
+                    { name: "material theme", url: "webapp/12/main.html" },
+                    { name: "명언카드", url: "webapp/13/main.html" },
+                    { name: "BMI", url: "webapp/14/main.html" },
+                    { name: "음성노트", url: "webapp/15/main.html" },
+                    { name: "월간지출관리", url: "webapp/16/main.html" },
+                    { name: "뽀모도로 타이머", url: "webapp/17/main.html" },
+                    { name: "약속시간 메모 HTML", url: "webapp/18/main.html" },
+                    { name: "월간메모", url: "webapp/19/main.html" },
+                    { name: "채팅계산기", url: "webapp/20/main.html" },
+                    { name: "주판덧셈뺄셈", url: "webapp/21/main.html" }
+
+                ]
+            }
+        ];
+
+        // 아코디언 메뉴 그리기
+        const accordion = document.getElementById('accordionMenu');
+        menuData.forEach((item, i) => {
+            const accItem = document.createElement('div');
+            accItem.className = 'accordion-item';
+
+            const titleBtn = document.createElement('button');
+            titleBtn.className = 'accordion-title';
+            titleBtn.textContent = item.title;
+            titleBtn.onclick = function () {
+                // toggle 펼치기
+                document.querySelectorAll('.accordion-content').forEach(el => {
+                    if (el !== contentDiv) el.classList.remove('active');
+                });
+                contentDiv.classList.toggle('active');
+            };
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'accordion-content';
+            item.links.forEach(link => {
+                const linkEl = document.createElement('a');
+                linkEl.className = 'menu-link';
+                linkEl.textContent = link.name;
+                linkEl.href = "#";
+                linkEl.onclick = function (e) {
+                    e.preventDefault();
+                    loadContent(link.url, true);
+                };
+                contentDiv.appendChild(linkEl);
+            });
+
+            accItem.appendChild(titleBtn);
+            accItem.appendChild(contentDiv);
+            accordion.appendChild(accItem);
+        });
+
+        // iframe 로딩 및 히스토리 스택 관리
+        const frame = document.getElementById('contentFrame');
+        let navHistory = [];
+        let currentIdx = -1;
+
+        function loadContent(url, addToHistory) {
+            frame.src = url;
+            if (addToHistory) {
+                // 히스토리 추가시 현재 이후는 모두 삭제
+                navHistory = navHistory.slice(0, currentIdx + 1);
+                navHistory.push(url);
+                currentIdx = navHistory.length - 1;
+            }
+            updateNavBtns();
+        }
+
+        // 히스토리 back/forward
+        function goBack() {
+            if (currentIdx > 0) {
+                currentIdx--;
+                frame.src = navHistory[currentIdx];
+                updateNavBtns();
+            }
+        }
+        function goForward() {
+            if (currentIdx < navHistory.length - 1) {
+                currentIdx++;
+                frame.src = navHistory[currentIdx];
+                updateNavBtns();
+            }
+        }
+
+        // 새 창 열기
+        function openNewWindow() {
+            if (navHistory.length > 0 && currentIdx >= 0) {
+                window.open(navHistory[currentIdx], '_blank');
+            }
+        }
+
+        // 버튼 활성화/비활성화
+        function updateNavBtns() {
+            document.getElementById('backBtn').disabled = currentIdx <= 0;
+            document.getElementById('forwardBtn').disabled = currentIdx >= navHistory.length - 1;
+            document.getElementById('openBtn').disabled = navHistory.length === 0;
+        }
+
+        // 이벤트 바인딩
+        document.getElementById('backBtn').onclick = goBack;
+        document.getElementById('forwardBtn').onclick = goForward;
+        document.getElementById('openBtn').onclick = openNewWindow;
+        updateNavBtns();
+
+        // 모바일에서 height 재설정
+        function setFullHeight() {
+            document.documentElement.style.setProperty('--vh', window.innerHeight * 0.01 + 'px');
+        }
+
+        window.addEventListener('resize', setFullHeight);
+        window.addEventListener('load', setFullHeight);
+    </script>
+</body>
+
+</html>

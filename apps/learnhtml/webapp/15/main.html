@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>음성 메모</title>
+    <style>
+        body {
+            font-family: "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+            margin: 0;
+            padding: 24px;
+            background: linear-gradient(135deg, #f7f8fc, #eef1f8);
+            color: #111;
+        }
+
+        .app {
+            max-width: 760px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            margin: 0 0 12px;
+            font-size: 28px;
+            letter-spacing: -0.5px;
+        }
+
+        p.lead {
+            margin: 0 0 16px;
+            color: #555;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #444;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #bbb;
+            transition: background 0.2s;
+        }
+
+        .status-dot.active {
+            background: #e83f6f;
+        }
+
+        .panel {
+            margin: 18px 0;
+            padding: 14px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            background: #fafbfd;
+            min-height: 52px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 10px 0 4px;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 12px 16px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.05s ease, box-shadow 0.1s ease;
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
+        #recordBtn {
+            background: #111827;
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(17, 24, 39, 0.18);
+        }
+
+        #recordBtn.recording {
+            background: #e83f6f;
+            box-shadow: 0 6px 16px rgba(232, 63, 111, 0.3);
+        }
+
+        #clearBtn {
+            background: #e5e7eb;
+            color: #111;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            border: 1px solid #eceff5;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: transform 0.05s ease, box-shadow 0.1s ease;
+        }
+
+        li:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .note-text {
+            flex: 1;
+            text-align: left;
+            color: #111;
+        }
+
+        .note-time {
+            color: #6b7280;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .empty {
+            color: #777;
+            text-align: center;
+            padding: 16px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <h1>음성 메모</h1>
+        <p class="lead">버튼을 누르고 말하면 텍스트로 저장됩니다. 저장된 항목을 누르면 다시 읽어줍니다.</p>
+
+        <div class="status">
+            <div id="statusDot" class="status-dot"></div>
+            <div id="statusText">대기 중</div>
+        </div>
+
+        <div class="panel" id="lastResult">(아직 인식된 텍스트가 없습니다)</div>
+
+        <div class="controls">
+            <button id="recordBtn">녹음 시작</button>
+            <button id="clearBtn">전체 삭제</button>
+        </div>
+
+        <h3>저장된 텍스트</h3>
+        <div class="panel">
+            <ul id="noteList"></ul>
+            <div id="emptyState" class="empty">저장된 텍스트가 없습니다.</div>
+        </div>
+    </div>
+
+    <script>
+        const recordBtn = document.getElementById('recordBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const statusText = document.getElementById('statusText');
+        const statusDot = document.getElementById('statusDot');
+        const lastResult = document.getElementById('lastResult');
+        const noteList = document.getElementById('noteList');
+        const emptyState = document.getElementById('emptyState');
+        const storageKey = 'voiceNotes';
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+        let isRecording = false;
+        let currentMemo = '';
+        let wakeLock = null;
+
+        function getNotes() {
+            const stored = localStorage.getItem(storageKey);
+            try {
+                return stored ? JSON.parse(stored) : [];
+            } catch (_) {
+                return [];
+            }
+        }
+
+        function setNotes(notes) {
+            localStorage.setItem(storageKey, JSON.stringify(notes));
+            renderList();
+        }
+
+        function formatTime(ms) {
+            const date = new Date(ms);
+            const mm = String(date.getMonth() + 1).padStart(2, '0');
+            const dd = String(date.getDate()).padStart(2, '0');
+            const hh = String(date.getHours()).padStart(2, '0');
+            const min = String(date.getMinutes()).padStart(2, '0');
+            return `${mm}/${dd} ${hh}:${min}`;
+        }
+
+        function renderList() {
+            const notes = getNotes();
+            noteList.innerHTML = '';
+            if (!notes.length) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            emptyState.style.display = 'none';
+            notes.forEach((note, idx) => {
+                const li = document.createElement('li');
+                li.dataset.index = String(idx);
+                const textDiv = document.createElement('div');
+                textDiv.className = 'note-text';
+                textDiv.textContent = note.text;
+                const timeDiv = document.createElement('div');
+                timeDiv.className = 'note-time';
+                timeDiv.textContent = formatTime(note.savedAt);
+                li.appendChild(textDiv);
+                li.appendChild(timeDiv);
+                noteList.appendChild(li);
+            });
+        }
+
+        function speakText(text) {
+            if (!window.speechSynthesis) return alert('이 브라우저에서는 음성 합성이 지원되지 않습니다.');
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'ko-KR';
+            utter.volume = 1; // 최대 볼륨
+            window.speechSynthesis.speak(utter);
+        }
+
+        function saveCurrentMemo() {
+            const text = currentMemo.trim();
+            if (!text) return;
+            const notes = getNotes();
+            notes.unshift({ text, savedAt: Date.now() });
+            setNotes(notes.slice(0, 200));
+            lastResult.textContent = text;
+        }
+
+        function stopRecordingUI() {
+            isRecording = false;
+            recordBtn.textContent = '녹음 시작';
+            recordBtn.classList.remove('recording');
+            statusText.textContent = '대기 중';
+            statusDot.classList.remove('active');
+        }
+
+        async function requestWakeLock() {
+            if (!('wakeLock' in navigator)) return;
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                wakeLock.addEventListener('release', () => { wakeLock = null; });
+            } catch (_) {
+                wakeLock = null;
+            }
+        }
+
+        function releaseWakeLock() {
+            if (wakeLock && wakeLock.release) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && isRecording) {
+                requestWakeLock();
+            }
+        });
+
+        if (!recognition) {
+            statusText.textContent = '이 브라우저에서는 음성 인식이 지원되지 않습니다.';
+            recordBtn.disabled = true;
+        } else {
+            recognition.lang = 'ko-KR';
+            recognition.interimResults = false;
+            recognition.continuous = true; // 계속 대기하며 자동 종료되지 않도록
+
+            recognition.addEventListener('result', (event) => {
+                const transcript = event.results[0][0].transcript.trim();
+                if (transcript) {
+                    currentMemo = currentMemo ? `${currentMemo} ${transcript}` : transcript;
+                    lastResult.textContent = currentMemo;
+                } else {
+                    lastResult.textContent = '(인식 실패)';
+                }
+                // 녹음은 유지, 저장은 사용자 중지 시점에 수행
+            });
+
+            recognition.addEventListener('start', () => {
+                isRecording = true;
+                recordBtn.textContent = '녹음 중지';
+                recordBtn.classList.add('recording');
+                statusText.textContent = '녹음 중...';
+                statusDot.classList.add('active');
+            });
+
+            recognition.addEventListener('end', () => {
+                // 자동으로 끝났더라도 사용자가 중지하기 전까지 재시작
+                if (isRecording) {
+                    setTimeout(() => recognition.start(), 150);
+                } else {
+                    saveCurrentMemo();
+                    stopRecordingUI();
+                    releaseWakeLock();
+                }
+            });
+
+            recognition.addEventListener('error', (event) => {
+                alert(`음성 인식 오류: ${event.error}`);
+                saveCurrentMemo();
+                stopRecordingUI();
+                releaseWakeLock();
+            });
+        }
+
+        recordBtn.addEventListener('click', () => {
+            if (!recognition) return;
+            if (!isRecording) {
+                currentMemo = '';
+                lastResult.textContent = '(녹음 중, 텍스트를 받아오는 중...)';
+                isRecording = true;
+                recognition.start();
+                requestWakeLock();
+            } else {
+                isRecording = false;
+                recognition.stop();
+                // 중지 시점에 한번에 저장
+                saveCurrentMemo();
+                stopRecordingUI();
+                releaseWakeLock();
+            }
+        });
+
+        clearBtn.addEventListener('click', () => {
+            if (confirm('모든 저장된 텍스트를 삭제할까요?')) {
+                setNotes([]);
+                lastResult.textContent = '(아직 인식된 텍스트가 없습니다)';
+                currentMemo = '';
+            }
+        });
+
+        noteList.addEventListener('click', (event) => {
+            const li = event.target.closest('li');
+            if (!li) return;
+            const notes = getNotes();
+            const note = notes[Number(li.dataset.index)];
+            if (note) {
+                speakText(note.text);
+                lastResult.textContent = note.text;
+            }
+        });
+
+        renderList();
+    </script>
+</body>
+
+</html>

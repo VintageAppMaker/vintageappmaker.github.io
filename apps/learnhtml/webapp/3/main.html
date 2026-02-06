@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Structured Flashcard App</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f0f0f0;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        fieldset {
+            border: 1px solid #ccc;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 5px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        fieldset.collapsed {
+            display: none;
+        }
+
+        legend {
+            font-weight: bold;
+            padding: 0 0.5rem;
+            cursor: pointer;
+        }
+
+        input,
+        select,
+        button {
+            padding: 0.5rem;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            background-color: #58595a;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1976d2;
+        }
+
+        #deck {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .flashcard {
+            width: 200px;
+            height: 120px;
+            perspective: 1000px;
+            position: relative;
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+
+        .flashcard.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .card-front {
+            background: white;
+        }
+
+        .card-back {
+            background: #223f23;
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        .card-actions {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .card-actions button {
+            font-size: 0.8rem;
+            padding: 2px 6px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 3px;
+        }
+
+        .card-actions .edit {
+            background: #ff9800;
+        }
+
+        #cardAddFieldset {
+            background-color: #c6c7c7;
+            /* 노란색 배경 */
+        }
+    </style>
+</head>
+
+<body>
+    <h1>📁 영어암기 Flashcard</h1>
+
+    <fieldset>
+        <legend>덱 선택</legend>
+        <div class="group">
+            <select id="deckSelector" onchange="renderDeck()">
+                <option value="기본">기본</option>
+            </select>
+            <button onclick="exportSelectedDeck()">덱 내보내기</button>
+            <button onclick="deleteSelectedDeck()">덱 삭제</button>
+        </div>
+    </fieldset>
+
+    <fieldset id="deckAddFieldset">
+        <legend>덱 추가</legend>
+        <div class="group">
+            <input type="text" id="newDeckPath" placeholder="덱이름을 입력하세요">
+            <button onclick="addDeckPath()">덱 추가</button>
+        </div>
+    </fieldset>
+
+    <fieldset id="deckImportFieldset">
+        <legend>덱 불러오기</legend>
+        <div class="group">
+            <input type="file" id="importFile" accept="application/json">
+            <button onclick="importDeck()">덱 불러오기</button>
+        </div>
+    </fieldset>
+
+    <fieldset id="cardAddFieldset">
+        <legend>카드 추가</legend>
+        <div class="group">
+            <input type="text" id="frontInput" placeholder="Front">
+            <input type="text" id="backInput" placeholder="Back">
+            <button onclick="addCard()">카드 추가</button>
+        </div>
+    </fieldset>
+
+    <div id="deck"></div>
+
+    <script>
+        let structuredDecks = { "기본": [] };
+        const deckSelector = document.getElementById("deckSelector");
+
+        function updateStorage() {
+            localStorage.setItem("structuredDecks", JSON.stringify(structuredDecks));
+        }
+
+        function renderDeck() {
+            const container = document.getElementById("deck");
+            container.innerHTML = "";
+            const selectedDeck = deckSelector.value;
+            if (!selectedDeck) return;
+
+            const cards = structuredDecks[selectedDeck] || [];
+            cards.forEach((card, i) => {
+                const el = document.createElement("div");
+                el.className = "flashcard";
+
+                const inner = document.createElement("div");
+                inner.className = "card-inner";
+
+                const front = document.createElement("div");
+                front.className = "card-front";
+                front.innerHTML = card.front;
+
+                const back = document.createElement("div");
+                back.className = "card-back";
+                back.innerHTML = card.back;
+
+                inner.appendChild(front);
+                inner.appendChild(back);
+                el.appendChild(inner);
+
+                const actions = document.createElement("div");
+                actions.className = "card-actions";
+
+                const editBtn = document.createElement("button");
+                editBtn.className = "edit";
+                editBtn.textContent = "수정";
+                editBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    const newFront = prompt("앞면 수정", card.front);
+                    const newBack = prompt("뒷면 수정", card.back);
+                    if (newFront !== null && newBack !== null) {
+                        structuredDecks[selectedDeck][i] = { front: newFront, back: newBack };
+                        updateStorage();
+                        renderDeck();
+                    }
+                };
+
+                const delBtn = document.createElement("button");
+                delBtn.textContent = "삭제";
+                delBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    structuredDecks[selectedDeck].splice(i, 1);
+                    updateStorage();
+                    renderDeck();
+                };
+
+                actions.appendChild(editBtn);
+                actions.appendChild(delBtn);
+                front.appendChild(actions);
+
+                el.onclick = (event) => {
+                    if (event.target.tagName.toLowerCase() === "button") return;
+                    el.classList.toggle("flipped");
+                    const text = el.classList.contains("flipped") ? card.back : card.front;
+                    speak(text);
+                };
+
+                container.appendChild(el);
+            });
+        }
+
+        function exportSelectedDeck() {
+            const selectedDeck = deckSelector.value;
+            const cards = structuredDecks[selectedDeck];
+            if (!cards) return alert("덱을 선택하세요.");
+            const blob = new Blob([JSON.stringify(cards, null, 2)], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `${selectedDeck}.json`;
+            a.click();
+        }
+
+        function deleteSelectedDeck() {
+            const selectedDeck = deckSelector.value;
+            if (selectedDeck === "기본") return alert("기본 덱은 삭제할 수 없습니다.");
+            if (!confirm(`덱 '${selectedDeck}'을(를) 삭제하시겠습니까?`)) return;
+            delete structuredDecks[selectedDeck];
+            updateStorage();
+            deckSelector.remove(deckSelector.selectedIndex);
+            deckSelector.value = "기본";
+            renderDeck();
+            alert(`덱 '${selectedDeck}'이(가) 삭제되었습니다.`);
+        }
+
+        function addDeckPath() {
+            const path = document.getElementById("newDeckPath").value.trim();
+            if (!path) return alert("덱 이름을 입력하세요.");
+            if (structuredDecks[path]) return alert("이미 존재하는 덱입니다.");
+            structuredDecks[path] = [];
+            updateStorage();
+            const option = document.createElement("option");
+            option.value = path;
+            option.textContent = path;
+            deckSelector.appendChild(option);
+            deckSelector.value = path;
+            renderDeck();
+            alert(`덱 '${path}' 추가됨.`);
+            document.getElementById("newDeckPath").value = "";
+        }
+
+        function importDeck() {
+            const fileInput = document.getElementById("importFile");
+            const file = fileInput.files[0];
+            if (!file) return alert("파일을 선택하세요.");
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const fileName = file.name.replace(/\.json$/, "");
+                loadDecksFromFile(fileName, e.target.result);
+            };
+            reader.readAsText(file);
+        }
+
+        function loadDecksFromFile(fileName, fileContent) {
+            try {
+                const newDeck = JSON.parse(fileContent);
+                structuredDecks[fileName] = newDeck;
+                updateStorage();
+                const option = document.createElement("option");
+                option.value = fileName;
+                option.textContent = fileName;
+                deckSelector.appendChild(option);
+                deckSelector.value = fileName;
+                renderDeck();
+                alert(`덱 '${fileName}' 로드 완료`);
+            } catch (error) {
+                alert("JSON 파일 형식이 잘못되었습니다.");
+            }
+        }
+
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = /[\u3131-\uD79D]/ugi.test(text) ? "ko-KR" : "en-US";
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function addCard() {
+            const selectedDeck = deckSelector.value;
+            const front = document.getElementById("frontInput").value.trim();
+            const back = document.getElementById("backInput").value.trim();
+
+            if (!front || !back) {
+                return alert("카드의 앞면과 뒷면을 모두 입력하세요.");
+            }
+
+            if (!structuredDecks[selectedDeck]) {
+                return alert("덱이 선택되지 않았습니다.");
+            }
+
+            structuredDecks[selectedDeck].push({ front, back });
+            updateStorage();
+            renderDeck();
+
+            document.getElementById("frontInput").value = "";
+            document.getElementById("backInput").value = "";
+
+            alert("카드가 추가되었습니다.");
+        }
+
+        renderDeck();
+    </script>
+</body>
+
+</html>

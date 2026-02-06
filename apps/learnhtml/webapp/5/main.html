@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <script src="xlsx.full.min.js"></script>
+</head>
+
+<body>
+    <h2>카드 사용 내역</h2>
+    <table id="usageTable" border="1">
+        <tr>
+            <th>항목</th>
+            <th>금액</th>
+        </tr>
+        <tr>
+            <td>커피</td>
+            <td>5000</td>
+        </tr>
+        <tr>
+            <td>마트</td>
+            <td>30000</td>
+        </tr>
+        <tr>
+            <td>택시</td>
+            <td>12000</td>
+        </tr>
+    </table>
+    <br>
+    <button onclick="exportToExcel()">Excel로 내보내기 (합계 포함)</button>
+
+    <script>
+        function exportToExcel() {
+            var ws = XLSX.utils.table_to_sheet(document.getElementById("usageTable"));
+
+            // 수식 및 텍스트 셀 추가
+            ws['A5'] = { t: 's', v: '합계' };
+            ws['B5'] = { t: 'n', f: 'SUM(B2:B4)' };
+
+            // 워크시트 범위 수동 지정 (A1:B5까지 포함하도록)
+            ws['!ref'] = 'A1:B5';
+
+            // 워크북 생성 및 저장
+            var wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "사용내역");
+            XLSX.writeFile(wb, "카드사용내역_SUM.xlsx");
+        }
+    </script>
+</body>
+
+</html>

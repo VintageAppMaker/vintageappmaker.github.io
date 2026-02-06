@@ -1,0 +1,138 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오늘의 질문</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #236106;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            background-color: black;
+            width: 80%;
+            height: 90%;
+            border: 1px solid rgb(41, 41, 41);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .message {
+            max-width: 70%;
+            margin: 5px 0;
+            padding: 8px 12px;
+            border-radius: 16px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-row {
+            display: flex;
+            width: 100%;
+            margin-bottom: 8px;
+        }
+
+        .message.you {
+            background: #fbfd7d;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message.other {
+            background: white;
+            margin-right: auto;
+            text-align: left;
+        }
+
+        .chat-input {
+            display: flex;
+            border-top: 1px solid #ccc;
+            padding: 10px;
+            background: #fafafa;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            font-size: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        .chat-input button {
+            margin-left: 10px;
+            padding: 10px 16px;
+            font-size: 1rem;
+            border: none;
+            background: #007bff;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="chat-container">
+        <div class="chat-messages">
+            <div class="message-row">
+                <div class="message you">
+                    나이가 들어가니 하루에 대해 궁금해진다.<br>
+                    하루에 가치는 무엇일까?<br>
+                    왜 걱정은 끊임없이 많아지는 것일까?<br>
+                    무엇이 그렇게 걱정일까?<br>
+                </div>
+            </div>
+
+            <div class="message-row">
+                <div class="message other">
+                    세상을 아는만큼 무서움도 늘어가는 것<br>
+                    세월이 쌓이면서 보고 배운 것이 없겠는가?<br>
+                    무식할 수록 용감하고<br>
+                    많이 알 수록 비겁해지는 것이다<br>
+                </div>
+            </div>
+            <div class="message-row">
+                <div class="message you">
+                    애 (👩‍🦰) 키우는 것이 무섭고 예측되는 <br>미래가(📈📉📊) 무섭다.
+                </div>
+            </div>
+
+            <div class="message-row">
+                <div class="message other">
+                    그것이 인간의 삶이다.
+                </div>
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" placeholder="메시지를 입력하세요...">
+            <button>전송</button>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,1419 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>Material Template Widgets</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: \"Segoe UI\", system-ui, sans-serif;
+      --md-surface: #ffffff;
+      --md-surface-variant: #f2f5f8;
+      --md-primary: #006a6a;
+      --md-on-primary: #ffffff;
+      --md-outline: #d1d7dc;
+      --md-shadow: 0 1px 2px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.24);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #eef2f5;
+      color: #1f3333;
+      min-height: 100vh;
+    }
+
+    main {
+      display: grid;
+      gap: 24px;
+      padding: 112px 24px 128px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    section {
+      display: grid;
+      gap: 16px;
+    }
+
+    section > h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .app-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: var(--md-surface);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      box-shadow: var(--md-shadow);
+      z-index: 20;
+    }
+
+    .app-bar-title {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .app-bar-actions {
+      margin-left: auto;
+      display: flex;
+      gap: 12px;
+    }
+
+    .icon-button {
+      width: 44px;
+      height: 44px;
+      border-radius: 22px;
+      border: none;
+      background: transparent;
+      color: #1f3333;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 120ms ease, transform 120ms ease, box-shadow 120ms ease;
+    }
+
+    .icon-button svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .icon-button:hover {
+      background: rgba(0,0,0,0.06);
+    }
+
+    .icon-button:active {
+      transform: scale(0.96);
+    }
+
+    .nav-drawer {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 280px;
+      background: var(--md-surface);
+      box-shadow: var(--md-shadow);
+      transform: translateX(-100%);
+      transition: transform 200ms ease;
+      padding: 96px 24px 24px;
+      display: grid;
+      gap: 16px;
+      z-index: 30;
+    }
+
+    .nav-drawer.open {
+      transform: translateX(0);
+    }
+
+    .nav-drawer-header {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--md-outline);
+    }
+
+    .nav-drawer-title {
+      font-weight: 600;
+    }
+
+    .nav-drawer-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .nav-drawer-list button {
+      justify-self: stretch;
+      text-align: left;
+      padding: 12px 16px;
+      border-radius: 20px;
+      background: transparent;
+      border: none;
+      font-size: 16px;
+      color: inherit;
+      cursor: pointer;
+      transition: background 120ms ease, transform 120ms ease;
+    }
+
+    .nav-drawer-list button:hover {
+      background: var(--md-surface-variant);
+    }
+
+    .nav-scrim {
+      position: fixed;
+      inset: 0;
+      background: rgba(17,17,17,0.32);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 150ms ease;
+      z-index: 25;
+    }
+
+    .nav-scrim.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .md-card {
+      background: var(--md-surface);
+      border-radius: 16px;
+      box-shadow: var(--md-shadow);
+      padding: 20px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .md-card h3 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .md-card-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .md-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 20px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      box-shadow: var(--md-shadow);
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease, color 120ms ease;
+    }
+
+    .md-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 3px 6px rgba(0,0,0,0.18);
+    }
+
+    .md-button:active {
+      transform: scale(0.98);
+    }
+
+    .md-button--tonal {
+      background: #4fb0b0;
+      color: #063131;
+    }
+
+    .md-button--text {
+      background: transparent;
+      color: var(--md-primary);
+      box-shadow: none;
+    }
+
+    .md-button--text:hover {
+      background: rgba(0,106,106,0.08);
+      box-shadow: none;
+      transform: none;
+    }
+
+    .md-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 18px;
+      font-size: 14px;
+      background: var(--md-surface-variant);
+      color: #1f3333;
+      border: 1px solid var(--md-outline);
+    }
+
+    .chip-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--md-primary);
+    }
+
+    .md-form-card {
+      padding: 28px;
+    }
+
+    .md-form {
+      display: grid;
+      gap: 20px;
+    }
+
+    .md-form-row {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+
+    .md-text-field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .md-text-field label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #2b4040;
+    }
+
+    .md-text-field input,
+    .md-text-field select,
+    .md-text-field textarea {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--md-outline);
+      background: var(--md-surface);
+      padding: 14px 16px;
+      font: inherit;
+      color: inherit;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+
+    .md-text-field select {
+      appearance: none;
+      padding-right: 40px;
+      background-image: linear-gradient(45deg, transparent 50%, #1f3333 50%), linear-gradient(135deg, #1f3333 50%, transparent 50%);
+      background-position: calc(100% - 24px) calc(50% - 3px), calc(100% - 19px) calc(50% - 3px);
+      background-size: 6px 6px;
+      background-repeat: no-repeat;
+    }
+
+    .md-text-field textarea {
+      resize: vertical;
+      min-height: 112px;
+    }
+
+    .md-text-field input:focus,
+    .md-text-field select:focus,
+    .md-text-field textarea:focus {
+      outline: none;
+      border-color: var(--md-primary);
+      box-shadow: 0 0 0 3px rgba(0, 106, 106, 0.14);
+    }
+
+    .md-text-field--focused label {
+      color: var(--md-primary);
+    }
+
+    .md-text-field--filled label {
+      color: #425151;
+    }
+
+    .md-text-field--invalid label {
+      color: #b3261e;
+    }
+
+    .md-text-field--invalid input,
+    .md-text-field--invalid select,
+    .md-text-field--invalid textarea {
+      border-color: #b3261e;
+      box-shadow: 0 0 0 3px rgba(179, 38, 30, 0.16);
+    }
+
+    .md-field-helper {
+      font-size: 12px;
+      color: #5a6b6b;
+    }
+
+    .md-field-helper--error {
+      color: #b3261e;
+    }
+
+    .md-form-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .md-form-feedback {
+      margin: 0;
+      font-size: 14px;
+      color: #2b4040;
+    }
+
+    .md-form-feedback--error {
+      color: #b3261e;
+    }
+
+    .md-radio-card {
+      gap: 20px;
+    }
+
+    .md-radio-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .md-radio-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .md-radio-caption {
+      font-size: 14px;
+      color: #5a6b6b;
+    }
+
+    .md-radio-group {
+      display: grid;
+      gap: 12px;
+    }
+
+    .md-radio {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 28px;
+      cursor: pointer;
+      transition: background 160ms ease, box-shadow 160ms ease;
+    }
+
+    .md-radio--checked {
+      background: rgba(0, 106, 106, 0.14);
+      box-shadow: inset 0 0 0 1px rgba(0, 106, 106, 0.24);
+    }
+
+    .md-radio:hover {
+      background: rgba(0, 106, 106, 0.08);
+    }
+
+    .md-radio input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .md-radio-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--md-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 160ms ease, background 160ms ease;
+    }
+
+    .md-radio-icon::after {
+      content: "";
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: transparent;
+      transition: transform 160ms ease, background 160ms ease;
+      transform: scale(0);
+    }
+
+    .md-radio input:checked + .md-radio-icon::after {
+      background: var(--md-primary);
+      transform: scale(1);
+    }
+
+    .md-radio input:focus-visible + .md-radio-icon {
+      outline: 3px solid rgba(0, 106, 106, 0.24);
+      outline-offset: 2px;
+    }
+
+    .md-radio-label {
+      font-size: 16px;
+    }
+
+    .md-radio-feedback {
+      margin: 0;
+      font-size: 14px;
+      color: #2b4040;
+    }
+
+    .progress-list {
+      display: grid;
+      gap: 16px;
+    }
+
+    .md-progress-card {
+      gap: 8px;
+    }
+
+    .md-progress-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+    }
+
+    .md-progress-description {
+      margin: 0;
+      font-size: 14px;
+      color: #425151;
+    }
+
+    .md-linear-progress {
+      position: relative;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--md-surface-variant);
+      overflow: hidden;
+    }
+
+    .md-linear-progress__indicator {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: var(--md-primary);
+      transform-origin: left center;
+      transform: scaleX(0);
+      transition: transform 160ms cubic-bezier(0.4, 0, 0.2, 1);
+      will-change: transform;
+    }
+
+    .md-linear-progress[data-indeterminate="true"] .md-linear-progress__indicator {
+      transform: translateX(-105%) scaleX(0.5);
+      animation: md-linear-progress-indeterminate 1.8s infinite cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .md-progress-meta {
+      font-size: 14px;
+      color: #1f3333;
+    }
+
+    @keyframes md-linear-progress-indeterminate {
+      0% {
+        transform: translateX(-105%) scaleX(0.4);
+      }
+      50% {
+        transform: translateX(-15%) scaleX(0.9);
+      }
+      100% {
+        transform: translateX(120%) scaleX(0.5);
+      }
+    }
+    dialog {
+      border: none;
+      border-radius: 28px;
+      padding: 0;
+      box-shadow: var(--md-shadow);
+      max-width: 360px;
+    }
+
+    dialog::backdrop {
+      background: rgba(33, 33, 33, 0.32);
+      backdrop-filter: blur(3px);
+    }
+
+    .dialog-form {
+      display: grid;
+      gap: 16px;
+      padding: 24px;
+    }
+
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .dialog-title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .dialog-body {
+      margin: 0;
+      line-height: 1.5;
+      color: #2b4040;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .dialog-actions .md-button {
+      min-width: 96px;
+    }
+
+    .carousel {
+      position: relative;
+      overflow: hidden;
+      border-radius: 20px;
+      background: var(--md-surface);
+      box-shadow: var(--md-shadow);
+      min-height: 220px;
+    }
+
+    .carousel-track {
+      display: flex;
+      transition: transform 300ms ease;
+      height: 100%;
+    }
+
+    .carousel-slide {
+      flex: 0 0 100%;
+      padding: 32px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .carousel-slide h3 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .carousel-slide p {
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .carousel-controls {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      pointer-events: none;
+    }
+
+    .carousel-controls .icon-button {
+      pointer-events: auto;
+      background: rgba(255,255,255,0.82);
+      box-shadow: var(--md-shadow);
+    }
+
+    .carousel-indicators {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+    }
+
+    .carousel-indicators button {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(16,32,32,0.3);
+      cursor: pointer;
+      transition: transform 120ms ease, background 120ms ease;
+    }
+
+    .carousel-indicators button.active {
+      background: var(--md-primary);
+      transform: scale(1.1);
+    }
+
+    .bottom-app-bar {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: min(560px, calc(100% - 32px));
+      height: 72px;
+      background: var(--md-surface);
+      box-shadow: var(--md-shadow);
+      border-radius: 24px 24px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 15;
+    }
+
+    .bottom-actions {
+      display: flex;
+      gap: 16px;
+    }
+
+    .bottom-app-bar-title {
+      font-weight: 600;
+    }
+
+    .fab {
+      position: fixed;
+      right: 32px;
+      bottom: 96px;
+      width: 64px;
+      height: 64px;
+      border-radius: 32px;
+      border: none;
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      box-shadow: var(--md-shadow);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 150ms ease, box-shadow 150ms ease;
+    }
+
+    .fab svg {
+      width: 28px;
+      height: 28px;
+      fill: currentColor;
+    }
+
+    .fab:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+    }
+
+    .fab:active {
+      transform: scale(0.96);
+    }
+
+    @media (max-width: 720px) {
+      main {
+        padding: 104px 16px 144px;
+      }
+
+      .app-bar {
+        height: 64px;
+        padding: 0 16px;
+      }
+
+      .nav-drawer {
+        width: min(320px, 80vw);
+      }
+
+      .bottom-app-bar {
+        width: calc(100% - 16px);
+        padding: 0 16px;
+      }
+
+      .fab {
+        right: 16px;
+        bottom: 104px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-bar">
+    <button class="icon-button" id="drawer-toggle" type="button" aria-label="내비게이션 열기">
+      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z" /></svg>
+    </button>
+    <span class="app-bar-title">Material Template Widgets</span>
+    <div class="app-bar-actions">
+      <button class="icon-button" id="app-bar-dialog-trigger" type="button" aria-label="다이얼로그 열기">
+        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M11 18h2v-2h-2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2a2 2 0 1 1 4 0c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z" /></svg>
+      </button>
+    </div>
+  </header>
+
+  <aside class="nav-drawer" id="nav-drawer" aria-hidden="true">
+    <div class="nav-drawer-header">
+      <span class="nav-drawer-title">컴포넌트</span>
+      <button class="icon-button" id="drawer-close" type="button" aria-label="내비게이션 닫기">
+        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L12 13.41l-4.89 4.88-1.41-1.42L10.59 12 4.29 5.71 5.7 4.29 12 10.59l6.29-6.3z" /></svg>
+      </button>
+    </div>
+    <nav class="nav-drawer-list">
+      <button type="button" data-scroll-target="carousel-section">캐러셀</button>
+      <button type="button" data-scroll-target="card-examples">카드</button>
+      <button type="button" data-scroll-target="button-examples">버튼</button>
+      <button type="button" data-scroll-target="form-examples">입력 폼</button>
+      <button type="button" data-scroll-target="radio-examples">라디오 버튼</button>
+      <button type="button" data-scroll-target="progress-examples">프로그레스 바</button>
+      <button type="button" data-scroll-target="chip-examples">칩</button>
+      <button type="button" data-scroll-target="dialog-examples">다이얼로그</button>
+    </nav>
+  </aside>
+  <div class="nav-scrim" id="nav-scrim"></div>
+
+  <main>
+    <section id="carousel-section">
+      <h2>Carousel</h2>
+      <div class="carousel" id="carousel">
+        <div class="carousel-track" id="carousel-track"></div>
+        <div class="carousel-controls">
+          <button class="icon-button" type="button" id="carousel-prev" aria-label="이전 슬라이드">
+            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="m15.41 7.41-1.42-1.41L8.59 11l5.4 5.01 1.42-1.41L11.41 11z" /></svg>
+          </button>
+          <button class="icon-button" type="button" id="carousel-next" aria-label="다음 슬라이드">
+            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" /></svg>
+          </button>
+        </div>
+        <div class="carousel-indicators" id="carousel-indicators"></div>
+      </div>
+    </section>
+
+    <section id="card-examples">
+      <h2>Cards</h2>
+    </section>
+
+    <section id="button-examples">
+      <h2>Buttons</h2>
+    </section>
+
+    <section id="form-examples">
+      <h2>Input Form</h2>
+      <article class="md-card md-form-card">
+        <form class="md-form" id="feedback-form" novalidate>
+          <div class="md-form-row">
+            <div class="md-text-field">
+              <label for="name-input">이름</label>
+              <input id="name-input" name="name" type="text" autocomplete="name" required placeholder="홍길동" />
+              <span class="md-field-helper">필수 입력</span>
+            </div>
+            <div class="md-text-field">
+              <label for="email-input">이메일</label>
+              <input id="email-input" name="email" type="email" autocomplete="email" required placeholder="name@example.com" />
+              <span class="md-field-helper">연락받을 이메일</span>
+            </div>
+          </div>
+          <div class="md-text-field">
+            <label for="topic-select">문의 종류</label>
+            <select id="topic-select" name="topic" required>
+              <option value="" disabled selected>선택하세요</option>
+              <option value="support">기술 지원</option>
+              <option value="design">디자인 피드백</option>
+              <option value="other">기타</option>
+            </select>
+            <span class="md-field-helper">필수 선택</span>
+          </div>
+          <div class="md-text-field">
+            <label for="message-input">메시지</label>
+            <textarea id="message-input" name="message" rows="3" maxlength="200" placeholder="요청 내용을 간단히 작성해 주세요."></textarea>
+            <span class="md-field-helper">최대 200자</span>
+          </div>
+          <div class="md-form-actions">
+            <button class="md-button" type="submit">보내기</button>
+          </div>
+          <p class="md-form-feedback" id="form-feedback" role="status" aria-live="polite"></p>
+        </form>
+      </article>
+    </section>
+
+    <section id="radio-examples">
+      <h2>Radio Buttons</h2>
+      <article class="md-card md-radio-card">
+        <header class="md-radio-header">
+          <span class="md-radio-title" id="radio-group-title">알림 빈도</span>
+          <span class="md-radio-caption">상황에 맞는 알림 빈도를 선택하세요</span>
+        </header>
+        <div class="md-radio-group" role="radiogroup" aria-labelledby="radio-group-title">
+          <label class="md-radio">
+            <input type="radio" name="notification-frequency" value="daily" checked />
+            <span class="md-radio-icon"></span>
+            <span class="md-radio-label">하루에 한 번</span>
+          </label>
+          <label class="md-radio">
+            <input type="radio" name="notification-frequency" value="weekly" />
+            <span class="md-radio-icon"></span>
+            <span class="md-radio-label">주 1회 요약</span>
+          </label>
+          <label class="md-radio">
+            <input type="radio" name="notification-frequency" value="mute" />
+            <span class="md-radio-icon"></span>
+            <span class="md-radio-label">알림 끄기</span>
+          </label>
+        </div>
+        <p class="md-radio-feedback" id="radio-feedback" role="status" aria-live="polite">하루에 한 번을 선택했습니다.</p>
+      </article>
+    </section>
+    <section id="progress-examples">
+      <h2>Progress Bar</h2>
+      <div class="progress-list" id="progress-list"></div>
+    </section>
+    <section id="chip-examples">
+      <h2>Assist Chips</h2>
+    </section>
+
+    <section id="dialog-examples">
+      <h2>Dialog</h2>
+    </section>
+  </main>
+
+  <footer class="bottom-app-bar">
+    <div class="bottom-actions">
+      <button class="icon-button" type="button" data-action="bookmark" aria-label="북마크">
+        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M6 4c-1.1 0-2 .9-2 2v16l8-3.2 8 3.2V6c0-1.1-.9-2-2-2H6z" /></svg>
+      </button>
+      <button class="icon-button" type="button" data-action="share" aria-label="공유">
+        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a2.5 2.5 0 0 0 0-1.39l7.02-4.11A2.5 2.5 0 0 0 18 7.91a2.5 2.5 0 1 0-2.5-2.5c0 .23.03.45.08.66l-7.02 4.11a2.5 2.5 0 1 0 0 4.44l7.02 4.11c-.05.21-.08.43-.08.66a2.5 2.5 0 1 0 2.5-2.5z" /></svg>
+      </button>
+      <button class="icon-button" type="button" data-action="search" aria-label="검색">
+        <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM9.5 14A4.5 4.5 0 1 1 9.5 5a4.5 4.5 0 0 1 0 9z" /></svg>
+      </button>
+    </div>
+    <span class="bottom-app-bar-title">빠른 작업</span>
+  </footer>
+
+  <button class="fab" id="fab" type="button" aria-label="새 작업 추가">
+    <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M19 11H13V5h-2v6H5v2h6v6h2v-6h6z" /></svg>
+  </button>
+
+  <template id="card-template">
+    <article class="md-card">
+      <h3 class="md-card-title"></h3>
+      <p class="md-card-body"></p>
+      <footer class="md-card-actions">
+        <button class="md-button">Primary Action</button>
+      </footer>
+    </article>
+  </template>
+
+  <template id="button-template">
+    <button class="md-button">
+      <span class="label"></span>
+    </button>
+  </template>
+
+  <template id="chip-template">
+    <span class="md-chip">
+      <span class="chip-icon"></span>
+      <span class="chip-label"></span>
+    </span>
+  </template>
+
+  <template id="dialog-template">
+    <dialog>
+      <form method="dialog" class="dialog-form">
+        <header class="dialog-header">
+          <h2 class="dialog-title"></h2>
+          <button type="button" class="icon-button dialog-close" data-action="close" aria-label="대화상자 닫기">
+            <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M18.3 5.71 12 12l6.3 6.29-1.41 1.42L12 13.41l-4.89 4.88-1.41-1.42L10.59 12 4.29 5.71 5.7 4.29 12 10.59l6.29-6.3z" /></svg>
+          </button>
+        </header>
+        <p class="dialog-body"></p>
+        <div class="dialog-actions">
+          <button type="button" value="cancel" class="md-button md-button--text" data-action="cancel">취소</button>
+          <button type="button" value="confirm" class="md-button" data-action="confirm">확인</button>
+        </div>
+      </form>
+    </dialog>
+  </template>
+
+  <script>
+    function renderTemplate(id, setupFn) {
+      const template = document.getElementById(id);
+      const fragment = template.content.cloneNode(true);
+      setupFn(fragment);
+      return fragment;
+    }
+
+    const cardContainer = document.getElementById("card-examples");
+    [
+      { title: "Material Card", body: "머티리얼 디자인 가이드를 따르며 카드 단위로 콘텐츠를 구분합니다." },
+      { title: "Progress", body: "카드는 상태, 진행률, 작업 요약 등 다양한 정보를 담을 수 있습니다." }
+    ].forEach((data) => {
+      cardContainer.appendChild(renderTemplate("card-template", (fragment) => {
+        fragment.querySelector(".md-card-title").textContent = data.title;
+        fragment.querySelector(".md-card-body").textContent = data.body;
+      }));
+    });
+
+    const buttonContainer = document.getElementById("button-examples");
+    [
+      { label: "기본 액션" },
+      { label: "톤 다운 액션", className: "md-button md-button--tonal" },
+      { label: "다이얼로그 열기", id: "dialog-trigger" }
+    ].forEach((config) => {
+      const fragment = renderTemplate("button-template", (node) => {
+        node.querySelector(".label").textContent = config.label;
+      });
+      const button = fragment.firstElementChild;
+      if (config.className) {
+        button.className = config.className;
+      }
+      if (config.id) {
+        button.id = config.id;
+      }
+      buttonContainer.appendChild(fragment);
+    });
+
+    const chipContainer = document.getElementById("chip-examples");
+    [
+      { label: "필터: 전체" },
+      { label: "새로운 메시지" },
+      { label: "오프라인" }
+    ].forEach((data) => {
+      chipContainer.appendChild(renderTemplate("chip-template", (fragment) => {
+        fragment.querySelector(".chip-label").textContent = data.label;
+      }));
+    });
+
+    function validateControl(wrapper, control) {
+      const helper = wrapper.querySelector(".md-field-helper");
+      let message = "";
+      const value = control instanceof HTMLSelectElement ? control.value : control.value.trim();
+      if (control.hasAttribute("required")) {
+        if (control instanceof HTMLSelectElement && !value) {
+          message = "옵션을 선택해 주세요.";
+        } else if ((control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement) && value.length === 0) {
+          message = "필수 입력 항목입니다.";
+        }
+      }
+      if (!message && control instanceof HTMLInputElement && control.type === "email" && control.value && control.validity.typeMismatch) {
+        message = "이메일 형식이 올바르지 않습니다.";
+      }
+      if (!message && control instanceof HTMLTextAreaElement && control.maxLength > 0 && control.value.length > control.maxLength) {
+        message = `메시지는 ${control.maxLength}자 이내로 작성해 주세요.`;
+      }
+      wrapper.classList.toggle("md-text-field--invalid", Boolean(message));
+      if (helper) {
+        if (helper.dataset.default === undefined) {
+          helper.dataset.default = helper.textContent || "";
+        }
+        helper.textContent = message || helper.dataset.default;
+        helper.classList.toggle("md-field-helper--error", Boolean(message));
+      }
+      return !message;
+    }
+
+    const formElement = document.getElementById("feedback-form");
+    const formFeedback = document.getElementById("form-feedback");
+    if (formElement) {
+      const fieldWrappers = Array.from(formElement.querySelectorAll(".md-text-field"));
+      fieldWrappers.forEach((wrapper) => {
+        const control = wrapper.querySelector("input, select, textarea");
+        if (!control) {
+          return;
+        }
+        const helper = wrapper.querySelector(".md-field-helper");
+        if (helper && helper.dataset.default === undefined) {
+          helper.dataset.default = helper.textContent || "";
+        }
+        const updateFilled = () => {
+          if (control instanceof HTMLSelectElement) {
+            wrapper.classList.toggle("md-text-field--filled", control.value !== "");
+          } else {
+            wrapper.classList.toggle("md-text-field--filled", control.value.trim().length > 0);
+          }
+        };
+        updateFilled();
+        const interactionEvent = control instanceof HTMLSelectElement ? "change" : "input";
+        control.addEventListener("focus", () => {
+          wrapper.classList.add("md-text-field--focused");
+        });
+        control.addEventListener("blur", () => {
+          wrapper.classList.remove("md-text-field--focused");
+          validateControl(wrapper, control);
+        });
+        control.addEventListener(interactionEvent, () => {
+          updateFilled();
+          if (wrapper.classList.contains("md-text-field--invalid")) {
+            validateControl(wrapper, control);
+          }
+        });
+      });
+
+      formElement.addEventListener("submit", (event) => {
+        event.preventDefault();
+        let isValid = true;
+        fieldWrappers.forEach((wrapper) => {
+          const control = wrapper.querySelector("input, select, textarea");
+          if (!control) {
+            return;
+          }
+          const valid = validateControl(wrapper, control);
+          if (isValid && !valid) {
+            control.focus();
+          }
+          isValid = isValid && valid;
+        });
+        if (formFeedback) {
+          formFeedback.classList.toggle("md-form-feedback--error", !isValid);
+          formFeedback.textContent = isValid
+            ? "메시지를 보냈습니다. 곧 연락드릴게요!"
+            : "필수 입력 항목을 확인해 주세요.";
+        }
+        if (isValid) {
+          formElement.reset();
+          fieldWrappers.forEach((wrapper) => {
+            wrapper.classList.remove("md-text-field--filled", "md-text-field--invalid", "md-text-field--focused");
+            const helper = wrapper.querySelector(".md-field-helper");
+            if (helper && helper.dataset.default !== undefined) {
+              helper.textContent = helper.dataset.default;
+              helper.classList.remove("md-field-helper--error");
+            }
+          });
+        }
+      });
+
+      formElement.addEventListener("reset", () => {
+        window.setTimeout(() => {
+          fieldWrappers.forEach((wrapper) => {
+            wrapper.classList.remove("md-text-field--filled", "md-text-field--invalid", "md-text-field--focused");
+            const helper = wrapper.querySelector(".md-field-helper");
+            if (helper && helper.dataset.default !== undefined) {
+              helper.textContent = helper.dataset.default;
+              helper.classList.remove("md-field-helper--error");
+            }
+          });
+          if (formFeedback) {
+            formFeedback.classList.remove("md-form-feedback--error");
+            formFeedback.textContent = "";
+          }
+        }, 0);
+      });
+    }
+
+    const radioFeedback = document.getElementById("radio-feedback");
+    const radioLabels = Array.from(document.querySelectorAll("#radio-examples .md-radio"));
+    if (radioLabels.length) {
+      const updateRadioState = () => {
+        radioLabels.forEach((label) => {
+          const input = label.querySelector("input[type=radio]");
+          if (!input) {
+            return;
+          }
+          label.classList.toggle("md-radio--checked", input.checked);
+          if (input.checked && radioFeedback) {
+            const radioText = label.querySelector(".md-radio-label");
+            if (radioText) {
+              radioFeedback.textContent = `${radioText.textContent}을 선택했습니다.`;
+            }
+          }
+        });
+      };
+      radioLabels.forEach((label) => {
+        const input = label.querySelector("input[type=radio]");
+        if (!input) {
+          return;
+        }
+        input.addEventListener("change", updateRadioState);
+      });
+      updateRadioState();
+    }
+
+    const progressList = document.getElementById("progress-list");
+    const determinateBars = [];
+    if (progressList) {
+      const progressData = [
+        { title: "파일 동기화", description: "클라우드와 파일 버전을 맞추는 중입니다.", value: 38, speed: 5 },
+        { title: "분석 보고서 생성", description: "필요한 데이터를 수집하며 진행률을 계산하고 있습니다.", indeterminate: true }
+      ];
+
+      progressData.forEach((item) => {
+        const card = document.createElement("article");
+        card.className = "md-card md-progress-card";
+
+        const header = document.createElement("div");
+        header.className = "md-progress-header";
+
+        const title = document.createElement("span");
+        title.textContent = item.title;
+        header.appendChild(title);
+
+        const meta = document.createElement("span");
+        meta.className = "md-progress-meta";
+
+        const description = document.createElement("p");
+        description.className = "md-progress-description";
+        description.textContent = item.description;
+
+        const progressBar = document.createElement("div");
+        progressBar.className = "md-linear-progress";
+        progressBar.setAttribute("role", "progressbar");
+        progressBar.setAttribute("aria-valuemin", "0");
+        progressBar.setAttribute("aria-valuemax", "100");
+
+        const indicator = document.createElement("div");
+        indicator.className = "md-linear-progress__indicator";
+        progressBar.appendChild(indicator);
+
+        if (item.indeterminate) {
+          progressBar.dataset.indeterminate = "true";
+          progressBar.setAttribute("aria-valuetext", "진행률 계산 중");
+          meta.textContent = "계산 중";
+        } else {
+          const initialValue = Math.max(0, Math.min(100, Number(item.value) || 0));
+          meta.textContent = `${Math.round(initialValue)}%`;
+          progressBar.setAttribute("aria-valuenow", String(Math.round(initialValue)));
+          indicator.style.transform = `scaleX(${initialValue / 100})`;
+          determinateBars.push({
+            indicator,
+            progressBar,
+            meta,
+            value: initialValue,
+            increment: Math.max(1, Number(item.speed) || 4)
+          });
+        }
+
+        header.appendChild(meta);
+        card.appendChild(header);
+        card.appendChild(description);
+        card.appendChild(progressBar);
+        progressList.appendChild(card);
+      });
+    }
+
+    if (determinateBars.length) {
+      window.setInterval(() => {
+        determinateBars.forEach((item) => {
+          item.value += item.increment;
+          if (item.value > 100) {
+            item.value = 0;
+          }
+          const normalized = Math.max(0, Math.min(100, item.value));
+          item.indicator.style.transform = `scaleX(${normalized / 100})`;
+          item.progressBar.setAttribute("aria-valuenow", String(Math.round(normalized)));
+          item.meta.textContent = `${Math.round(normalized)}%`;
+        });
+      }, 800);
+    }
+
+    const dialogContainer = document.getElementById("dialog-examples");
+    const dialogTriggerButton = document.getElementById("dialog-trigger");
+    const dialogFragment = renderTemplate("dialog-template", (fragment) => {
+      fragment.querySelector(".dialog-title").textContent = "머티리얼 스타일 다이얼로그";
+      fragment.querySelector(".dialog-body").textContent = "템플릿과 스크립트를 통해 show/close 동작을 구성했습니다.";
+    });
+    const dialog = dialogFragment.querySelector("dialog");
+    dialogContainer.appendChild(dialogFragment);
+
+    function openDialog() {
+      dialog.showModal();
+    }
+
+    if (dialogTriggerButton) {
+      dialogTriggerButton.addEventListener("click", openDialog);
+    }
+
+    const appBarDialogTrigger = document.getElementById("app-bar-dialog-trigger");
+    if (appBarDialogTrigger) {
+      appBarDialogTrigger.addEventListener("click", openDialog);
+    }
+
+    const dialogCancelButton = dialog.querySelector("[data-action=\"cancel\"]");
+    const dialogCloseButton = dialog.querySelector("[data-action=\"close\"]");
+    const dialogConfirmButton = dialog.querySelector("[data-action=\"confirm\"]");
+
+    if (dialogCancelButton) {
+      dialogCancelButton.addEventListener("click", () => {
+        dialog.close("cancel");
+      });
+    }
+
+    if (dialogCloseButton) {
+      dialogCloseButton.addEventListener("click", () => {
+        dialog.close("close");
+      });
+    }
+
+    if (dialogConfirmButton) {
+      dialogConfirmButton.addEventListener("click", () => {
+        dialog.close("confirm");
+      });
+    }
+
+    dialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      dialog.close("cancel");
+    });
+
+    dialog.addEventListener("close", (event) => {
+      const returnValue = event.target.returnValue;
+      if (returnValue === "confirm") {
+        alert("확인되었습니다.");
+      } else if (returnValue === "cancel") {
+        alert("취소되었습니다.");
+      } else if (returnValue === "close") {
+        alert("닫기 버튼을 눌렀습니다.");
+      }
+    });
+
+    const navDrawer = document.getElementById("nav-drawer");
+    const navScrim = document.getElementById("nav-scrim");
+    const drawerToggle = document.getElementById("drawer-toggle");
+    const drawerClose = document.getElementById("drawer-close");
+    let drawerOpen = false;
+
+    function setDrawer(open) {
+      drawerOpen = open;
+      navDrawer.classList.toggle("open", open);
+      navDrawer.setAttribute("aria-hidden", String(!open));
+      navScrim.classList.toggle("open", open);
+    }
+
+    function openDrawer() {
+      setDrawer(true);
+    }
+
+    function closeDrawer() {
+      setDrawer(false);
+    }
+
+    drawerToggle.addEventListener("click", openDrawer);
+    drawerClose.addEventListener("click", closeDrawer);
+    navScrim.addEventListener("click", closeDrawer);
+
+    navDrawer.querySelectorAll("[data-scroll-target]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const targetId = button.getAttribute("data-scroll-target");
+        const section = document.getElementById(targetId);
+        if (section) {
+          const offset = section.getBoundingClientRect().top + window.scrollY - 96;
+          window.scrollTo({ top: offset < 0 ? 0 : offset, behavior: "smooth" });
+        }
+        closeDrawer();
+      });
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && drawerOpen) {
+        closeDrawer();
+      }
+    });
+
+    const bottomActionButtons = document.querySelectorAll(".bottom-app-bar [data-action]");
+    bottomActionButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        const action = button.getAttribute("data-action");
+        console.log("Bottom app bar action: " + action);
+      });
+    });
+
+    const fab = document.getElementById("fab");
+    let dynamicCardCount = 0;
+    fab.addEventListener("click", () => {
+      dynamicCardCount += 1;
+      const newCard = renderTemplate("card-template", (fragment) => {
+        fragment.querySelector(".md-card-title").textContent = "즉석 카드 " + dynamicCardCount;
+        fragment.querySelector(".md-card-body").textContent = "플로팅 액션 버튼을 눌러 추가된 카드입니다.";
+        fragment.querySelector(".md-card-actions .md-button").textContent = "자세히";
+      });
+      cardContainer.appendChild(newCard);
+      const newCardElement = cardContainer.lastElementChild;
+      if (newCardElement && typeof newCardElement.scrollIntoView === "function") {
+        newCardElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
+
+    const carouselTrack = document.getElementById("carousel-track");
+    const carouselIndicators = document.getElementById("carousel-indicators");
+    const carouselPrev = document.getElementById("carousel-prev");
+    const carouselNext = document.getElementById("carousel-next");
+    const carouselElement = document.getElementById("carousel");
+
+    const carouselData = [
+      {
+        title: "Guided Layouts",
+        description: "머티리얼 3 컴포넌트를 조합해 빠르게 프로토타입을 제작하세요.",
+        background: "linear-gradient(135deg, #d6f3f0 0%, #ffffff 100%)"
+      },
+      {
+        title: "Adaptive UI",
+        description: "앱바, 드로어, FAB을 함께 사용하면 다양한 화면 크기에 대응할 수 있습니다.",
+        background: "linear-gradient(135deg, #f7f1ff 0%, #ffffff 100%)"
+      },
+      {
+        title: "Delightful Motion",
+        description: "캐러셀 전환과 같은 섬세한 모션은 사용자 경험을 풍부하게 만듭니다.",
+        background: "linear-gradient(135deg, #fff3d6 0%, #ffffff 100%)"
+      }
+    ];
+
+    carouselData.forEach((slide, index) => {
+      const slideElement = document.createElement("article");
+      slideElement.className = "carousel-slide";
+      slideElement.style.background = slide.background;
+      slideElement.innerHTML = "<h3>" + slide.title + "</h3><p>" + slide.description + "</p>";
+      carouselTrack.appendChild(slideElement);
+
+      const indicator = document.createElement("button");
+      indicator.type = "button";
+      indicator.setAttribute("aria-label", (index + 1) + "번째 슬라이드");
+      indicator.dataset.index = String(index);
+      carouselIndicators.appendChild(indicator);
+    });
+
+    let currentSlide = 0;
+    let autoSlideTimer = null;
+
+    function goToSlide(index) {
+      if (!carouselData.length) {
+        return;
+      }
+      currentSlide = (index + carouselData.length) % carouselData.length;
+      const offset = -currentSlide * 100;
+      carouselTrack.style.transform = "translateX(" + offset + "%)";
+      carouselIndicators.querySelectorAll("button").forEach((indicator, idx) => {
+        indicator.classList.toggle("active", idx === currentSlide);
+      });
+    }
+
+    function startAutoSlide() {
+      stopAutoSlide();
+      autoSlideTimer = window.setInterval(() => {
+        goToSlide(currentSlide + 1);
+      }, 6000);
+    }
+
+    function stopAutoSlide() {
+      if (autoSlideTimer) {
+        window.clearInterval(autoSlideTimer);
+        autoSlideTimer = null;
+      }
+    }
+
+    carouselPrev.addEventListener("click", () => {
+      goToSlide(currentSlide - 1);
+      startAutoSlide();
+    });
+
+    carouselNext.addEventListener("click", () => {
+      goToSlide(currentSlide + 1);
+      startAutoSlide();
+    });
+
+    carouselIndicators.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLButtonElement)) {
+        return;
+      }
+      const index = Number(target.dataset.index);
+      if (!Number.isNaN(index)) {
+        goToSlide(index);
+        startAutoSlide();
+      }
+    });
+
+    carouselElement.addEventListener("mouseenter", stopAutoSlide);
+    carouselElement.addEventListener("mouseleave", startAutoSlide);
+
+    goToSlide(0);
+    startAutoSlide();
+  </script>
+</body>
+</html>
+
+
+

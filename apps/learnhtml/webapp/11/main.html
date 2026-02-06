@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>세로 풀기 사칙연산 계산기</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            /* slate-900 */
+            --panel: #111827;
+            /* gray-900 */
+            --ink: #e5e7eb;
+            /* gray-200 */
+            --muted: #94a3b8;
+            /* slate-400 */
+            --accent: #22c55e;
+            /* green-500 */
+            --danger: #ef4444;
+            /* red-500 */
+            --shadow: 0 8px 24px rgba(0, 0, 0, .35);
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: linear-gradient(180deg, #0b1024, #0f172a);
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, pretendard, Apple SD Gothic Neo, "Noto Sans KR", sans-serif;
+            color: var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 16px
+        }
+
+        .app {
+            width: min(440px, 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px
+        }
+
+        .title {
+            font-weight: 700;
+            letter-spacing: .2px
+        }
+
+        .engine-toggle {
+            display: flex;
+            gap: 6px;
+            align-items: center
+        }
+
+        .engine-toggle button {
+            border: 1px solid #374151;
+            background: #111827;
+            color: #cbd5e1;
+            padding: 6px 10px;
+            border-radius: 10px;
+            cursor: pointer
+        }
+
+        .engine-toggle button.active {
+            border-color: var(--accent);
+            color: #10b981
+        }
+
+        .display {
+            background: var(--panel);
+            border-radius: 16px;
+            padding: 14px 14px 10px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 180px
+        }
+
+        .history {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            line-height: 1.5;
+            max-height: 140px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column-reverse;
+            border-left: 3px solid #334155;
+            padding-left: 10px
+        }
+
+        .history .row {
+            opacity: .95
+        }
+
+        .history .eq {
+            color: #bef264
+        }
+
+        .history .hint {
+            color: var(--muted)
+        }
+
+        .current {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: .5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: end
+        }
+
+        .current .expr {
+            color: #e2e8f0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 80%
+        }
+
+        .current .value {
+            color: #fff
+        }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px
+        }
+
+        .btn {
+            user-select: none;
+            -webkit-user-select: none;
+            border: none;
+            border-radius: 14px;
+            padding: 16px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            background: #1f2937;
+            color: #e5e7eb;
+            box-shadow: var(--shadow)
+        }
+
+        .btn:active {
+            transform: translateY(1px)
+        }
+
+        .btn.op {
+            background: #0b3b2a
+        }
+
+        .btn.accent {
+            background: #064e3b
+        }
+
+        .btn.danger {
+            background: #3f1a1a
+        }
+
+        .btn.wide {
+            grid-column: span 2
+        }
+
+        /* small screens tweak */
+        @media (max-width:380px) {
+            .current {
+                font-size: 22px
+            }
+
+            .btn {
+                padding: 14px;
+                font-size: 16px
+            }
+        }
+
+        /* Custom transparent scrollbars for the vertical log (history) */
+        .history {
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
+        }
+
+        .history::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+            background: transparent;
+        }
+
+        .history::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .history::-webkit-scrollbar-thumb {
+            background-color: transparent;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        /* Optional: hide scrollbars on legacy Edge/IE while keeping scroll */
+        .history {
+            -ms-overflow-style: none;
+        }
+
+        /* If you want them entirely hidden everywhere, uncomment below:
+    .history{ scrollbar-width: none; }
+    .history::-webkit-scrollbar{ display:none; }
+    */
+    </style>
+</head>
+
+<body>
+    <div class="app" id="app">
+        <div class="topbar">
+            <div class="title">🧮 세로 풀기 사칙연산 계산기</div>
+
+        </div>
+
+        <section class="display">
+            <div class="history" id="history" aria-live="polite">
+                <!-- 최신 계산이 위에 보이도록 column-reverse -->
+                <div class="row hint">여기에 계산 과정이 세로로 기록됩니다.</div>
+            </div>
+            <div class="current">
+                <div class="expr" id="expr">0</div>
+                <div class="value" id="value">0</div>
+            </div>
+        </section>
+
+        <section class="keypad" aria-label="키패드">
+            <button class="btn danger" data-action="clear">AC</button>
+            <button class="btn" data-action="back">⌫</button>
+            <button class="btn" data-value="%">%</button>
+            <button class="btn op" data-value="/">÷</button>
+
+            <button class="btn" data-value="7">7</button>
+            <button class="btn" data-value="8">8</button>
+            <button class="btn" data-value="9">9</button>
+            <button class="btn op" data-value="*">×</button>
+
+            <button class="btn" data-value="4">4</button>
+            <button class="btn" data-value="5">5</button>
+            <button class="btn" data-value="6">6</button>
+            <button class="btn op" data-value="-">−</button>
+
+            <button class="btn" data-value="1">1</button>
+            <button class="btn" data-value="2">2</button>
+            <button class="btn" data-value="3">3</button>
+            <button class="btn op" data-value="+">+</button>
+
+            <button class="btn wide" data-value="0">0</button>
+            <button class="btn" data-value=".">.</button>
+            <button class="btn accent" data-action="equals">=</button>
+        </section>
+
+        <p style="color:#94a3b8;margin:6px 2px 0;line-height:1.4">
+            • 상단은 <b>세로 기록</b>입니다. 각 계산이 줄단위로 추가됩니다.<br />
+            • 연산 규칙: <b>일반 계산기 방식(왼→오 순차 평가)</b>로 동작합니다.
+        </p>
+    </div>
+
+    <script>
+        // 공통 UI 유틸 – 두 엔진이 공유
+        (function () {
+            function qs(id) { return document.getElementById(id) }
+            window.calcUI = {
+                els: { app: qs('app'), history: qs('history'), expr: qs('expr'), value: qs('value') },
+                pushHistory: function (text, cls) {
+                    var row = document.createElement('div');
+                    row.className = 'row' + (cls ? (' ' + cls) : '');
+                    row.textContent = text;
+                    this.els.history.prepend(row);
+                },
+                clearHistoryHintIfNeeded: function () {
+                    var first = this.els.history.lastElementChild;
+                    if (first && first.classList.contains('hint')) first.remove();
+                }
+            };
+        })();
+    </script>
+
+    <!-- ES6 엔진: let/const, 화살표함수, 템플릿리터럴 사용 -->
+    <script>
+        (function () {
+            const state = {
+                current: '0',
+                acc: null,
+                op: null,
+                justEvaluated: false
+            };
+
+            const isOp = v => ['+', '-', '*', '/'].includes(v);
+            const fmt = n => (Number.isFinite(n) ? (Number(n.toFixed(12)) + '').replace(/\.0+$/, '') : 'NaN');
+
+            const updateDisplay = () => {
+                calcUI.els.expr.textContent = state.op && state.acc !== null
+                    ? `${fmt(state.acc)} ${state.op} ${state.current}`
+                    : state.current;
+                calcUI.els.value.textContent = state.current;
+            };
+
+            const inputDigit = v => {
+                if (state.justEvaluated) { state.current = '0'; state.justEvaluated = false; }
+                if (v === '.') {
+                    if (!state.current.includes('.')) state.current += '.';
+                } else {
+                    state.current = state.current === '0' ? v : state.current + v;
+                }
+                updateDisplay();
+            };
+
+            const setOp = op => {
+                if (isOp(op)) {
+                    if (state.op && state.acc !== null) { // 연속 연산: 이전 것 평가
+                        equals();
+                    }
+                    state.acc = parseFloat(state.current);
+                    state.op = op;
+                    state.current = '0';
+                    updateDisplay();
+                }
+            };
+
+            const clearAll = () => {
+                state.current = '0'; state.acc = null; state.op = null; state.justEvaluated = false;
+                updateDisplay();
+            };
+
+            const backspace = () => {
+                if (state.justEvaluated) return; // 결과 직후에는 백스페이스 방지
+                state.current = (state.current.length > 1) ? state.current.slice(0, -1) : '0';
+                updateDisplay();
+            };
+
+            const percent = () => {
+                // 일반 계산기처럼 현재 입력값을 % 변환
+                state.current = fmt(parseFloat(state.current) / 100);
+                updateDisplay();
+            };
+
+            const equals = () => {
+                if (state.op && state.acc !== null) {
+                    const a = state.acc; const b = parseFloat(state.current);
+                    let res = NaN;
+                    switch (state.op) {
+                        case '+': res = a + b; break;
+                        case '-': res = a - b; break;
+                        case '*': res = a * b; break;
+                        case '/': res = b === 0 ? NaN : a / b; break;
+                    }
+                    const line = `${fmt(a)} ${state.op} ${fmt(b)} = ${fmt(res)}`;
+                    calcUI.clearHistoryHintIfNeeded();
+                    calcUI.pushHistory(line, 'eq');
+                    state.current = fmt(res);
+                    state.acc = null; state.op = null; state.justEvaluated = true;
+                    updateDisplay();
+                }
+            };
+
+            // 공개 인터페이스
+            window.calcEngineES6 = {
+                bind: (root) => {
+                    root.addEventListener('click', (e) => {
+                        const t = e.target;
+                        if (!t.classList.contains('btn')) return;
+                        const val = t.getAttribute('data-value');
+                        const action = t.getAttribute('data-action');
+
+                        if (action === 'clear') return clearAll();
+                        if (action === 'back') return backspace();
+                        if (action === 'equals') return equals();
+
+                        if (val) {
+                            if (isOp(val)) return setOp(val);
+                            if (val === '%') return percent();
+                            return inputDigit(val);
+                        }
+                    });
+                    // 키보드 지원
+                    window.addEventListener('keydown', (e) => {
+                        const k = e.key;
+                        if (/^[0-9]$/.test(k)) return inputDigit(k);
+                        if (k === '.') return inputDigit('.');
+                        if (['+', '-', '*', '/'].includes(k)) return setOp(k);
+                        if (k === 'Enter' || k === '=') return equals();
+                        if (k === 'Backspace') return backspace();
+                        if (k === '%') return percent();
+                        if (k.toLowerCase() === 'c') return clearAll();
+                    });
+                    // 초기 표시
+                    (function () { calcUI.pushHistory('예) 12 + 7 = 19', 'hint'); })();
+                }
+            };
+        })();
+    </script>
+
+
+
+    <!-- 초기화: ES6 엔진만 사용 -->
+    <script>
+        (function () {
+            var root = document.querySelector('.keypad');
+            if (window.calcEngineES6 && root) { window.calcEngineES6.bind(root); }
+        })();
+    </script>
+</body>
+
+</html>

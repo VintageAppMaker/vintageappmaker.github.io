@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markdown Preview (Live)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.5.1/github-markdown-light.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<style>
+  html,body{height:100%;margin:0}
+  body{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif; margin: 0; padding: 2em; background: #fafbfc;}
+  .markdown-body img {
+    width: 90%;
+    border-radius: 16px;
+    box-shadow: 0 2px 5px #0003;
+    display: block;
+    margin: 1em auto;
+  }
+  pre code.hljs {
+    border-radius: 8px;
+    padding: 1em;
+    font-size: 1em;
+  }
+</style>
+</head>
+<body>
+<div id="app" class="markdown-body"><h1>Material Template Widgets 개발자 매뉴얼</h1>
+<p>이 문서는 <code>material.html</code>에 정의된 <code>&lt;template&gt;</code> 조각을 재사용하는 방법을 정리한 개발자용 매뉴얼입니다. 각 템플릿의 DOM 구조, 필요한 데이터, 사용 예제를 통해 위젯을 확장하거나 변형할 때 참고할 수 있도록 구성했습니다.</p>
+<h2>1. 도우미 함수: <code>renderTemplate</code></h2>
+<p>파일 하단 스크립트에는 모든 템플릿 렌더링에 사용하는 헬퍼 함수가 정의되어 있습니다.</p>
+<pre><code class="language-js">function renderTemplate(id, setupFn) {
+  const template = document.getElementById(id);
+  const fragment = template.content.cloneNode(true);
+  setupFn(fragment);
+  return fragment;
+}
+</code></pre>
+<p>사용 지침</p>
+<ul>
+<li><code>id</code>: 대상 <code>&lt;template id=&quot;...&quot;&gt;</code> 값과 일치해야 합니다.</li>
+<li><code>setupFn(fragment)</code>: 복제된 <code>DocumentFragment</code> 내부 요소를 선택해 텍스트, 속성, 이벤트를 주입합니다.</li>
+<li>반환값은 <code>DocumentFragment</code>이므로 <code>appendChild</code>, <code>append</code>, <code>before</code> 등으로 DOM에 삽입합니다.</li>
+<li>깜빡임을 줄이려면 DOM에 붙이기 전에 이벤트 리스너를 연결하세요.</li>
+</ul>
+<h2>2. 템플릿 레퍼런스</h2>
+<h3>2.1 Card (<code>card-template</code>)</h3>
+<pre><code class="language-html">&lt;article class=&quot;md-card&quot;&gt;
+  &lt;h3 class=&quot;md-card-title&quot;&gt;&lt;/h3&gt;
+  &lt;p class=&quot;md-card-body&quot;&gt;&lt;/p&gt;
+  &lt;footer class=&quot;md-card-actions&quot;&gt;
+    &lt;button class=&quot;md-button&quot;&gt;Primary Action&lt;/button&gt;
+  &lt;/footer&gt;
+&lt;/article&gt;
+</code></pre>
+<p>주요 노드</p>
+<ul>
+<li><code>.md-card-title</code>: 카드 제목</li>
+<li><code>.md-card-body</code>: 본문 텍스트 또는 추가 요소 위치</li>
+<li><code>.md-card-actions .md-button</code>: 기본 액션 버튼 라벨 및 핸들러</li>
+</ul>
+<p>사용 예제</p>
+<pre><code class="language-js">const cardContainer = document.querySelector(&#39;#card-examples&#39;);
+const cardData = {
+  title: &#39;릴리스 노트&#39;,
+  body: &#39;2.4.0 버전의 주요 변경 사항을 확인하세요.&#39;,
+  actionLabel: &#39;변경 로그 열기&#39;,
+};
+
+const releaseCard = renderTemplate(&#39;card-template&#39;, (fragment) =&gt; {
+  fragment.querySelector(&#39;.md-card-title&#39;).textContent = cardData.title;
+  fragment.querySelector(&#39;.md-card-body&#39;).textContent = cardData.body;
+  fragment.querySelector(&#39;.md-card-actions .md-button&#39;).textContent = cardData.actionLabel;
+});
+
+releaseCard.querySelector(&#39;.md-button&#39;).addEventListener(&#39;click&#39;, () =&gt; {
+  console.log(&#39;변경 로그 열기&#39;);
+});
+
+cardContainer.appendChild(releaseCard);
+</code></pre>
+<p>Tips</p>
+<ul>
+<li>본문 영역에 칩, 리스트 등 다른 요소를 삽입해 카드 구성을 확장할 수 있습니다.</li>
+<li>보조 액션이 필요하면 버튼을 복제하거나 추가 버튼을 삽입하세요.</li>
+</ul>
+<h3>2.2 Button (<code>button-template</code>)</h3>
+<pre><code class="language-html">&lt;button class=&quot;md-button&quot;&gt;
+  &lt;span class=&quot;label&quot;&gt;&lt;/span&gt;
+&lt;/button&gt;
+</code></pre>
+<p>커스터마이징 포인트</p>
+<ul>
+<li><code>.label</code>: 버튼 텍스트</li>
+<li>버튼 요소: <code>md-button--tonal</code>, <code>md-button--text</code> 추가 또는 SVG 아이콘 삽입</li>
+</ul>
+<pre><code class="language-js">const toolbar = document.querySelector(&#39;#button-examples&#39;);
+
+const saveButton = renderTemplate(&#39;button-template&#39;, (fragment) =&gt; {
+  fragment.querySelector(&#39;.label&#39;).textContent = &#39;임시 저장&#39;;
+});
+
+const shareButton = renderTemplate(&#39;button-template&#39;, (fragment) =&gt; {
+  const button = fragment.firstElementChild;
+  button.classList.add(&#39;md-button--tonal&#39;);
+  fragment.querySelector(&#39;.label&#39;).textContent = &#39;공유&#39;;
+  button.insertAdjacentHTML(
+    &#39;afterbegin&#39;,
+    &#39;&lt;svg width=&quot;18&quot; height=&quot;18&quot; viewBox=&quot;0 0 24 24&quot;&gt;&lt;path d=&quot;M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7a2.5 2.5 0 0 0 0-1.39l7.02-4.11A2.5 2.5 0 0 0 18 7.91a2.5 2.5 0 1 0-2.5-2.5c0 .23.03.45.08.66l-7.02 4.11a2.5 2.5 0 1 0 0 4.44l7.02 4.11c-.05.21-.08.43-.08.66a2.5 2.5 0 1 0 2.5-2.5z&quot;/&gt;&lt;/svg&gt;&#39;
+  );
+});
+
+[saveButton, shareButton].forEach((fragment) =&gt; {
+  const button = fragment.firstElementChild;
+  button.addEventListener(&#39;click&#39;, (event) =&gt; {
+    console.log(`클릭한 버튼: ${event.currentTarget.textContent.trim()}`);
+  });
+  toolbar.appendChild(fragment);
+});
+</code></pre>
+<h3>2.3 Chip (<code>chip-template</code>)</h3>
+<pre><code class="language-html">&lt;span class=&quot;md-chip&quot;&gt;
+  &lt;span class=&quot;chip-icon&quot;&gt;&lt;/span&gt;
+  &lt;span class=&quot;chip-label&quot;&gt;&lt;/span&gt;
+&lt;/span&gt;
+</code></pre>
+<p>커스터마이징 포인트</p>
+<ul>
+<li><code>.chip-label</code>: 칩 텍스트</li>
+<li><code>.chip-icon</code>: 장식용 원형 (색상 변경, 숨김, 다른 요소로 교체 가능)</li>
+</ul>
+<pre><code class="language-js">const chipRack = document.querySelector(&#39;#chip-examples&#39;);
+const tags = [
+  { label: &#39;전체&#39;, color: &#39;#006a6a&#39; },
+  { label: &#39;새로 추가&#39;, color: &#39;#4fb0b0&#39; },
+  { label: &#39;오프라인&#39;, color: &#39;#aa3a3a&#39; },
+];
+
+tags.forEach(({ label, color }) =&gt; {
+  const chip = renderTemplate(&#39;chip-template&#39;, (fragment) =&gt; {
+    fragment.querySelector(&#39;.chip-label&#39;).textContent = label;
+    fragment.querySelector(&#39;.chip-icon&#39;).style.background = color;
+  });
+
+  chip.firstElementChild.addEventListener(&#39;click&#39;, () =&gt; {
+    console.log(`필터 변경: ${label}`);
+  });
+
+  chipRack.appendChild(chip);
+});
+</code></pre>
+<h3>2.4 Dialog (<code>dialog-template</code>)</h3>
+<pre><code class="language-html">&lt;dialog&gt;
+  &lt;form method=&quot;dialog&quot; class=&quot;dialog-form&quot;&gt;
+    &lt;header class=&quot;dialog-header&quot;&gt;
+      &lt;h2 class=&quot;dialog-title&quot;&gt;&lt;/h2&gt;
+      &lt;button type=&quot;button&quot; class=&quot;icon-button dialog-close&quot; data-action=&quot;close&quot;&gt;...&lt;/button&gt;
+    &lt;/header&gt;
+    &lt;p class=&quot;dialog-body&quot;&gt;&lt;/p&gt;
+    &lt;div class=&quot;dialog-actions&quot;&gt;
+      &lt;button type=&quot;button&quot; value=&quot;cancel&quot; class=&quot;md-button md-button--text&quot; data-action=&quot;cancel&quot;&gt;&lt;/button&gt;
+      &lt;button type=&quot;button&quot; value=&quot;confirm&quot; class=&quot;md-button&quot; data-action=&quot;confirm&quot;&gt;&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/form&gt;
+&lt;/dialog&gt;
+</code></pre>
+<p>사용 순서</p>
+<ol>
+<li>템플릿을 복제하고 제목 및 본문 텍스트를 설정합니다.</li>
+<li><code>[data-action=&quot;cancel&quot; | &quot;close&quot; | &quot;confirm&quot;]</code> 요소에 클릭 핸들러를 연결합니다.</li>
+<li><code>close</code> 이벤트에서 <code>returnValue</code>를 확인해 사용자 응답을 처리합니다.</li>
+<li><code>dialog.showModal()</code>로 열고 <code>dialog.close(value)</code>로 닫습니다.</li>
+</ol>
+<pre><code class="language-js">const dialogLayer = document.body;
+const trigger = document.querySelector(&#39;#dialog-trigger&#39;);
+
+const dialogFragment = renderTemplate(&#39;dialog-template&#39;, (fragment) =&gt; {
+  fragment.querySelector(&#39;.dialog-title&#39;).textContent = &#39;항목 삭제&#39;;
+  fragment.querySelector(&#39;.dialog-body&#39;).textContent = &#39;이 작업은 되돌릴 수 없습니다.&#39;;
+});
+
+const dialog = dialogFragment.querySelector(&#39;dialog&#39;);
+
+dialog.querySelector(&#39;[data-action=&quot;confirm&quot;]&#39;).textContent = &#39;삭제&#39;;
+dialog.querySelector(&#39;[data-action=&quot;cancel&quot;]&#39;).textContent = &#39;취소&#39;;
+
+dialog.querySelector(&#39;[data-action=&quot;confirm&quot;]&#39;).addEventListener(&#39;click&#39;, () =&gt; dialog.close(&#39;confirm&#39;));
+dialog.querySelector(&#39;[data-action=&quot;cancel&quot;]&#39;).addEventListener(&#39;click&#39;, () =&gt; dialog.close(&#39;cancel&#39;));
+dialog.querySelector(&#39;[data-action=&quot;close&quot;]&#39;).addEventListener(&#39;click&#39;, () =&gt; dialog.close(&#39;close&#39;));
+
+dialog.addEventListener(&#39;close&#39;, () =&gt; {
+  switch (dialog.returnValue) {
+    case &#39;confirm&#39;:
+      console.log(&#39;항목 삭제 완료&#39;);
+      break;
+    case &#39;cancel&#39;:
+      console.log(&#39;삭제 취소&#39;);
+      break;
+    case &#39;close&#39;:
+      console.log(&#39;헤더 닫기 버튼으로 닫음&#39;);
+      break;
+    default:
+      break;
+  }
+});
+
+dialogLayer.append(dialogFragment);
+
+trigger.addEventListener(&#39;click&#39;, () =&gt; dialog.showModal());
+</code></pre>
+<h2>3. 통합 가이드라인</h2>
+<ul>
+<li><strong>접근성 유지</strong>: <code>aria-label</code>, <code>role</code>, <code>aria-live</code> 속성은 가능한 유지하거나 동등한 대안을 제공합니다.</li>
+<li><strong>스타일 토큰 재사용</strong>: <code>md-</code> 접두사의 클래스는 <code>material.html</code>의 스타일과 연결되므로 이름 변경 대신 보조 클래스를 추가해 확장하세요.</li>
+<li><strong>데이터 기반 렌더링</strong>: 구성 객체 배열을 순회하며 템플릿을 채우는 패턴을 사용하면 UI 상태를 일관되게 유지할 수 있습니다.</li>
+<li><strong>생명주기 관리</strong>: DOM에 삽입하기 전에 리스너를 연결하고, 더 이상 필요 없는 프래그먼트는 제거해 메모리 누수를 방지하세요.</li>
+</ul>
+<h2>4. End-to-End 예제</h2>
+<p>카드와 칩 템플릿을 조합해 간단한 &quot;할 일&quot; 모듈을 만드는 예시입니다.</p>
+<pre><code class="language-js">const taskContainer = document.querySelector(&#39;#card-examples&#39;);
+
+const taskCard = renderTemplate(&#39;card-template&#39;, (fragment) =&gt; {
+  fragment.querySelector(&#39;.md-card-title&#39;).textContent = &#39;오늘 리뷰&#39;;
+  fragment.querySelector(&#39;.md-card-body&#39;).textContent = &#39;PR 검토와 지원 티켓 분류를 진행하세요.&#39;;
+  fragment.querySelector(&#39;.md-card-actions .md-button&#39;).textContent = &#39;완료 처리&#39;;
+});
+
+taskCard.querySelector(&#39;.md-card-actions .md-button&#39;).addEventListener(&#39;click&#39;, () =&gt; {
+  console.log(&#39;할 일 완료&#39;);
+});
+
+const tags = [&#39;우선순위: 높음&#39;, &#39;팀: 디자인&#39;];
+const chipRow = document.createElement(&#39;div&#39;);
+chipRow.style.display = &#39;flex&#39;;
+chipRow.style.gap = &#39;8px&#39;;
+
+tags.forEach((label) =&gt; {
+  const chip = renderTemplate(&#39;chip-template&#39;, (fragment) =&gt; {
+    fragment.querySelector(&#39;.chip-label&#39;).textContent = label;
+  });
+  chipRow.appendChild(chip);
+});
+
+taskCard.querySelector(&#39;.md-card-body&#39;).appendChild(document.createElement(&#39;hr&#39;));
+taskCard.querySelector(&#39;.md-card-body&#39;).appendChild(chipRow);
+
+taskContainer.appendChild(taskCard);
+</code></pre>
+<h2>5. 유지보수 체크리스트</h2>
+<ul>
+<li>템플릿 구조가 변경되면 이 매뉴얼도 함께 갱신하세요.</li>
+<li>예제 코드는 항상 <code>material.html</code> 구현과 동기화하고 테스트하세요.</li>
+<li>폼, 프로그레스 바 등 새 템플릿을 도입하면 본 문서에 섹션을 추가해 팀과 공유하세요.</li>
+</ul>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  async function setContent(html) {
+    const root = document.getElementById('app');
+    root.innerHTML = html;
+    // 코드 블록 하이라이트 적용
+    root.querySelectorAll('pre code').forEach(block => {
+      hljs.highlightElement(block);
+    });
+  }
+
+  // 최초 로딩
+  fetch('/content', { cache: 'no-store' })
+    .then(r => r.text())
+    .then(setContent);
+
+  // SSE로 실시간 업데이트
+  const evtSource = new EventSource('/events');
+  evtSource.onmessage = function(event) {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === 'refresh') setContent(data.html);
+    } catch {}
+  };
+</script>
+</body>
+</html>

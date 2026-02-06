@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CryptoJS 암호화/복호화 예제</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <style>
+        input,
+        textarea {
+            width: 70%;
+            padding: 5px;
+            margin-bottom: 10px;
+            margin-right: 40px;
+        }
+
+        #display {
+            width: 70%;
+            border: 1px solid #ccc;
+            padding: 10px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>🔐 AES-256 암호화 & 복호화</h2>
+
+    <label>비밀번호:</label><br>
+    <input type="password" id="password" placeholder="예: 1234" />
+    <br>
+
+    <label>원본 메시지:</label><br>
+    <textarea id="plainText">이것은 AES-256으로 암호화된 메시지입니다.</textarea>
+    <br>
+
+    <button onclick="encrypt()">🔒 암호화</button>
+    <button onclick="decrypt()">🔓 복호화</button>
+
+    <h3>🔗 암호화된 문자열:</h3>
+    <div id="encrypted"></div>
+
+    <h3>📦 복호화 결과:</h3>
+    <div id="display"></div>
+
+    <script>
+        function encrypt() {
+            const password = document.getElementById("password").value;
+            const plainText = document.getElementById("plainText").value;
+            const encrypted = CryptoJS.AES.encrypt(plainText, password).toString();
+            document.getElementById("encrypted").textContent = encrypted;
+        }
+
+        function decrypt() {
+            const password = document.getElementById("password").value;
+            const encrypted = document.getElementById("encrypted").textContent;
+
+            try {
+                const decrypted = CryptoJS.AES.decrypt(encrypted, password);
+                const text = decrypted.toString(CryptoJS.enc.Utf8);
+                if (!text) throw new Error("복호화 실패");
+
+                document.getElementById("display").textContent = text;
+            } catch (e) {
+                document.getElementById("display").textContent = "❌ 복호화 실패: 비밀번호가 틀리거나 유효하지 않은 암호문입니다.";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

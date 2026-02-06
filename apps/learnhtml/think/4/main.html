@@ -1,0 +1,172 @@
+<!DOCTYPE html><html>
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poor+Story&display=swap" rel="stylesheet">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <style>
+        *{
+            font-family: "Poor Story"; 
+        }
+
+        body{
+            background-color: whitesmoke;        
+            margin-left: 25pt;
+            min-height: 100svh;
+            display: flex;
+            align-items: left;
+            justify-content: left;
+            flex-direction: column;  
+        }
+        
+        .content {
+            padding-top: 5pt;
+            padding-left: 10px;
+            margin-bottom: 25pt;
+        }
+
+        div.fixed {
+            position: fixed;
+            bottom: 25px;   /* 하단에서 25px 위로 이동 */
+            width: 180px;
+            color: grey;
+            font-size: large;
+            
+            right: 45pt;  /* 오른쪽 여백 = (전체 - 본문) */
+        }
+
+        /* table: 테이블 구조로 요소들을 정렬 */
+        .table-box {
+            display: table;
+            background-color: transparent;
+            padding: 10px;
+            width: 85%;
+        }
+
+        .table-row {
+            display: table-row;
+        }
+
+        .table-cell {
+            display: table-cell;
+            border: 1px solid black;
+            padding: 5px;
+        }
+
+        .header{
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .custom-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid #aaa;
+            background-color: #ccc;
+            cursor: pointer;
+            vertical-align: middle; /* 수직 정렬 추가 */
+            position: relative;
+        }
+
+        .custom-checkbox:checked {
+            background-color: black;
+        }
+
+        .custom-checkbox:checked::after {
+            content: "\2714"; /* 유니코드 체크표시 ✔ */
+            color: white;
+            font-size: 14px;
+            position: absolute;
+            top: 0;
+            left: 3px;
+        }
+
+    </style>
+</head>
+<body>
+    <h1>업무정리</h1>
+    <div class="fixed">선택과 집중</div>
+    
+    <div class="header">
+		1. Programming (Software)
+    </div>
+    
+    <div class = "content">
+        프로그램이나 파일에 광고를 붙여 수익창출<br><br>
+        <div class="table-box">
+            <div class="table-row">
+                <div class="table-cell">1</div>
+                <div class="table-cell">Excel 파일 & 광고</div>
+                <div class="table-cell">
+                    <div style = "margin-left:10pt">
+                        <input type="checkbox" class="custom-checkbox"  id="scales" name="scales" checked />
+                        <label for="scales">스타트업 또는 기획자가 원하는 Excel 파일(쇼핑가격정보, 기사정보 취합)</label>
+                    </div> 
+                    <div style = "margin-left:10pt">
+                        <input type="checkbox" id="scales" class="custom-checkbox" name="scales" checked />
+                        <label for="scales">VBA로 자동화(웹스크래핑, 쿠팡 오픈)</label>
+                    </div> 
+                    <div style = "margin-left:10pt">
+                        <input type="checkbox" id="scales" class="custom-checkbox" name="scales" checked />
+                        <label for="scales">배포와 공유 용의하게</label>
+                    </div>
+                    
+                    <p>질문항목</p>
+                    <ol>
+                        <li> 사용자 타게팅은? </li>
+                        <li> 쿠팡링크를 누를 사람들은?</li>
+                        <li> 배포를 용의하게 하는 방법은?</li>
+                    </ol>
+                </div>
+            </div>
+            <div class="table-row">
+                <div class="table-cell">2</div>
+                <div class="table-cell">웹앱 활용</div>
+                <div class="table-cell">
+                    <div style = "margin-left:10pt">
+                        <input type="checkbox" id="scales" class="custom-checkbox" name="scales" checked />
+                        <label for="scales">각종 유틸리티 성향의 웹앱</label>
+                    </div>
+                    <div style = "margin-left:10pt">
+                        <input type="checkbox" id="scales" class="custom-checkbox" name="scales" checked />
+                        <label for="scales">배포공유 용의하게</label>
+                    </div>
+                    <div style = "margin-left:10pt">
+                        <input type="checkbox" id="scales" class="custom-checkbox" name="scales" checked />
+                        <label for="scales">쿠팡광고 링크</label>
+                    </div>
+                    <p>기능</p>
+                    <ol>
+                        <li> 암기카드</li>
+                        <li> ASMR</li>
+                        <li> 필사노트(타이핑)</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="header">
+		3. 글과 영상(Contents)  
+    </div>
+    <div class = "content">
+        Contents를 통한 고객유입. 브런치, 티스토리, github을 저장소로 활용. 
+        <br> 메일링 서비스로 유통촉직: substack
+        
+        <ol>
+            <li> AI, IT 정보 </li>
+            <li> 명상, 명언, ASMR </li>
+        </ol>
+    </div>
+
+    
+    <!-- 스크롤 테스트 목적 -->
+    <div style="padding-bottom:2000px">
+    </div>
+</body>
+</html>

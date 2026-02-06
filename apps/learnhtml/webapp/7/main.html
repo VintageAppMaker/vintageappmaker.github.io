@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poor+Story&display=swap" rel="stylesheet">
+
+    <meta charset="UTF-8">
+    <title>Markdown Viewer + Syntax Highlighting</title>
+
+    <!-- CSS: 코드 하이라이팅 테마 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" />
+
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            padding: 2rem;
+        }
+
+        pre code {
+            display: block;
+            padding: 1em;
+            background: #f6f8fa;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .frame {
+            font-family: 'Poor Story';
+            color: rgb(113, 197, 169);
+            background-color: #062924;
+            border-radius: 4px;
+            box-shadow: 1px 1px 2px black;
+            padding: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>📘 test.md 내용</h2>
+    <div id="preview" class="frame">불러오는 중...</div>
+
+    <p> 마크다운이 아닌 일반 텍스트입니다. </p>
+
+    <!-- JS: marked.js -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script> -->
+
+    <!-- JS: highlight.js 전체 번들 -->
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script> -->
+
+    <script src="marked.min.js"></script>
+    <script src="highlight.min.js"></script>
+
+    </script>
+    <!-- 실제 코드 실행 -->
+    <script>
+        // marked 설정
+        marked.setOptions({
+            langPrefix: 'hljs language-', // highlight.js 클래스 적용
+        });
+
+        // Markdown 파일 로드 후 하이라이팅
+        fetch('./test.md')
+            .then(response => response.text())
+            .then(md => {
+                document.getElementById('preview').innerHTML = marked.parse(md);
+                document.querySelectorAll('pre code').forEach(block => {
+                    hljs.highlightElement(block); // ✅ 여기가 핵심
+                });
+            })
+            .catch(error => {
+                document.getElementById('preview').textContent = '에러: ' + error.message;
+            });
+    </script>
+
+</body>
+
+</html>

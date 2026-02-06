@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인생 (Cigarette)</title>
+    <style>
+        body {
+            font-family: "Nanum Myeongjo", serif;
+            background: #f5f2ed;
+            color: #4a4a4a;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .label {
+            background: #fff;
+            padding: 1.5rem;
+            max-width: 600px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        .label-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .label-header .ko {
+            font-weight: bold;
+        }
+
+        .label-header .en {
+            font-style: italic;
+            color: #777;
+        }
+
+        .divider {
+            border-top: 2px solid #ccc;
+            margin: 0.5rem 0 1rem;
+        }
+
+        .label p {
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .images {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .images img {
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+            border: 1px solid #ddd;
+        }
+
+        .images .left {
+            flex: 1;
+        }
+
+        .images .right {
+            padding-top: 16px;
+            width: 120px;
+            height: auto;
+            flex-shrink: 0;
+        }
+
+        .caption {
+            font-size: 0.875rem;
+            color: #555;
+            margin-top: 0.25rem;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="label">
+        <div class="label-header">
+            <div class="ko">인생</div>
+            <div class="en">Life</div>
+        </div>
+        <div class="divider"></div>
+        <p>인생이 힘들어 밀패된 공간에 혼자 괴로워 할 때, 
+        그 공간을 나와 세상을 보아야 한다. 나만한 괴로움을 가진 사람들은 부지기수로 많다는 것을 알게된다. 
+        그럼에도 그들이 웃는 이유는 세상은 그런 고통 속에서도 미래를 꿈꿀 수 있는 무엇이 존재하기 때문이다. </p>
+        <div class="images">
+            <figure class="left">
+                <img src="https://img7.yna.co.kr/photo/yna/YH/2009/06/29/PYH2009062907830001300_P2.jpg"
+                    alt="걱정인형">
+                <figcaption class="caption">과테말라 걱정인형</figcaption>
+            </figure>
+            <div class="right">
+                <img src="https://ecimg.cafe24img.com/pg91b22390480081/hbjj2518/web/product/big/20220726/b87abd7be298413fd327787991ff4946.jpg"
+                    alt="쇼핑몰 자료">
+                <figcaption class="caption">판매되는 걱정인형</figcaption>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

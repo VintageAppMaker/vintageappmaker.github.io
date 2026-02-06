@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>타이핑 카드뉴스</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+    <!-- ✅ Google Fonts: Poor Story -->
+    <link href="https://fonts.googleapis.com/css2?family=Poor+Story&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --vh: 100%;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poor Story', cursive;
+            background: #f0f0f0;
+            height: 100%;
+        }
+
+        .slider-container {
+            max-width: 480px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            background: #fff;
+            height: calc(var(--vh, 1vh) * 100);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slider {
+            display: flex;
+            transition: transform 0.4s ease-in-out;
+            flex: 1;
+        }
+
+        .slide {
+            width: 100%;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .media {
+            flex: 1;
+            background: black;
+        }
+
+        .media img,
+        .media video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .caption {
+            height: 50%;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: 1.3rem;
+            line-height: 1.5;
+            color: white;
+        }
+
+        .indicators {
+            text-align: center;
+            padding: 10px;
+            background: #fff;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            margin: 5px;
+            background-color: #bbb;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .dot.active {
+            background-color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="slider-container" id="sliderContainer">
+        <div id="slider" class="slider"></div>
+        <div class="indicators" id="indicators"></div>
+    </div>
+
+    <script>
+        const cardData = [
+            {
+                type: "video",
+                src: "https://cdn.pixabay.com/video/2024/05/30/214500_large.mp4",
+                text: "공부는 절대 혼자 못해요. 100명 중 한 두 명만 가능해요! 공부잘하는 애들만 가능해요.",
+                bgColor: "#2ecc71"
+            },
+            {
+                type: "video",
+                src: "https://cdn.pixabay.com/video/2019/03/21/22182-325698769_large.mp4",
+                text: "그래서 선생님이 중요합니다. 바로 옆에서 도와주어야 해야 해요! ",
+                bgColor: "#34495e"
+            },
+            {
+                type: "video",
+                src: "https://cdn.pixabay.com/video/2015/10/16/1028-142624363_large.mp4",
+                text: "서아만 그런 것 아니에요! 아빠도 엄마도 학원 다니기 힘들었어요. 특히 아빠는 선생님이 안봐주면 더 힘들었어요!",
+                bgColor: "#e67e22"
+            },
+            {
+                type: "video",
+                src: "https://cdn.pixabay.com/video/2015/08/08/80-135733160_large.mp4",
+                text: "공부는 힘들지만 학원 다닌만큼 조금이나마 실력이 늘어났답니다.",
+                bgColor: "#2ecc71"
+            },
+            {
+                type: "video",
+                src: "https://cdn.pixabay.com/video/2015/08/08/40-135715695_medium.mp4",
+                text: "두려워 하지 말아요! 내게 맞는 선생님을 만나면 공부가 즐거워져요~ ",
+                bgColor: "#34495e"
+            },
+
+        ];
+
+        const slider = document.getElementById('slider');
+        const indicators = document.getElementById('indicators');
+        let currentIndex = 0;
+        let typingInterval = null;
+        let speechAllowed = false;
+
+        function speakText(text) {
+            if (!speechAllowed) return;
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance(text.replace(/\n/g, " "));
+            utter.lang = 'ko-KR';
+            window.speechSynthesis.speak(utter);
+        }
+
+        function typeWriter(target, text, delay = 50) {
+            target.textContent = "";
+            let i = 0;
+            clearInterval(typingInterval);
+            typingInterval = setInterval(() => {
+                if (i < text.length) {
+                    target.textContent += text[i];
+                    i++;
+                } else {
+                    clearInterval(typingInterval);
+                }
+            }, delay);
+        }
+
+        function renderSlides() {
+            cardData.forEach((card, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+
+                const media = document.createElement('div');
+                media.className = 'media';
+                if (card.type === "image") {
+                    const img = document.createElement('img');
+                    img.src = card.src;
+                    media.appendChild(img);
+                } else if (card.type === "video") {
+                    const video = document.createElement('video');
+                    video.src = card.src;
+                    video.autoplay = true;
+                    video.loop = true;
+                    video.muted = true;
+                    video.playsInline = true;
+                    media.appendChild(video);
+                }
+
+                const caption = document.createElement('div');
+                caption.className = 'caption';
+                caption.style.backgroundColor = card.bgColor;
+                caption.setAttribute('data-text', card.text);
+
+                slide.appendChild(media);
+                slide.appendChild(caption);
+                slider.appendChild(slide);
+
+                const dot = document.createElement('span');
+                dot.className = 'dot';
+                if (index === 0) dot.classList.add('active');
+                dot.onclick = () => goToSlide(index);
+                indicators.appendChild(dot);
+            });
+        }
+
+        function updateSlider() {
+            slider.style.transform = `translateX(-${currentIndex * 100}%)`;
+            document.querySelectorAll('.dot').forEach((dot, i) => {
+                dot.classList.toggle('active', i === currentIndex);
+            });
+
+            const caption = slider.children[currentIndex].querySelector('.caption');
+            const text = caption.getAttribute('data-text');
+            typeWriter(caption, text);
+            speakText(text);
+        }
+
+        function goToSlide(index) {
+            currentIndex = index;
+            updateSlider();
+        }
+
+        // 터치 이벤트
+        let startX = 0;
+        const container = document.getElementById('sliderContainer');
+
+        container.addEventListener('touchstart', e => {
+            speechAllowed = true; // 최초 사용자 상호작용 감지
+            startX = e.touches[0].clientX;
+        });
+
+        container.addEventListener('touchend', e => {
+            const endX = e.changedTouches[0].clientX;
+            const diff = startX - endX;
+            if (diff > 50) {
+                currentIndex = (currentIndex + 1) % cardData.length;
+                updateSlider();
+            } else if (diff < -50) {
+                currentIndex = (currentIndex - 1 + cardData.length) % cardData.length;
+                updateSlider();
+            }
+        });
+
+        // 모바일에서 실제 100vh 처리
+        function setRealVh() {
+            const vh = window.innerHeight * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+        }
+
+        window.addEventListener('resize', setRealVh);
+        window.addEventListener('orientationchange', setRealVh);
+
+        renderSlides();
+        setRealVh();
+        updateSlider();
+    </script>
+
+</body>
+
+</html>

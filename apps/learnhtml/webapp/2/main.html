@@ -1,0 +1,226 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>타이핑 연습 - CSS 축하 애니메이션</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f4f4f4;
+            padding: 2rem;
+            max-width: 600px;
+            margin: auto;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .hint {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: #555;
+            line-height: 1.8;
+            word-break: break-word;
+        }
+
+        .correct {
+            color: green;
+        }
+
+        .wrong {
+            color: red;
+        }
+
+        .remaining {
+            color: #bbb;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            font-size: 1.2rem;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: green;
+            width: 0%;
+            text-align: center;
+            color: white;
+            line-height: 20px;
+            transition: width 0.3s ease;
+        }
+
+        .error {
+            background-color: red !important;
+        }
+
+        /* 축하 애니메이션 */
+        .celebration {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #2b8a3e;
+            margin-top: 1.5rem;
+            display: none;
+            animation: pulse 1s ease infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        .emoji-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .emoji {
+            position: absolute;
+            font-size: 2rem;
+            animation: fall 1.8s ease-out forwards;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-50px) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(500px) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>명언 타이핑 연습</h1>
+    <div class="hint" id="quoteDisplay"></div>
+
+    <input type="text" id="typingInput" placeholder="위 문장을 똑같이 입력하세요." autocomplete="off" />
+
+    <div class="progress-bar">
+        <div class="progress" id="progressBar">0%</div>
+    </div>
+
+    <div class="celebration" id="celebration">🎉 성공! 잘 하셨어요! 🎉</div>
+    <div class="emoji-container" id="emojiContainer"></div>
+
+    <script>
+        const quotes = [
+            "믿어라e you can and you're halfway there.",
+            "최 to predict the future is to create it.",
+            "맹ss is not final, failure is not fatal: It is the courage to continue that counts.",
+            "그것 does not matter how slowly you go as long as you do not stop.",
+            "더  future belongs to those who believe in the beauty of their dreams."
+        ];
+
+        const quote = quotes[Math.floor(Math.random() * quotes.length)];
+        const input = document.getElementById("typingInput");
+        const progress = document.getElementById("progressBar");
+        const quoteDisplay = document.getElementById("quoteDisplay");
+        const celebration = document.getElementById("celebration");
+        const emojiContainer = document.getElementById("emojiContainer");
+
+        let finished = false;
+
+        function renderQuote(userInput) {
+            let resultHTML = '';
+            let errorStarted = false;
+
+            for (let i = 0; i < quote.length; i++) {
+                const correctChar = quote[i];
+                const userChar = userInput[i];
+
+                if (userChar === undefined) {
+                    resultHTML += `<span class="remaining">${correctChar}</span>`;
+                } else if (!errorStarted && userChar === correctChar) {
+                    resultHTML += `<span class="correct">${correctChar}</span>`;
+                } else {
+                    errorStarted = true;
+                    resultHTML += `<span class="wrong">${correctChar}</span>`;
+                }
+            }
+
+            quoteDisplay.innerHTML = resultHTML;
+        }
+
+        // 초기 문장 렌더링
+        renderQuote('');
+
+        // 이모지 생성
+        function launchEmojis(count = 20) {
+            for (let i = 0; i < count; i++) {
+                const emoji = document.createElement('div');
+                emoji.className = 'emoji';
+                emoji.innerText = '🎉';
+
+                emoji.style.left = Math.random() * 90 + '%';
+                emoji.style.animationDuration = 1 + Math.random() + 's';
+
+                emojiContainer.appendChild(emoji);
+
+                // 자동 삭제
+                setTimeout(() => {
+                    emoji.remove();
+                }, 2000);
+            }
+        }
+
+        input.addEventListener("input", () => {
+            const userInput = input.value;
+            renderQuote(userInput);
+
+            if (!quote.startsWith(userInput)) {
+                progress.style.width = "0%";
+                progress.textContent = "0%";
+                progress.classList.add("error");
+                celebration.style.display = "none";
+                finished = false;
+                return;
+            }
+
+            const percentage = Math.floor((userInput.length / quote.length) * 100);
+            progress.style.width = percentage + "%";
+            progress.textContent = percentage + "%";
+            progress.classList.remove("error");
+
+            if (userInput === quote && !finished) {
+                finished = true;
+                celebration.style.display = "block";
+                launchEmojis(25);
+            }
+        });
+    </script>
+
+</body>
+
+</html>

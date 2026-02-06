@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주산- 4자리 덧셈뺄셈</title>
+    <style>
+        :root {
+            --frame-color: #424242; /* Dark Gray */
+            --rod-color: #e0e0e0;   /* Light Gray */
+            --bead-color: #757575;  /* Mid Gray */
+            --bead-active-color: #212121; /* Almost Black */
+            --background-color: #f5f5f5;
+            --text-color: #212121;
+            --container-bg: #ffffff;
+            --success-color: #4CAF50;
+            --error-color: #F44336;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        #problem-container {
+            font-size: 2.5rem;
+            font-weight: 500;
+            margin: 20px;
+            padding: 20px 30px;
+            background: var(--container-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        #abacus {
+            display: flex;
+            background-color: var(--frame-color);
+            padding: 20px 15px;
+            border-radius: 12px;
+            border: 8px solid #212121;
+            gap: 10px;
+            user-select: none;
+        }
+
+        .rod {
+            width: 50px;
+            height: 300px;
+            background-color: var(--rod-color);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-radius: 5px;
+        }
+
+        .beam {
+            position: absolute;
+            top: 80px;
+            left: -10px;
+            right: -10px;
+            height: 12px;
+            background-color: #212121;
+            z-index: 10;
+        }
+
+        .bead {
+            width: 45px;
+            height: 30px;
+            background-color: var(--bead-color);
+            border-radius: 15px;
+            position: absolute;
+            cursor: pointer;
+            transition: top 0.2s ease-in-out, opacity 0.1s ease-in-out, background-color 0.1s ease-in-out;
+            border: 1px solid #555;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.2);
+        }
+
+        .bead.heaven.active, .bead.earth.active {
+            background-color: var(--bead-active-color);
+        }
+        
+        .bead.heaven { top: 10px; }
+        .bead.heaven.active { top: 45px; }
+
+        .bead.earth { /* Generic class for earth beads */ }
+        
+        /* Individual bead blink effect */
+        .bead.blink {
+            opacity: 0.5;
+            background-color: #bdbdbd; /* Lighter gray for blink */
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            padding: 0;
+            font-size: 1.1rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            color: var(--text-color);
+            transition: background-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            background-color: #bdbdbd;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        button svg {
+            width: 28px;
+            height: 28px;
+            fill: currentColor;
+        }
+
+        #result-msg {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        #result-msg.success { color: var(--success-color); }
+        #result-msg.error { color: var(--error-color); }
+
+        #explanation-container {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 600px;
+            background: var(--container-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            min-height: 50px;
+            font-size: 1.1rem;
+        }
+
+        #explanation-container ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            text-align: left;
+        }
+
+        #explanation-container li {
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #explanation-container li:hover {
+            background-color: #f0f0f0;
+        }
+
+        #explanation-container li:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>주산- 4자리 덧셈뺄셈</h1>
+
+    <div id="problem-container">
+        <span id="problem-text">문제를 생성하세요</span>
+    </div>
+
+    <div id="abacus">
+        <!-- 6개의 자리수 (10만단위까지 표현 가능) -->
+        <div class="rod" data-place="5"><div class="beam"></div></div>
+        <div class="rod" data-place="4"><div class="beam"></div></div>
+        <div class="rod" data-place="3"><div class="beam"></div></div>
+        <div class="rod" data-place="2"><div class="beam"></div></div>
+        <div class="rod" data-place="1"><div class="beam"></div></div>
+        <div class="rod" data-place="0"><div class="beam"></div></div>
+    </div>
+
+    <div class="controls">
+        <button onclick="generateProblem()" title="새 문제">
+            <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        </button>
+        <button onclick="resetAbacus()" title="주판 초기화">
+            <svg viewBox="0 0 24 24"><path d="M19 13H5v-2h14v2zm-7-6.59L9.58 4 8.17 5.41 12 9.24l3.83-3.83L14.42 4 12 6.41zM20 18H4v-2h16v2z"/></svg>
+        </button>
+        <button id="check-btn" onclick="checkAnswer()" title="정답 확인">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>
+        </button>
+        <button id="explain-btn" onclick="showExplanation()" title="해설">
+            <svg viewBox="0 0 24 24"><path d="M11 18h2v-2h-2v2zm1-16C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-2.21 0-4 1.79-4 4h2c0-1.1.9-2 2-2s2 .9 2 2c0 2-3 1.75-3 5h2c0-2.25 3-2.5 3-5 0-2.21-1.79-4-4-4z"/></svg>
+        </button>
+    </div>
+
+    <div id="result-msg"></div>
+
+    <div id="explanation-container"></div>
+
+    <script>
+        let currentAnswer = 0;
+        let currentProblem = ''; // 현재 문제 저장
+        const rods = document.querySelectorAll('.rod');
+        const abacusState = Array(6).fill(0).map(() => ({ heaven: 0, earth: 0 }));
+
+        // 주판 초기 설정
+        function initAbacus() {
+            rods.forEach((rod, idx) => {
+                rod.innerHTML = '<div class="beam"></div>';
+                
+                // 윗알 (5) 생성
+                const hBead = document.createElement('div');
+                hBead.className = 'bead heaven';
+                hBead.onclick = () => toggleHeaven(idx, hBead);
+                rod.appendChild(hBead);
+
+                // 아래알 (1) 4개 생성
+                for (let i = 1; i <= 4; i++) {
+                    const eBead = document.createElement('div');
+                    eBead.className = `bead earth earth-${i}`;
+                    eBead.style.top = `${130 + (i * 35)}px`;
+                    eBead.onclick = () => moveEarth(idx, i);
+                    rod.appendChild(eBead);
+                }
+            });
+        }
+
+        function toggleHeaven(rodIdx, element) {
+            // Blink the specific bead that is moving
+            element.classList.add('blink');
+            setTimeout(() => element.classList.remove('blink'), 200);
+
+            abacusState[rodIdx].heaven = abacusState[rodIdx].heaven === 5 ? 0 : 5;
+            element.classList.toggle('active');
+        }
+
+        function moveEarth(rodIdx, beadNum) {
+            const rod = rods[rodIdx];
+            const earthBeads = rod.querySelectorAll('.earth');
+            const oldEarthValue = abacusState[rodIdx].earth;
+            
+            const isUp = oldEarthValue >= beadNum;
+            const newEarthValue = isUp ? beadNum - 1 : beadNum;
+
+            const beadsToBlink = [];
+            earthBeads.forEach((bead, i) => {
+                const bIdx = i + 1;
+                const wasActive = bIdx <= oldEarthValue;
+                const isNowActive = bIdx <= newEarthValue;
+                if (wasActive !== isNowActive) {
+                    beadsToBlink.push(bead);
+                }
+            });
+
+            beadsToBlink.forEach(b => b.classList.add('blink'));
+            setTimeout(() => {
+                beadsToBlink.forEach(b => b.classList.remove('blink'));
+            }, 200);
+
+            abacusState[rodIdx].earth = newEarthValue;
+            updateRodVisual(rodIdx);
+        }
+
+        function updateRodVisual(rodIdx) {
+            const rod = rods[rodIdx];
+            const state = abacusState[rodIdx];
+            
+            // Heaven bead
+            const hBead = rod.querySelector('.heaven');
+            if (state.heaven === 5) hBead.classList.add('active');
+            else hBead.classList.remove('active');
+
+            // Earth beads
+            const earthBeads = rod.querySelectorAll('.earth');
+            earthBeads.forEach((bead, i) => {
+                const bIdx = i + 1; // Bead index (1 to 4)
+                if (bIdx <= state.earth) { // If this bead is 'active' (moved up)
+                    bead.classList.add('active');
+                    bead.style.top = `${85 + (bIdx * 35) - 35}px`; // Move up
+                } else {
+                    bead.classList.remove('active');
+                    bead.style.top = `${135 + (bIdx * 35)}px`; // Move down
+                }
+            });
+        }
+
+        function setBeadState(rodIdx, value) {
+            if (value < 0 || value > 9) return;
+
+            const rod = rods[rodIdx];
+            const oldState = { ...abacusState[rodIdx] };
+            
+            const newState = {
+                heaven: (value >= 5) ? 5 : 0,
+                earth: value % 5
+            };
+
+            const beadsToBlink = [];
+
+            // Check heaven bead
+            if (oldState.heaven !== newState.heaven) {
+                beadsToBlink.push(rod.querySelector('.heaven'));
+            }
+
+            // Check earth beads
+            const earthBeads = rod.querySelectorAll('.earth');
+            earthBeads.forEach((bead, i) => {
+                const bIdx = i + 1;
+                const wasActive = bIdx <= oldState.earth;
+                const isNowActive = bIdx <= newState.earth;
+                if (wasActive !== isNowActive) {
+                    beadsToBlink.push(bead);
+                }
+            });
+
+            beadsToBlink.forEach(b => b.classList.add('blink'));
+            setTimeout(() => {
+                beadsToBlink.forEach(b => b.classList.remove('blink'));
+            }, 200);
+
+            abacusState[rodIdx] = newState;
+            updateRodVisual(rodIdx);
+        }
+
+        function setAbacusValue(number) {
+            const strNum = String(number).padStart(6, '0');
+            for (let i = 0; i < 6; i++) {
+                setBeadState(i, parseInt(strNum[i], 10));
+            }
+        }
+        
+        function resetAbacus() {
+            abacusState.forEach((state, i) => {
+                state.heaven = 0;
+                state.earth = 0;
+            });
+            initAbacus(); // Re-creates beads and resets positions via CSS classes
+            document.getElementById('result-msg').innerText = '';
+            document.getElementById('explanation-container').innerHTML = '';
+        }
+
+        function generateProblem() {
+            const num1 = Math.floor(Math.random() * 9000) + 1000;
+            const num2 = Math.floor(Math.random() * 9000) + 1000;
+            const operator = Math.random() > 0.5 ? '+' : '-';
+            
+            let problem, result;
+            if (operator === '+') {
+                result = num1 + num2;
+                problem = `${num1} + ${num2} = ?`;
+            } else {
+                const n1 = Math.max(num1, num2);
+                const n2 = Math.min(num1, num2);
+                result = n1 - n2;
+                problem = `${n1} - ${n2} = ?`;
+            }
+            
+            document.getElementById('problem-text').innerText = problem;
+            currentProblem = problem;
+            currentAnswer = result;
+            resetAbacus();
+        }
+
+        function showExplanation() {
+            const problemText = currentProblem.replace(' = ?', '');
+            const parts = problemText.split(' ');
+            const num1 = parseInt(parts[0], 10);
+            const operator = parts[1];
+            const num2 = parseInt(parts[2], 10);
+
+            const explanationDiv = document.getElementById('explanation-container');
+            explanationDiv.innerHTML = ''; 
+            resetAbacus();
+
+            const steps = [];
+            let currentVal = 0;
+
+            // 1. 첫 번째 숫자를 놓습니다.
+            currentVal = num1;
+            steps.push({
+                text: `1. 먼저, 주판에 첫 번째 숫자인 ${num1}을 놓습니다.`,
+                value: currentVal
+            });
+
+            // 2. 두 번째 숫자를 계산합니다.
+            steps.push({
+                text: `2. 이제 두 번째 숫자인 ${num2}를 ${operator === '+' ? '더합니다' : '뺍니다'}.`,
+                value: currentVal // 이 단계에서는 값이 변하지 않음
+            });
+            
+            const num2Str = String(num2).padStart(4, '0');
+            for(let i = 3; i >= 0; i--) {
+                const digit = parseInt(num2Str[i], 10);
+                if (digit === 0) continue;
+
+                const placeValue = Math.pow(10, 3 - i);
+                const valueToChange = (operator === '+') ? digit * placeValue : -digit * placeValue;
+                const placeName = {1: '일', 10: '십', 100: '백', 1000: '천'}[placeValue];
+                
+                currentVal += valueToChange;
+
+                steps.push({
+                    text: `- ${placeName}의 자리: ${digit}을/를 ${operator === '+' ? '더합니다' : '뺍니다'}. (중간 값: ${currentVal})`,
+                    value: currentVal
+                });
+            }
+            
+            steps.push({
+                text: `완료! 최종 결과는 ${currentAnswer} 입니다.`,
+                value: currentAnswer
+            });
+
+            const ul = document.createElement('ul');
+            steps.forEach(step => {
+                const li = document.createElement('li');
+                li.innerText = step.text;
+                li.setAttribute('onclick', `displayStep(${step.value})`);
+                ul.appendChild(li);
+            });
+            explanationDiv.appendChild(ul);
+
+            // 첫 단계를 기본으로 표시
+            displayStep(steps[0].value);
+        }
+
+        function displayStep(value) {
+            setAbacusValue(value);
+        }
+
+        function getAbacusValue() {
+            let total = 0;
+            abacusState.forEach((state, idx) => {
+                const power = 5 - idx;
+                const value = state.heaven + state.earth;
+                total += value * Math.pow(10, power);
+            });
+            return total;
+        }
+
+        const placeNames = { 0: '십만', 1: '만', 2: '천', 3: '백', 4: '십', 5: '일' };
+
+        function getRodValue(rodIdx) {
+            if (rodIdx < 0 || rodIdx >= abacusState.length) return 0;
+            const state = abacusState[rodIdx];
+            return state.heaven + state.earth;
+        }
+
+        function showExplanation() {
+            const problemText = currentProblem.replace(' = ?', '');
+            const parts = problemText.split(' ');
+            const num1 = parseInt(parts[0], 10);
+            const operator = parts[1];
+            const num2 = parseInt(parts[2], 10);
+
+            const explanationDiv = document.getElementById('explanation-container');
+            explanationDiv.innerHTML = '';
+            resetAbacus();
+
+            const steps = [];
+            setAbacusValue(num1);
+            steps.push({
+                text: `1. 먼저, 주판에 첫 번째 숫자인 ${num1}을 놓습니다.`,
+                value: num1
+            });
+            
+            steps.push({
+                text: `2. 이제 두 번째 숫자인 ${num2}를 ${operator === '+' ? '더합니다' : '뺍니다'}.`,
+                value: getAbacusValue()
+            });
+
+            const num2Str = String(num2).padStart(4, '0');
+            
+            for (let i = 0; i < 4; i++) {
+                const digit = parseInt(num2Str[i], 10);
+                if (digit === 0) continue;
+                
+                const rodIdx = i + 2;
+                const placeName = placeNames[rodIdx];
+
+                steps.push({
+                    text: `--- ${placeName}의 자리 계산 (${digit}) ---`,
+                    value: getAbacusValue()
+                });
+
+                if (operator === '+') {
+                    addValueToRod(rodIdx, digit, steps);
+                } else {
+                    subtractValueFromRod(rodIdx, digit, steps);
+                }
+            }
+
+            steps.push({
+                text: `완료! 최종 결과는 ${currentAnswer} 입니다.`,
+                value: currentAnswer
+            });
+
+            const ul = document.createElement('ul');
+            steps.forEach(step => {
+                const li = document.createElement('li');
+                li.innerText = step.text;
+                li.setAttribute('onclick', `displayStep(${step.value})`);
+                ul.appendChild(li);
+            });
+            explanationDiv.appendChild(ul);
+
+            if (steps.length > 0) {
+                displayStep(steps[0].value);
+            }
+        }
+        
+        function addValueToRod(rodIdx, value, steps) {
+            if (value === 0 || rodIdx < 0) return;
+
+            const currentValue = getRodValue(rodIdx);
+            const placeName = placeNames[rodIdx];
+
+            // Case 1: Direct addition is possible
+            if (currentValue + value < 10) {
+                setBeadState(rodIdx, currentValue + value);
+                steps.push({
+                    text: `${placeName}의 자리에 ${value}를 직접 더합니다.`,
+                    value: getAbacusValue()
+                });
+                return;
+            }
+
+            // Case 2: Carry-over (보수 활용)
+            const complement = 10 - value;
+            steps.push({
+                text: `${placeName}의 자리에 ${value}를 더할 수 없어, 윗자리에 1을 더하고 ${placeName}의 자리에서 보수 ${complement}를 뺍니다.`,
+                value: getAbacusValue()
+            });
+
+            // 2a: Add 1 to the rod on the left (recursively)
+            addValueToRod(rodIdx - 1, 1, steps);
+            
+            // 2b: Subtract complement from the current rod
+            subtractValueFromRod(rodIdx, complement, steps, true);
+        }
+
+        function subtractValueFromRod(rodIdx, value, steps, isComplement = false) {
+            if (value === 0 || rodIdx < 0) return;
+
+            const currentValue = getRodValue(rodIdx);
+            const placeName = placeNames[rodIdx];
+            const actionText = isComplement ? '보수를' : '';
+
+            // Case 1: Direct subtraction is possible
+            if (currentValue >= value) {
+                setBeadState(rodIdx, currentValue - value);
+                steps.push({
+                    text: `${placeName}의 자리에서 ${value}를 ${actionText} 직접 뺍니다.`,
+                    value: getAbacusValue()
+                });
+                return;
+            }
+
+            // Case 2: Borrow (보수 활용)
+            const complement = 10 - value;
+            steps.push({
+                text: `${placeName}의 자리에서 ${value}를 ${actionText} 뺄 수 없어, 윗자리에서 1을 빼고 ${placeName}의 자리에 보수 ${complement}를 더합니다.`,
+                value: getAbacusValue()
+            });
+
+            // 2a: Subtract 1 from the rod on the left (recursively)
+            subtractValueFromRod(rodIdx - 1, 1, steps);
+
+            // 2b: Add complement to the current rod
+            addValueToRod(rodIdx, complement, steps);
+        }
+
+        function displayStep(value) {
+            setAbacusValue(value);
+        }
+
+        // 초기화 실행
+        initAbacus();
+        generateProblem();
+    </script>
+</body>
+</html>

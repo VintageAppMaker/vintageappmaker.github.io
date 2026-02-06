@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>무인카페 노트</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poor+Story&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f6f2ea;
+            font-family: 'Poor Story', sans-serif;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .note {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fffef9;
+            padding: 2rem;
+            border: 2px solid #ccc;
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #999;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .content {
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .highlight {
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: #333;
+        }
+
+        .grid-section {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1rem;
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        .grid-section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: calc(100% / 3);
+            border-left: 2px dashed #aaa;
+        }
+
+        .grid-left {
+            white-space: pre-line;
+            padding-right: 1rem;
+        }
+
+        .grid-right {
+            white-space: pre-line;
+            padding-left: 1rem;
+        }
+
+        .footer {
+            margin-top: 2rem;
+            border-top: 1px dashed #aaa;
+            padding-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .vertical-text {
+            writing-mode: vertical-rl;
+            font-size: 0.95rem;
+            color: #444;
+            transform: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="note">
+        <div class="header">
+            <div>NOTES</div>
+            <div>2025.07.05</div>
+        </div>
+
+        <div class="content">
+            <div class="grid-section">
+                <div class="grid-left">
+                    무인카페에 있을 때마다
+                    인간의 "수준"을 고민하게 된다.
+
+                    "무인"이라는 의미를
+                    사용자들은 어떻게 받아들이는 것일까?
+
+                    "무인 is free"
+
+                    로 받아들이는 사람들이 존재함에 놀랄 때가 있다.
+
+                </div>
+                <div class="grid-right">
+                    ■ 외부음식 반입
+                    ■ 구매없이 자리점유
+                    ■ 쓰레기 투기
+
+                    에 대하여 아무런 "미안함"과
+                    "부끄러움"이 없는가?
+
+                    <span class="highlight">공공의식의 변화</span>
+
+                    인가? 아니면 무인을
+                    "free"로 인식하는 것일까?
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div style="text-align: center; font-weight: bold;">
+                꼰대가 되는 걸까? <br>
+                시장분석 (무인점포)이<br> 우울한 것일까?
+            </div>
+            <img src="https://m.health.chosun.com/site/data/img_dir/2022/12/29/2022122901864_0.jpg" alt="icon"
+                width="200" height="200" style="border-radius: 16px; filter: grayscale();">
+            <div class="vertical-text">
+                공공질서라는 단어가<br>
+                어느새 사라진 듯 하다.<br>
+                무한 경쟁을 외쳤던 그 때부터<br>
+                우리는 .<br>
+                중요한 것을 잃어버린 것 같다.
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>

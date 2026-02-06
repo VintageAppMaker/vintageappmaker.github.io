@@ -1,0 +1,378 @@
+[
+    {
+        "front": "Excuse me, do you have a moment?",
+        "back": "실례합니다, 잠깐 시간 괜찮으세요?"
+    },
+    {
+        "front": "Can you help me?",
+        "back": "저 좀 도와주실 수 있나요?"
+    },
+    {
+        "front": "I'm looking for this address.",
+        "back": "이 주소를 찾고 있어요."
+    },
+    {
+        "front": "Can you show me on the map?",
+        "back": "지도에서 알려 주실 수 있나요?"
+    },
+    {
+        "front": "Where am I on this map?",
+        "back": "지도상에서 여기가 어디인가요?"
+    },
+    {
+        "front": "How do I get to the train station?",
+        "back": "기차역에 어떻게 가나요?"
+    },
+    {
+        "front": "Is this the right way to the museum?",
+        "back": "박물관 가는 길이 맞나요?"
+    },
+    {
+        "front": "Which way is north?",
+        "back": "북쪽이 어느 쪽인가요?"
+    },
+    {
+        "front": "How far is it from here?",
+        "back": "여기서 얼마나 멀어요?"
+    },
+    {
+        "front": "Is it within walking distance?",
+        "back": "걸어서 갈 수 있는 거리인가요?"
+    },
+    {
+        "front": "Can I take a bus there?",
+        "back": "버스를 타고 갈 수 있나요?"
+    },
+    {
+        "front": "Is there a subway nearby?",
+        "back": "근처에 지하철이 있나요?"
+    },
+    {
+        "front": "Can you write it down?",
+        "back": "적어 주실 수 있나요?"
+    },
+    {
+        "front": "Could you repeat that, please?",
+        "back": "다시 말씀해 주실 수 있나요?"
+    },
+    {
+        "front": "Please speak slowly.",
+        "back": "천천히 말씀해 주세요."
+    },
+    {
+        "front": "I don't speak English well.",
+        "back": "영어를 잘 못해요."
+    },
+    {
+        "front": "Do you speak Korean?",
+        "back": "한국어 하세요?"
+    },
+    {
+        "front": "Can I take a picture here?",
+        "back": "여기서 사진 찍어도 되나요?"
+    },
+    {
+        "front": "Is it safe around here?",
+        "back": "이 근처는 안전한가요?"
+    },
+    {
+        "front": "What is this building?",
+        "back": "이 건물은 뭐예요?"
+    },
+    {
+        "front": "Where is the nearest ATM?",
+        "back": "가장 가까운 ATM이 어디에 있나요?"
+    },
+    {
+        "front": "Where can I find a taxi?",
+        "back": "택시는 어디에서 탈 수 있나요?"
+    },
+    {
+        "front": "Is there a convenience store nearby?",
+        "back": "근처에 편의점 있나요?"
+    },
+    {
+        "front": "Where can I buy a SIM card?",
+        "back": "심카드는 어디서 살 수 있나요?"
+    },
+    {
+        "front": "Can I walk there from here?",
+        "back": "여기서 걸어갈 수 있나요?"
+    },
+    {
+        "front": "What time is it?",
+        "back": "지금 몇 시예요?"
+    },
+    {
+        "front": "Is there a public restroom nearby?",
+        "back": "공중화장실 근처에 있나요?"
+    },
+    {
+        "front": "Can I use your phone?",
+        "back": "전화 좀 써도 될까요?"
+    },
+    {
+        "front": "My phone battery is dead.",
+        "back": "핸드폰 배터리가 다 됐어요."
+    },
+    {
+        "front": "Where can I charge my phone?",
+        "back": "핸드폰 충전은 어디서 하나요?"
+    },
+    {
+        "front": "I'm lost.",
+        "back": "길을 잃었어요."
+    },
+    {
+        "front": "I'm not from around here.",
+        "back": "저는 이 근처 사람이 아니에요."
+    },
+    {
+        "front": "Can you call a taxi for me?",
+        "back": "택시를 불러 주실 수 있나요?"
+    },
+    {
+        "front": "Do you know this place?",
+        "back": "이곳 아세요?"
+    },
+    {
+        "front": "Have you been here before?",
+        "back": "여기 와보신 적 있나요?"
+    },
+    {
+        "front": "Is this place popular?",
+        "back": "이 장소는 유명한가요?"
+    },
+    {
+        "front": "Where can I eat something simple?",
+        "back": "간단하게 먹을 곳이 어디 있나요?"
+    },
+    {
+        "front": "Where is the nearest café?",
+        "back": "가장 가까운 카페가 어디인가요?"
+    },
+    {
+        "front": "Do you know a good local spot?",
+        "back": "현지인이 자주 가는 곳 아세요?"
+    },
+    {
+        "front": "I'm here on vacation.",
+        "back": "저는 휴가차 왔어요."
+    },
+    {
+        "front": "Where are you from?",
+        "back": "어디서 오셨어요?"
+    },
+    {
+        "front": "What’s your name?",
+        "back": "이름이 뭐예요?"
+    },
+    {
+        "front": "Nice to meet you!",
+        "back": "만나서 반가워요!"
+    },
+    {
+        "front": "Have a great day!",
+        "back": "좋은 하루 보내세요!"
+    },
+    {
+        "front": "Thank you very much!",
+        "back": "정말 감사합니다!"
+    },
+    {
+        "front": "You're welcome.",
+        "back": "천만에요."
+    },
+    {
+        "front": "Take care!",
+        "back": "조심히 가세요!"
+    },
+    {
+        "front": "Can I cross the street here?",
+        "back": "여기서 길 건너도 되나요?"
+    },
+    {
+        "front": "Is it far from here?",
+        "back": "여기서 멀어요?"
+    },
+    {
+        "front": "It’s on the left.",
+        "back": "왼쪽에 있어요."
+    },
+    {
+        "front": "It’s on the right.",
+        "back": "오른쪽에 있어요."
+    },
+    {
+        "front": "Go straight ahead.",
+        "back": "쭉 직진하세요."
+    },
+    {
+        "front": "Turn left at the corner.",
+        "back": "모퉁이에서 좌회전하세요."
+    },
+    {
+        "front": "Turn right at the traffic light.",
+        "back": "신호등에서 우회전하세요."
+    },
+    {
+        "front": "How long will it take?",
+        "back": "얼마나 걸릴까요?"
+    },
+    {
+        "front": "I’m meeting a friend here.",
+        "back": "여기서 친구를 만나기로 했어요."
+    },
+    {
+        "front": "Can I wait here?",
+        "back": "여기서 기다려도 되나요?"
+    },
+    {
+        "front": "What’s this area called?",
+        "back": "이 지역은 뭐라고 불러요?"
+    },
+    {
+        "front": "Is it okay to smoke here?",
+        "back": "여기서 담배 피워도 되나요?"
+    },
+    {
+        "front": "Where’s the nearest hotel?",
+        "back": "가장 가까운 호텔이 어디에 있나요?"
+    },
+    {
+        "front": "Where’s the police station?",
+        "back": "경찰서는 어디 있나요?"
+    },
+    {
+        "front": "I need to find a pharmacy.",
+        "back": "약국을 찾아야 해요."
+    },
+    {
+        "front": "Do I need to wear a mask?",
+        "back": "마스크를 써야 하나요?"
+    },
+    {
+        "front": "Are there any street performances nearby?",
+        "back": "근처에 거리 공연 있나요?"
+    },
+    {
+        "front": "Can I sit here?",
+        "back": "여기 앉아도 될까요?"
+    },
+    {
+        "front": "Is this seat taken?",
+        "back": "이 자리 비었나요?"
+    },
+    {
+        "front": "Can I join you?",
+        "back": "같이 앉아도 될까요?"
+    },
+    {
+        "front": "Do you know what time the bus comes?",
+        "back": "버스가 몇 시에 오나요?"
+    },
+    {
+        "front": "Does this bus go downtown?",
+        "back": "이 버스 시내로 가나요?"
+    },
+    {
+        "front": "How much is the fare?",
+        "back": "요금이 얼마인가요?"
+    },
+    {
+        "front": "Do you know where this bus stops?",
+        "back": "이 버스 어디에 서나요?"
+    },
+    {
+        "front": "Where’s the tourist information center?",
+        "back": "관광 안내소가 어디에 있나요?"
+    },
+    {
+        "front": "Can I get a brochure?",
+        "back": "안내 책자 받을 수 있나요?"
+    },
+    {
+        "front": "Is this street famous?",
+        "back": "이 거리는 유명한가요?"
+    },
+    {
+        "front": "What can I do around here?",
+        "back": "이 근처에서 뭐 할 수 있나요?"
+    },
+    {
+        "front": "Are there any festivals today?",
+        "back": "오늘 축제 있나요?"
+    },
+    {
+        "front": "What’s that smell?",
+        "back": "이 냄새는 뭐예요?"
+    },
+    {
+        "front": "Is this local food?",
+        "back": "이거 지역 음식인가요?"
+    },
+    {
+        "front": "Is it spicy?",
+        "back": "매워요?"
+    },
+    {
+        "front": "What’s in it?",
+        "back": "이 안에 뭐가 들어 있어요?"
+    },
+    {
+        "front": "Where are you going?",
+        "back": "어디 가세요?"
+    },
+    {
+        "front": "I'm just walking around.",
+        "back": "그냥 둘러보고 있어요."
+    },
+    {
+        "front": "I'm exploring the area.",
+        "back": "이 지역을 탐방 중이에요."
+    },
+    {
+        "front": "Can I ask you something?",
+        "back": "질문 좀 해도 될까요?"
+    },
+    {
+        "front": "Do you live around here?",
+        "back": "근처에 사세요?"
+    },
+    {
+        "front": "Are you a student?",
+        "back": "학생이세요?"
+    },
+    {
+        "front": "Do you work nearby?",
+        "back": "근처에서 일하세요?"
+    },
+    {
+        "front": "This street is beautiful.",
+        "back": "이 거리는 정말 예뻐요."
+    },
+    {
+        "front": "I love the vibe here.",
+        "back": "여기 분위기 좋네요."
+    },
+    {
+        "front": "What’s the name of this place?",
+        "back": "이곳 이름이 뭐예요?"
+    },
+    {
+        "front": "Is this a famous landmark?",
+        "back": "유명한 장소인가요?"
+    },
+    {
+        "front": "Can you recommend a place to visit?",
+        "back": "추천할 만한 장소 있나요?"
+    },
+    {
+        "front": "Thanks for your help!",
+        "back": "도와주셔서 감사합니다!"
+    },
+    {
+        "front": "Have a nice evening!",
+        "back": "좋은 저녁 되세요!"
+    }
+]

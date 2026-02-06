@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>슬라이딩 퍼즐</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            margin-top: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        :root {
+            --bg-color: #fff;
+            --text-color: #000;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;
+                --text-color: #f0f0f0;
+            }
+        }
+
+        .controls {
+            margin-bottom: 20px;
+        }
+
+        .controls label,
+        .controls select,
+        .controls button {
+            font-size: 16px;
+            margin: 0 5px;
+        }
+
+        select,
+        button {
+            padding: 5px 10px;
+            border: 1px solid #888;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            color: #222;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        select:focus,
+        button:focus {
+            outline: none;
+            box-shadow: 0 0 4px #888;
+        }
+
+        .board {
+            margin: auto;
+            display: grid;
+            gap: 2px;
+            border: 2px solid #333;
+        }
+
+        .tile {
+            background-size: 100% 100%;
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .empty {
+            background: #eee;
+            cursor: default;
+        }
+
+        #loading {
+            font-size: 1.2em;
+            color: var(--text-color);
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧩 슬라이딩 퍼즐</h1>
+    <div class="controls">
+        <label>퍼즐 크기: </label>
+        <select id="gridSize">
+            <option value="3">3 x 3</option>
+            <option value="4" selected>4 x 4</option>
+        </select>
+        &nbsp;&nbsp;
+        <label>배경 이미지: </label>
+        <select id="imageSelect">
+            <option value="0">이미지 1</option>
+            <option value="1">이미지 2</option>
+            <option value="2">이미지 3</option>
+            <option value="3">이미지 4</option>
+            <option value="4">이미지 5</option>
+        </select>
+        <br><br>
+        <button onclick="shuffle()">섞기</button>
+        <div id="loading"></div>
+    </div>
+    <div id="board" class="board"></div>
+
+    <script>
+        const images = [
+            'https://picsum.photos/id/1015/400',
+            'https://picsum.photos/id/1025/400',
+            'https://picsum.photos/id/1040/400',
+            'https://picsum.photos/id/1052/400',
+            'https://picsum.photos/id/1062/400'
+        ];
+
+        let size = 4;
+        let tiles = [];
+        let selectedImage = images[0];
+
+        const board = document.getElementById('board');
+        const loading = document.getElementById('loading');
+
+        document.getElementById('gridSize').addEventListener('change', triggerUpdate);
+        document.getElementById('imageSelect').addEventListener('change', triggerUpdate);
+
+        function triggerUpdate() {
+            loading.innerText = '🕓 퍼즐 설정 중...';
+            const imageIndex = parseInt(document.getElementById('imageSelect').value);
+            selectedImage = images[imageIndex];
+            size = parseInt(document.getElementById('gridSize').value);
+
+            const img = new Image();
+            img.src = selectedImage + `?${Date.now()}`; // cache busting
+            img.onload = () => {
+                startPuzzle();
+                loading.innerText = '';
+            };
+        }
+
+        function startPuzzle() {
+            tiles = [];
+            for (let i = 0; i < size * size - 1; i++) {
+                tiles.push(i);
+            }
+            tiles.push(null);
+            renderBoard();
+        }
+
+        function renderBoard() {
+            board.innerHTML = '';
+            board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+            board.style.width = `${100 * size}px`;
+            board.style.height = `${100 * size}px`;
+
+            tiles.forEach((tile, index) => {
+                const div = document.createElement('div');
+                div.classList.add('tile');
+
+                if (tile === null) {
+                    div.classList.add('empty');
+                } else {
+                    const row = Math.floor(tile / size);
+                    const col = tile % size;
+                    const totalSize = 100 * size;
+                    div.style.backgroundImage = `url(${selectedImage})`;
+                    div.style.backgroundSize = `${totalSize}px ${totalSize}px`;
+                    div.style.backgroundPosition = `-${col * 100}px -${row * 100}px`;
+                    div.addEventListener('click', () => moveTile(index));
+                }
+
+                board.appendChild(div);
+            });
+        }
+
+        function moveTile(index) {
+            const emptyIndex = tiles.indexOf(null);
+            const validMoves = getValidMoves(emptyIndex);
+            if (validMoves.includes(index)) {
+                [tiles[emptyIndex], tiles[index]] = [tiles[index], tiles[emptyIndex]];
+                renderBoard();
+                checkWin();
+            }
+        }
+
+        function getValidMoves(emptyIndex) {
+            const moves = [];
+            const row = Math.floor(emptyIndex / size);
+            const col = emptyIndex % size;
+            if (row > 0) moves.push(emptyIndex - size);
+            if (row < size - 1) moves.push(emptyIndex + size);
+            if (col > 0) moves.push(emptyIndex - 1);
+            if (col < size - 1) moves.push(emptyIndex + 1);
+            return moves;
+        }
+
+        function shuffle() {
+            for (let i = tiles.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+            }
+            renderBoard();
+        }
+
+        function checkWin() {
+            const correct = [...Array(size * size - 1).keys()].concat(null);
+            if (JSON.stringify(tiles) === JSON.stringify(correct)) {
+                setTimeout(() => alert('🎉 퍼즐 완성!'), 100);
+            }
+        }
+
+        // 초기 로딩
+        triggerUpdate();
+    </script>
+</body>
+
+</html>
