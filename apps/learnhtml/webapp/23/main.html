@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Apple IIe Monochrome Maze</title>
+    <link rel="stylesheet" href="maze_ascii.css" />
+</head>
+
+<body>
+    <div class="crt" id="crt" role="application" aria-label="Apple IIe style maze UI">
+        <div class="noise"></div>
+        <div class="bloom"></div>
+
+        <div class="frame">
+            <div class="topbar">
+                <div class="brand scanText jitter">MAZE // MONO</div>
+                <div class="status scanText" id="status">READY</div>
+            </div>
+
+            <div class="main">
+                <aside class="panel">
+                    <h3 class="scanText">MAP</h3>
+                    <div class="view scanText" id="mapView">
+                        <div class="art" id="art"></div>
+                    </div>
+                </aside>
+            </div>
+
+            <div class="mapInfo scanText" id="hint"></div>
+
+            <div class="controls" aria-label="Controls">
+                <div class="dpad" id="dpad" aria-label="Directional pad">
+                    <button class="btn n scanText" data-dir="0" aria-label="North">N</button>
+                    <button class="btn e scanText" data-dir="1" aria-label="East">E</button>
+                    <button class="btn s scanText" data-dir="2" aria-label="South">S</button>
+                    <button class="btn w scanText" data-dir="3" aria-label="West">W</button>
+                    <button class="btn c scanText" type="button" tabindex="-1" aria-hidden="true">D-PAD</button>
+                </div>
+                <div class="lpad" id="lpad" aria-label="Action buttons">
+                    <button class="btn icon-btn" id="lbtn" type="button" aria-label="Use Lantern">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path
+                                d="M8 21h8v-2H8v2zm4-20a7 7 0 0 0-4.2 12.6V17h8v-3.4A7 7 0 0 0 12 1zm2.6 11.2-.6.5V15h-4v-2.3l-.6-.5A5 5 0 1 1 14.6 12.2z" />
+                        </svg>
+                    </button>
+                    <button class="btn icon-btn" id="mbtn" type="button" aria-label="Open Messages">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path
+                                d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm0 2v9h3v2.2L9.5 15H20V6H4z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ending overlay (minimal, no ASCII frame) -->
+        <div id="endOverlay" class="endOverlay" aria-hidden="true">
+            <div class="endTitle scanText">YOU ESCAPE</div>
+            <div class="endEmoji scanText" aria-label="smile">
+                <div style="margin: 12px;">😀</div>
+            </div>
+        </div>
+
+    </div>
+
+    <dialog class="bottomSheet" id="messageSheet" aria-label="Messages">
+        <div class="sheetHandle" aria-hidden="true"></div>
+        <div class="sheetHeader">
+            <div class="sheetTitle scanText">SCREEN LOG</div>
+            <button class="sheetClose" id="messageClose" type="button" aria-label="Close Messages">CLOSE</button>
+        </div>
+        <div class="sheetBody scanText" id="messageBody"></div>
+    </dialog>
+
+    <script src="maze_ascii.js"></script>
+</body>
+
+</html>

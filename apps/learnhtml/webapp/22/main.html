@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JavaScript 실행기</title>
+    <style>
+        :root {
+            --bg: #f6f2ea;
+            --panel: #ffffff;
+            --ink: #1f1d1a;
+            --accent: #0f6b5d;
+            --muted: #6d6256;
+            --border: #e3d9cb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Noto Serif KR", "Apple SD Gothic Neo", "Nanum Myeongjo", serif;
+            color: var(--ink);
+            background: radial-gradient(1200px 600px at 20% -10%, #f2e7d7 0%, transparent 60%),
+                radial-gradient(800px 500px at 90% 10%, #e7efe9 0%, transparent 55%),
+                var(--bg);
+            min-height: 100vh;
+        }
+
+        .wrap {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 24px;
+        }
+
+        h1 {
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin: 0 0 10px 0;
+        }
+
+        .sub {
+            color: var(--muted);
+            margin: 0 0 24px 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            box-shadow: 0 10px 30px rgba(31, 29, 26, 0.08);
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .editor {
+            position: relative;
+            display: grid;
+            grid-template-columns: 44px 1fr;
+            min-height: 320px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #fffdf9;
+            overflow: hidden;
+        }
+
+        .gutter {
+            background: #f5eee3;
+            border-right: 1px solid var(--border);
+            padding: 12px 8px;
+            font-family: "Fira Code", "Cascadia Code", monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            letter-spacing: 0;
+            font-variant-ligatures: none;
+            tab-size: 2;
+            color: #8a7b6a;
+            text-align: right;
+            user-select: none;
+            white-space: pre;
+            overflow: hidden;
+        }
+
+        .editor-area {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100%;
+            min-height: 320px;
+            border: none;
+            padding: 12px;
+            font-family: "Fira Code", "Cascadia Code", monospace;
+            font-size: 14px;
+            letter-spacing: 0;
+            font-variant-ligatures: none;
+            tab-size: 2;
+            background: transparent;
+            color: #1f1d1a;
+            caret-color: #1f1d1a;
+            resize: none;
+            outline: none;
+            position: relative;
+            z-index: 2;
+            line-height: 1.5;
+            white-space: pre;
+            word-break: normal;
+            overflow: auto;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+            align-items: center;
+        }
+
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button.secondary {
+            background: #d9cec0;
+            color: #3d352c;
+        }
+
+        .output {
+            min-height: 320px;
+            border: 1px dashed var(--border);
+            border-radius: 10px;
+            padding: 12px;
+            background: #fffdf9;
+            font-family: "Fira Code", "Cascadia Code", monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+
+        pre {
+            margin: 0;
+            background: transparent !important;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <h1>JavaScript 실행기</h1>
+        <p class="sub">소스를 입력하고 실행 버튼을 누르면 결과가 표시됩니다. 오른쪽은 문법 강조 미리보기입니다.</p>
+
+        <div class="grid">
+            <div class="card">
+                <label for="source">소스 입력</label>
+                <div class="editor" id="editor">
+                    <div class="gutter" id="gutter"></div>
+                    <div class="editor-area">
+                        <textarea id="source" spellcheck="false">console.log('Hello, world!');
+
+const sum = (a, b) => a + b;
+console.log('2 + 3 =', sum(2, 3));</textarea>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button id="runBtn">실행</button>
+                    <button class="secondary" id="clearBtn">결과 지우기</button>
+                </div>
+            </div>
+
+            <div class="card" style="grid-column: 1 / -1;">
+                <label>실행 결과</label>
+                <div id="output" class="output"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const sourceEl = document.getElementById('source');
+        const gutterEl = document.getElementById('gutter');
+        const outputEl = document.getElementById('output');
+        const runBtn = document.getElementById('runBtn');
+        const clearBtn = document.getElementById('clearBtn');
+
+        function updateGutter() {
+            const lines = sourceEl.value.split('\n').length;
+            let nums = '';
+            for (let i = 1; i <= lines; i++) nums += i + '\n';
+            gutterEl.textContent = nums;
+        }
+        function syncScroll() {
+            const scrollTop = sourceEl.scrollTop;
+            const scrollLeft = sourceEl.scrollLeft;
+            gutterEl.scrollTop = scrollTop;
+        }
+
+        function appendOutput(text) {
+            outputEl.textContent += text + '\n';
+        }
+
+        function formatValue(value) {
+            if (typeof value === 'string') return value;
+            try {
+                return JSON.stringify(value);
+            } catch (err) {
+                return String(value);
+            }
+        }
+
+        let activeRunId = 0;
+        let restoreTimer = null;
+        let hardStopTimer = null;
+        let currentOriginalLog = null;
+
+        function clearTimers() {
+            if (restoreTimer) {
+                clearTimeout(restoreTimer);
+                restoreTimer = null;
+            }
+            if (hardStopTimer) {
+                clearTimeout(hardStopTimer);
+                hardStopTimer = null;
+            }
+        }
+
+        async function runCode() {
+            outputEl.textContent = '';
+            const GRACE_MS = 2500;
+            const MAX_MS = 10000;
+            let hasOutput = false;
+
+            activeRunId += 1;
+            const runId = activeRunId;
+
+            clearTimers();
+            if (currentOriginalLog) {
+                console.log = currentOriginalLog;
+                currentOriginalLog = null;
+            }
+
+            currentOriginalLog = console.log;
+
+            const scheduleRestore = (delay) => {
+                clearTimers();
+                restoreTimer = setTimeout(() => {
+                    if (activeRunId !== runId) return;
+                    console.log = currentOriginalLog;
+                    currentOriginalLog = null;
+                }, delay);
+            };
+
+            const touch = () => {
+                scheduleRestore(GRACE_MS);
+            };
+
+            console.log = (...args) => {
+                if (activeRunId !== runId) return;
+                const line = args.map(a => formatValue(a)).join(' ');
+                hasOutput = true;
+                appendOutput(line);
+                currentOriginalLog.apply(console, args);
+                touch();
+            };
+
+            touch();
+            hardStopTimer = setTimeout(() => {
+                if (activeRunId !== runId) return;
+                console.log = currentOriginalLog;
+                currentOriginalLog = null;
+            }, MAX_MS);
+
+            try {
+                // eslint-disable-next-line no-new-func
+                const fn = new Function('"use strict";\nreturn (async () => {\n' + sourceEl.value + '\n})();');
+                const result = fn();
+                const finalResult = result && typeof result.then === 'function'
+                    ? await result
+                    : result;
+                if (finalResult !== undefined) {
+                    hasOutput = true;
+                    appendOutput('반환값: ' + formatValue(finalResult));
+                }
+            } catch (err) {
+                hasOutput = true;
+                appendOutput('오류: ' + err.message);
+            } finally {
+                if (!hasOutput) {
+                    setTimeout(() => {
+                        if (activeRunId !== runId) return;
+                        if (!hasOutput) appendOutput('[출력 없음]');
+                    }, GRACE_MS);
+                }
+            }
+        }
+
+        sourceEl.addEventListener('input', () => {
+            updateGutter();
+        });
+        sourceEl.addEventListener('scroll', syncScroll);
+        runBtn.addEventListener('click', async () => {
+            updateGutter();
+            await runCode();
+        });
+        clearBtn.addEventListener('click', () => {
+            outputEl.textContent = '';
+        });
+
+        updateGutter();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,753 @@
+    /* 무료 웹폰트(구글 폰트)
+       - VT323: CRT/레트로 느낌
+       - Cousine: 고정폭 + ASCII/박스드로잉 안정적(art 깨짐 방지)
+       * 오프라인이면 로컬/시스템 폰트로 자동 폴백됨
+    */
+    @import url('https://fonts.googleapis.com/css2?family=VT323&family=Cousine:wght@400;700&display=swap');
+
+    :root {
+      --bg: #050705;
+      --phosphor: #a7ffb6;
+      --phosphor-dim: rgba(167, 255, 182, .55);
+      --border: rgba(167, 255, 182, .35);
+      --shadow: rgba(167, 255, 182, .25);
+      --scan: rgba(0, 0, 0, .18);
+    }
+
+    @font-face {
+      font-family: "VT323Local";
+      src: local("VT323"), local("VT323-Regular");
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 800px at 50% 45%, #0b150d 0%, var(--bg) 55%, #010201 100%);
+      color: var(--phosphor);
+      display: grid;
+      place-items: center;
+      font-family: "VT323", "VT323Local", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      letter-spacing: 0.2px;
+    }
+
+    .crt {
+      width: clamp(350px, 92vw, 980px);
+      height: clamp(520px, 86vh, 720px);
+      border: 1px solid var(--border);
+      box-shadow:
+        0 0 0 3px rgba(0, 0, 0, .35),
+        0 18px 60px rgba(0, 0, 0, .6),
+        0 0 30px var(--shadow);
+      border-radius: 16px;
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(0, 0, 0, .65), rgba(0, 0, 0, .55));
+    }
+
+    .crt:before {
+      content: "";
+      position: absolute;
+      inset: -30px;
+      background:
+        radial-gradient(1100px 700px at 50% 45%, transparent 0 55%, rgba(0, 0, 0, .45) 75%, rgba(0, 0, 0, .75) 100%),
+        radial-gradient(900px 900px at 50% 50%, rgba(167, 255, 182, .08), transparent 60%);
+      pointer-events: none;
+      filter: blur(0.2px);
+      transform: scale(1.02);
+    }
+
+    .crt:after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(to bottom,
+          rgba(0, 0, 0, 0) 0px,
+          rgba(0, 0, 0, 0) 2px,
+          var(--scan) 3px);
+      mix-blend-mode: multiply;
+      opacity: .55;
+      pointer-events: none;
+    }
+
+    .noise {
+      position: absolute;
+      inset: 0;
+      background-image:
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="120" height="120" filter="url(%23n)" opacity="0.35"/></svg>');
+      opacity: .18;
+      pointer-events: none;
+      mix-blend-mode: overlay;
+    }
+
+    .bloom {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(900px 500px at 50% 55%, rgba(167, 255, 182, .08), transparent 60%);
+      pointer-events: none;
+      mix-blend-mode: screen;
+      opacity: .6;
+    }
+
+    .frame {
+      position: absolute;
+      inset: 0;
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto 1fr auto auto;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(0, 0, 0, .25);
+    }
+
+    .brand {
+      font-size: clamp(22px, 2.2vw, 26px);
+      line-height: 1;
+    }
+
+    .status {
+      font-size: clamp(18px, 2vw, 20px);
+      opacity: .9;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(0, 0, 0, .22);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      min-height: 0;
+    }
+
+    .panel h3 {
+      margin: 0;
+      padding: 10px 12px;
+      font-size: clamp(18px, 2vw, 22px);
+      border-bottom: 1px solid rgba(167, 255, 182, .25);
+      background: rgba(0, 0, 0, .18);
+    }
+
+    .view {
+      padding: 12px;
+      font-size: clamp(18px, 2vw, 22px);
+      line-height: 1.1;
+      overflow: auto;
+      white-space: pre-wrap;
+      filter: contrast(1.05);
+    }
+
+    /* SCREEN 글씨 크기를 INFO(힌트)와 동일하게 */
+    #screen {
+      display: none;
+    }
+
+    .screenPlaceholder {
+      color: var(--phosphor-dim);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      letter-spacing: 1px;
+    }
+
+    .art {
+      /* ASCII 아트 깨짐 방지: Cousine(고정폭) 우선 적용 */
+      font-family: "Cousine", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-variant-ligatures: none;
+      letter-spacing: 0;
+      font-size: clamp(18px, 2vw, 20px);
+      line-height: 1;
+      white-space: pre;
+      opacity: .92;
+      color: var(--phosphor-dim);
+    }
+
+    .mapInfo {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(0, 0, 0, .22);
+      padding: 10px 12px;
+      font-size: clamp(18px, 2vw, 20px);
+      color: var(--phosphor-dim);
+      white-space: pre-wrap;
+    }
+
+    /* 글자 자체에 scanline 질감 */
+    .scanText {
+      text-shadow:
+        0 0 6px rgba(167, 255, 182, .35),
+        0 0 18px rgba(167, 255, 182, .18);
+
+      -webkit-mask-image: repeating-linear-gradient(to bottom,
+          rgba(255, 255, 255, 1) 0px,
+          rgba(255, 255, 255, 1) 1px,
+          rgba(255, 255, 255, .55) 2px,
+          rgba(255, 255, 255, 1) 3px);
+      mask-image: repeating-linear-gradient(to bottom,
+          rgba(255, 255, 255, 1) 0px,
+          rgba(255, 255, 255, 1) 1px,
+          rgba(255, 255, 255, .55) 2px,
+          rgba(255, 255, 255, 1) 3px);
+
+      -webkit-mask-size: 100% 3px;
+      mask-size: 100% 3px;
+      filter: contrast(1.08) saturate(1.05);
+    }
+
+    @keyframes jitter {
+      0% {
+        transform: translate(0, 0);
+      }
+
+      50% {
+        transform: translate(0.2px, 0);
+      }
+
+      100% {
+        transform: translate(0, 0);
+      }
+    }
+
+    .jitter {
+      animation: jitter 2.6s infinite;
+    }
+
+    /* === ENDING FX: 흔들림 + 깜빡임 === */
+    @keyframes endShake {
+      0% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+
+      10% {
+        transform: translate(-1px, 0.5px) rotate(-0.1deg);
+      }
+
+      20% {
+        transform: translate(1px, -0.5px) rotate(0.1deg);
+      }
+
+      30% {
+        transform: translate(-1.2px, -0.2px) rotate(-0.15deg);
+      }
+
+      40% {
+        transform: translate(1.2px, 0.2px) rotate(0.15deg);
+      }
+
+      50% {
+        transform: translate(-0.8px, 0.4px) rotate(-0.1deg);
+      }
+
+      60% {
+        transform: translate(0.8px, -0.4px) rotate(0.1deg);
+      }
+
+      70% {
+        transform: translate(-0.6px, 0.2px) rotate(-0.08deg);
+      }
+
+      80% {
+        transform: translate(0.6px, -0.2px) rotate(0.08deg);
+      }
+
+      90% {
+        transform: translate(-0.3px, 0.1px) rotate(-0.04deg);
+      }
+
+      100% {
+        transform: translate(0, 0) rotate(0deg);
+      }
+    }
+
+    @keyframes endFlicker {
+      0% {
+        opacity: 1;
+      }
+
+      8% {
+        opacity: 0.75;
+      }
+
+      16% {
+        opacity: 1;
+      }
+
+      24% {
+        opacity: 0.6;
+      }
+
+      32% {
+        opacity: 1;
+      }
+
+      40% {
+        opacity: 0.82;
+      }
+
+      48% {
+        opacity: 1;
+      }
+
+      56% {
+        opacity: 0.55;
+      }
+
+      64% {
+        opacity: 1;
+      }
+
+      72% {
+        opacity: 0.78;
+      }
+
+      80% {
+        opacity: 1;
+      }
+
+      88% {
+        opacity: 0.7;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .crt.endfx {
+      animation: endShake 900ms linear 0ms 2;
+    }
+
+    .crt.endfx .frame {
+      animation: endFlicker 900ms linear 0ms 2;
+    }
+
+    .crt.endfx .noise {
+      opacity: .32;
+    }
+
+    /* === Ending overlay: YOU ESCAPE + blinking emoji === */
+    .endOverlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 10px;
+      background: rgba(0, 0, 0, .55);
+      z-index: 5;
+      text-align: center;
+    }
+
+    .endOverlay.show {
+      display: flex;
+    }
+
+    .endTitle {
+      font-size: 54px;
+      line-height: 1;
+      letter-spacing: 1px;
+      text-shadow: 0 0 18px rgba(167, 255, 182, .28);
+    }
+
+    @keyframes emojiBlink {
+
+      0%,
+      49% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      50%,
+      74% {
+        opacity: 0.15;
+        transform: translateY(0.5px);
+      }
+
+      75%,
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .endEmoji {
+      font-size: 64px;
+      line-height: 1;
+      animation: emojiBlink 650ms steps(2, end) infinite;
+      filter: drop-shadow(0 0 12px rgba(167, 255, 182, .25));
+    }
+
+    .view::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .view::-webkit-scrollbar-thumb {
+      background: rgba(167, 255, 182, .22);
+      border-radius: 8px;
+    }
+
+    .view::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, .25);
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 2px 0;
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+
+    /* ===== D-Pad ===== */
+    .dpad {
+      width: 120px;
+      height: 120px;
+      position: relative;
+      display: block;
+      pointer-events: auto;
+      flex: 0 0 auto;
+    }
+
+    .dpad .btn {
+      pointer-events: auto;
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid rgba(167, 255, 182, .35);
+      background: rgba(0, 0, 0, .35);
+      color: var(--phosphor);
+      font-family: inherit;
+      font-size: clamp(16px, 2vw, 20px);
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      backdrop-filter: blur(2px);
+      box-shadow: 0 0 20px rgba(167, 255, 182, .08);
+      opacity: .7;
+    }
+
+    .dpad .btn:active {
+      opacity: 1;
+      transform: scale(0.98);
+    }
+
+    .dpad .btn[disabled] {
+      opacity: .25;
+      pointer-events: none;
+    }
+
+    .dpad .n {
+      left: 39px;
+      top: 0;
+    }
+
+    .dpad .s {
+      left: 39px;
+      bottom: 0;
+    }
+
+    .dpad .w {
+      left: 0;
+      top: 39px;
+    }
+
+    .dpad .e {
+      right: 0;
+      top: 39px;
+    }
+
+    .dpad .c {
+      left: 39px;
+      top: 39px;
+      opacity: .35;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    .lpad {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: flex-end;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .lpad .btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      border: 1px solid rgba(167, 255, 182, .35);
+      background: rgba(0, 0, 0, .35);
+      color: var(--phosphor);
+      font-family: inherit;
+      font-size: 22px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      backdrop-filter: blur(2px);
+      box-shadow: 0 0 20px rgba(167, 255, 182, .08);
+      opacity: .85;
+      pointer-events: auto;
+    }
+
+    .lpad .btn:active {
+      opacity: 1;
+      transform: scale(0.98);
+    }
+
+    .lpad .btn[disabled] {
+      opacity: .25;
+      pointer-events: none;
+    }
+
+    @keyframes lanternFlicker {
+      0% {
+        opacity: 1;
+        text-shadow: 0 0 10px rgba(167, 255, 182, .7);
+      }
+
+      50% {
+        opacity: .3;
+        text-shadow: 0 0 3px rgba(167, 255, 182, .25);
+      }
+
+      100% {
+        opacity: 1;
+        text-shadow: 0 0 12px rgba(167, 255, 182, .75);
+      }
+    }
+
+    .lanternGlow {
+      animation: lanternFlicker 3.6s ease-in-out infinite;
+    }
+
+    .icon-btn svg {
+      width: 26px;
+      height: 26px;
+      fill: currentColor;
+      opacity: .9;
+    }
+
+    .icon-btn:active svg {
+      opacity: 1;
+    }
+
+    @media (max-width: 420px) {
+      .frame {
+        padding: 12px;
+        gap: 10px;
+      }
+
+      .topbar {
+        padding: 8px 10px;
+      }
+
+      .controls {
+        gap: 8px;
+      }
+
+      .dpad {
+        width: 96px;
+        height: 96px;
+      }
+
+      .dpad .btn {
+        width: 34px;
+        height: 34px;
+        font-size: 16px;
+        border-radius: 10px;
+      }
+
+      .dpad .n {
+        left: 31px;
+      }
+
+      .dpad .s {
+        left: 31px;
+      }
+
+      .dpad .w {
+        top: 31px;
+      }
+
+      .dpad .e {
+        top: 31px;
+      }
+
+      .dpad .c {
+        left: 31px;
+        top: 31px;
+        font-size: 10px;
+      }
+
+      .lpad .btn {
+        width: 48px;
+        height: 48px;
+      }
+
+      .icon-btn svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      .panel h3 {
+        padding: 8px 10px;
+      }
+
+      .view {
+        padding: 10px;
+      }
+    }
+
+    @media (max-width: 350px) {
+      .controls {
+        justify-content: center;
+      }
+
+      .lpad {
+        justify-content: center;
+        width: 100%;
+      }
+    }
+
+    /* ===== Bottom Sheet (Messages) ===== */
+    .bottomSheet {
+      width: min(720px, 92vw);
+      max-width: 720px;
+      height: min(60vh, 520px);
+      max-height: 520px;
+      border: 1px solid var(--border);
+      border-radius: 16px 16px 0 0;
+      padding: 14px 16px 16px;
+      background:
+        radial-gradient(900px 500px at 50% 30%, rgba(167, 255, 182, .08), transparent 60%),
+        linear-gradient(180deg, rgba(0, 0, 0, .92), rgba(0, 0, 0, .85));
+      color: var(--phosphor);
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      transform: translate(-50%, 100%);
+      box-shadow: 0 -8px 30px rgba(0, 0, 0, .6);
+      opacity: 0;
+      transition: transform 180ms ease, opacity 180ms ease;
+      overflow: hidden;
+    }
+
+    .bottomSheet[open] {
+      transform: translate(-50%, 0);
+      opacity: 1;
+    }
+
+    .bottomSheet::backdrop {
+      background: rgba(0, 0, 0, .55);
+    }
+
+    .sheetHandle {
+      width: 54px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(167, 255, 182, .35);
+      margin: 0 auto 10px;
+    }
+
+    .sheetHeader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(167, 255, 182, .25);
+    }
+
+    .sheetTitle {
+      font-size: clamp(18px, 2vw, 22px);
+      letter-spacing: 1px;
+    }
+
+    .sheetClose {
+      border: 1px solid rgba(167, 255, 182, .35);
+      background: rgba(0, 0, 0, .35);
+      color: var(--phosphor);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-family: inherit;
+      font-size: 16px;
+      letter-spacing: 1px;
+      cursor: pointer;
+    }
+
+    .sheetBody {
+      margin-top: 10px;
+      height: calc(100% - 64px);
+      overflow: auto;
+      white-space: pre-wrap;
+      font-size: clamp(18px, 2vw, 20px);
+    }
+
+    /* Hide dialog's own scrollbar; keep inner themed scroll */
+    .bottomSheet::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+    }
+
+    .bottomSheet {
+      scrollbar-width: none;
+    }
+
+    /* Themed inner scroll (sheet body) */
+    .sheetBody::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .sheetBody::-webkit-scrollbar-thumb {
+      background: rgba(167, 255, 182, .35);
+      border-radius: 8px;
+      box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .35);
+    }
+
+    .sheetBody::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, .35);
+    }
+
+    /* iOS safe-area */
+    @supports (padding: max(0px)) {
+      .frame {
+        padding-bottom: max(18px, env(safe-area-inset-bottom));
+      }
+
+      .bottomSheet {
+        padding-bottom: max(16px, env(safe-area-inset-bottom));
+      }
+    }

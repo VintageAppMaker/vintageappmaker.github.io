@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Material TODO - Alpine.js</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js (defer 속성 추가: 초기화 오류 방지) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f5f5;
+        }
+        .material-shadow {
+            box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+        }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- TODO App Container -->
+    <div 
+        x-data="todoApp()" 
+        class="w-full max-w-md bg-white rounded-lg material-shadow overflow-hidden"
+        x-cloak
+    >
+        <!-- Header -->
+        <div class="bg-[#6200ee] p-6 text-white">
+            <h1 class="text-2xl font-medium flex items-center">
+                <span class="material-icons mr-2">assignment</span>
+                오늘의 할 일
+            </h1>
+            <p class="text-sm opacity-80 mt-1" x-text="`남은 할 일: ${remainingCount()}개`"></p>
+        </div>
+
+        <!-- Input Section -->
+        <div class="p-6 border-b border-gray-100">
+            <div class="flex items-center border-b-2 border-gray-300 transition-all duration-300 focus-within:border-[#6200ee]">
+                <input 
+                    type="text" 
+                    x-model="newTodo" 
+                    @keyup.enter="addTodo()"
+                    placeholder="할 일을 입력하세요..."
+                    class="flex-1 py-2 px-1 outline-none text-gray-700 bg-transparent"
+                >
+                <button 
+                    @click="addTodo()"
+                    class="ml-2 text-[#6200ee] hover:bg-purple-50 p-2 rounded-full transition-colors flex items-center justify-center"
+                >
+                    <span class="material-icons">add_circle</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Todo List -->
+        <ul class="max-h-96 overflow-y-auto">
+            <template x-for="todo in todos" :key="todo.id">
+                <li 
+                    class="flex items-center p-4 hover:bg-gray-50 transition-colors group border-b border-gray-50"
+                    :class="todo.completed ? 'opacity-60 bg-gray-50' : ''"
+                >
+                    <!-- Checkbox -->
+                    <button 
+                        @click="toggleTodo(todo.id)"
+                        class="mr-4 flex items-center justify-center text-gray-400"
+                        :class="todo.completed ? 'text-green-500' : 'hover:text-[#6200ee]'"
+                    >
+                        <span class="material-icons" x-text="todo.completed ? 'check_box' : 'check_box_outline_blank'"></span>
+                    </button>
+
+                    <!-- Text -->
+                    <span 
+                        class="flex-1 text-gray-800 transition-all"
+                        :class="todo.completed ? 'line-through text-gray-400' : ''"
+                        x-text="todo.text"
+                    ></span>
+
+                    <!-- Delete Button -->
+                    <button 
+                        @click="removeTodo(todo.id)"
+                        class="text-gray-300 hover:text-red-500 transition-colors"
+                    >
+                        <span class="material-icons">delete_outline</span>
+                    </button>
+                </li>
+            </template>
+        </ul>
+
+        <!-- Empty State -->
+        <template x-if="todos.length === 0">
+            <div class="p-10 text-center text-gray-400">
+                <span class="material-icons text-5xl mb-2">event_available</span>
+                <p>할 일이 없습니다. 즐거운 하루 되세요!</p>
+            </div>
+        </template>
+
+        <!-- Footer Actions -->
+        <div class="p-4 bg-gray-50 flex justify-between items-center text-xs text-gray-500">
+            <button 
+                @click="clearCompleted()" 
+                class="hover:text-red-600 transition-colors font-medium"
+                x-show="todos.some(t => t.completed)"
+            >
+                완료 항목 삭제
+            </button>
+            <div class="flex-1 text-right">
+                Alpine.js & Material Design
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function todoApp() {
+            return {
+                todos: JSON.parse(localStorage.getItem('alpine-todos') || '[]'),
+                newTodo: '',
+                
+                init() {
+                    // 데이터 변경 시 로컬스토리지 자동 저장
+                    this.$watch('todos', (value) => {
+                        localStorage.setItem('alpine-todos', JSON.stringify(value));
+                    });
+                },
+
+                // 할 일 추가
+                addTodo() {
+                    const text = this.newTodo.trim();
+                    if (!text) return;
+                    
+                    // 불변성을 유지하며 배열 업데이트 (화면 갱신 보장)
+                    this.todos = [
+                        {
+                            id: Date.now(),
+                            text: text,
+                            completed: false
+                        },
+                        ...this.todos
+                    ];
+                    
+                    this.newTodo = '';
+                },
+
+                // 완료 토글
+                toggleTodo(id) {
+                    this.todos = this.todos.map(todo => {
+                        if (todo.id === id) {
+                            return { ...todo, completed: !todo.completed };
+                        }
+                        return todo;
+                    });
+                },
+
+                // 삭제
+                removeTodo(id) {
+                    this.todos = this.todos.filter(todo => todo.id !== id);
+                },
+
+                // 완료 항목 전체 삭제
+                clearCompleted() {
+                    this.todos = this.todos.filter(todo => !todo.completed);
+                },
+
+                // 남은 개수 계산
+                remainingCount() {
+                    return this.todos.filter(todo => !todo.completed).length;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>로컬 HTML 캡처 앱</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    :root {
+      --bar-height: 56px;
+      --bg: #f5f7fb;
+      --bar: #1f2937;
+      --text: #e5e7eb;
+      --accent: #2563eb;
+      --accent-2: #1d4ed8;
+      --muted: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+      background: var(--bg);
+    }
+
+    .app {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-rows: var(--bar-height) 1fr;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      background: var(--bar);
+      color: var(--text);
+    }
+
+    .btn {
+      height: 38px;
+      padding: 0 14px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: var(--accent-2);
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status {
+      margin-left: auto;
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 48vw;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <button id="importBtn" class="btn" type="button">가져오기</button>
+      <button id="captureBtn" class="btn" type="button" disabled>이미지캡쳐</button>
+      <input id="fileInput" type="file" accept=".html,.htm,text/html" hidden />
+      <div id="status" class="status">HTML 파일을 선택해 주세요.</div>
+    </div>
+    <iframe id="viewer" title="HTML Viewer" sandbox="allow-same-origin allow-scripts"></iframe>
+  </div>
+
+  <script>
+    const importBtn = document.getElementById("importBtn");
+    const captureBtn = document.getElementById("captureBtn");
+    const fileInput = document.getElementById("fileInput");
+    const statusEl = document.getElementById("status");
+    const viewer = document.getElementById("viewer");
+
+    let loadedFileName = "capture";
+
+        function setStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    function sanitizeFileName(name) {
+      return name.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9가-힣_-]/g, "_") || "capture";
+    }
+
+
+
+    function ensureScrollbarHiddenInIframe() {
+      const iframeDoc = viewer.contentDocument;
+      if (!iframeDoc || !iframeDoc.head) {
+        return;
+      }
+
+      let styleEl = iframeDoc.getElementById("codex-hide-scrollbar-style");
+      if (!styleEl) {
+        styleEl = iframeDoc.createElement("style");
+        styleEl.id = "codex-hide-scrollbar-style";
+        styleEl.textContent =         `
+          html, body {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+          }
+          *::-webkit-scrollbar {
+            width: 0 !important;
+            height: 0 !important;
+            display: none !important;
+            background: transparent !important;
+          }
+        `;
+        iframeDoc.head.appendChild(styleEl);
+      }
+    }
+
+    function createDownload(canvas, baseName) {
+      const now = new Date();
+      const stamp = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0"),
+        "_",
+        String(now.getHours()).padStart(2, "0"),
+        String(now.getMinutes()).padStart(2, "0"),
+        String(now.getSeconds()).padStart(2, "0")
+      ].join("");
+
+      const a = document.createElement("a");
+      a.download = `${baseName}_${stamp}.png`;
+      a.href = canvas.toDataURL("image/png");
+      a.click();
+    }
+
+    async function captureFullIframe() {
+      if (typeof html2canvas !== "function") {
+        throw new Error("html2canvas 라이브러리를 불러오지 못했습니다.");
+      }
+
+      const iframeWindow = viewer.contentWindow;
+      const iframeDoc = viewer.contentDocument;
+
+      if (!iframeWindow || !iframeDoc || !iframeDoc.documentElement) {
+        throw new Error("iframe 문서에 접근할 수 없습니다.");
+      }
+
+      ensureScrollbarHiddenInIframe();
+
+      const docEl = iframeDoc.documentElement;
+      const body = iframeDoc.body;
+
+      const fullWidth = Math.max(
+        docEl.scrollWidth,
+        docEl.offsetWidth,
+        body ? body.scrollWidth : 0,
+        body ? body.offsetWidth : 0,
+        viewer.clientWidth
+      );
+
+      const fullHeight = Math.max(
+        docEl.scrollHeight,
+        docEl.offsetHeight,
+        body ? body.scrollHeight : 0,
+        body ? body.offsetHeight : 0,
+        viewer.clientHeight
+      );
+
+      if (!fullWidth || !fullHeight) {
+        throw new Error("캡처할 콘텐츠 크기를 계산하지 못했습니다.");
+      }
+
+      const maxCanvasSide = 16384;
+      const scalePreferred = Math.max(1, Math.min(2, iframeWindow.devicePixelRatio || window.devicePixelRatio || 1));
+      const scaleLimitBySize = Math.min(maxCanvasSide / fullWidth, maxCanvasSide / fullHeight);
+      if (scaleLimitBySize <= 0) {
+        throw new Error("캡처 크기 제한을 계산하지 못했습니다.");
+      }
+      const captureScale = Math.max(1, Math.min(scalePreferred, scaleLimitBySize));
+
+      if (fullWidth * captureScale > maxCanvasSide || fullHeight * captureScale > maxCanvasSide) {
+        throw new Error(`캡처 크기(${fullWidth}x${fullHeight})가 브라우저 캔버스 제한(${maxCanvasSide}px)을 초과했습니다.`);
+      }
+
+      const injectScrollbarHiddenStyle = (targetDoc) => {
+        if (!targetDoc || !targetDoc.head) {
+          return;
+        }
+        const style = targetDoc.createElement("style");
+        style.textContent = `
+          html, body {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+          }
+          *::-webkit-scrollbar {
+            width: 0 !important;
+            height: 0 !important;
+            display: none !important;
+            background: transparent !important;
+          }
+        `;
+        targetDoc.head.appendChild(style);
+      };
+
+      setStatus("캡처 중... 0%");
+
+      const canvas = await html2canvas(iframeDoc.documentElement, {
+        backgroundColor: null,
+        useCORS: true,
+        allowTaint: true,
+        scale: captureScale,
+        foreignObjectRendering: true,
+        x: 0,
+        y: 0,
+        width: fullWidth,
+        height: fullHeight,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: fullWidth,
+        windowHeight: fullHeight,
+        onclone: (clonedDoc) => {
+          injectScrollbarHiddenStyle(clonedDoc);
+        }
+      });
+
+      setStatus("캡처 중... 100%");
+      return canvas;
+    }
+    importBtn.addEventListener("click", () => fileInput.click());
+
+    fileInput.addEventListener("change", async (event) => {
+      const file = event.target.files && event.target.files[0];
+      if (!file) {
+        return;
+      }
+
+      loadedFileName = sanitizeFileName(file.name);
+      setStatus(`불러오는 중: ${file.name}`);
+      captureBtn.disabled = true;
+
+      try {
+        const htmlText = await file.text();
+
+        viewer.onload = () => {
+          ensureScrollbarHiddenInIframe();
+          captureBtn.disabled = false;
+          setStatus(`로드 완료: ${file.name}`);
+        };
+
+        viewer.srcdoc = htmlText;
+      } catch (error) {
+        setStatus(`불러오기 실패: ${error.message}`);
+      } finally {
+        fileInput.value = "";
+      }
+    });
+
+    captureBtn.addEventListener("click", async () => {
+      captureBtn.disabled = true;
+      importBtn.disabled = true;
+
+      try {
+        const canvas = await captureFullIframe();
+        createDownload(canvas, loadedFileName);
+        setStatus("캡처 완료: PNG 저장됨");
+      } catch (error) {
+        setStatus(`캡처 실패: ${error.message}`);
+      } finally {
+        captureBtn.disabled = false;
+        importBtn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

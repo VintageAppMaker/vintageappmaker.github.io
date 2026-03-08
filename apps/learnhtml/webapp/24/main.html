@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>App UI Wireframe SPA</title>
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --line: #e5e7eb;
+            --shadow: 0 10px 30px rgba(0, 0, 0, .08);
+
+            --home: #16a34a;
+            --task: #f59e0b;
+            --search: #7c3aed;
+            --settings: #ef4444;
+            --primary: #2563eb;
+
+            --danger: #ef4444;
+            --warn: #f59e0b;
+            --ok: #16a34a;
+
+            --radius: 18px;
+            --radius-sm: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+            color: var(--text);
+            background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 35%, var(--bg) 100%);
+            min-height: 100dvh;
+            display: grid;
+            place-items: center;
+            padding: 18px;
+        }
+
+        /* Phone frame */
+        .phone {
+            width: min(420px, 100%);
+            height: min(860px, 92dvh);
+            background: var(--card);
+            border: 1px solid rgba(0, 0, 0, .08);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .statusbar {
+            height: 12px;
+            background: #111827;
+            opacity: .92;
+        }
+
+        .appbar {
+            height: 56px;
+            padding: 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--line);
+            background: rgba(255, 255, 255, .88);
+            backdrop-filter: blur(8px);
+        }
+
+        .appbar h1 {
+            font-size: 16px;
+            margin: 0;
+            letter-spacing: -.2px;
+        }
+
+        .pill {
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            color: var(--muted);
+            background: #fff;
+        }
+
+        .main {
+            flex: 1;
+            overflow: auto;
+            background: linear-gradient(180deg, #ffffff 0%, #fbfdff 18%, #f6f8ff 100%);
+        }
+
+        .view {
+            display: none;
+            padding: 16px;
+            padding-bottom: 96px;
+            /* keep clear of tabbar */
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid rgba(0, 0, 0, .06);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, .05);
+            padding: 14px;
+        }
+
+        .stack {
+            display: grid;
+            gap: 12px;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .row.between {
+            justify-content: space-between;
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        .tiny {
+            font-size: 12px;
+        }
+
+        .btn {
+            appearance: none;
+            border: 0;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-weight: 700;
+            cursor: pointer;
+            background: var(--primary);
+            color: #fff;
+            box-shadow: 0 10px 22px rgba(37, 99, 235, .25);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn.secondary {
+            background: #fff;
+            color: var(--text);
+            border: 1px solid var(--line);
+            box-shadow: none;
+            font-weight: 700;
+        }
+
+        .btn.ghost {
+            background: transparent;
+            color: var(--text);
+            border: 1px dashed var(--line);
+            box-shadow: none;
+        }
+
+        .btn.danger {
+            background: #fff;
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, .35);
+            box-shadow: none;
+        }
+
+        .input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            outline: none;
+            background: #fff;
+            font-size: 14px;
+        }
+
+        .input:focus {
+            border-color: rgba(37, 99, 235, .55);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, .12);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(0, 0, 0, .08);
+            background: #fff;
+            color: var(--muted);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--muted);
+        }
+
+        .dot.ok {
+            background: var(--ok);
+        }
+
+        .dot.warn {
+            background: var(--warn);
+        }
+
+        .dot.danger {
+            background: var(--danger);
+        }
+
+        /* Home summary buttons */
+        .seg {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .seg button {
+            border: 1px solid var(--line);
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .seg button.active {
+            border-color: rgba(37, 99, 235, .35);
+            color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, .10);
+        }
+
+        /* Task list */
+        .task {
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: #fff;
+        }
+
+        .task .check {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 2px solid #cbd5e1;
+            display: grid;
+            place-items: center;
+            margin-top: 2px;
+            flex: 0 0 auto;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .task.done .check {
+            border-color: rgba(22, 163, 74, .55);
+            background: rgba(22, 163, 74, .10);
+        }
+
+        .task.done .check::after {
+            content: "✓";
+            font-size: 14px;
+            color: var(--ok);
+            font-weight: 900;
+        }
+
+        .task .meta {
+            flex: 1;
+        }
+
+        .task .title {
+            font-weight: 900;
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .task .sub {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .task .prio {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-top: 6px;
+            flex: 0 0 auto;
+            background: var(--ok);
+        }
+
+        .task[data-priority="high"] {
+            border-color: rgba(239, 68, 68, .35);
+            background: rgba(239, 68, 68, .05);
+        }
+
+        .task[data-priority="mid"] {
+            border-color: rgba(245, 158, 11, .35);
+            background: rgba(245, 158, 11, .05);
+        }
+
+        .task[data-priority="low"] {
+            border-color: rgba(22, 163, 74, .30);
+            background: rgba(22, 163, 74, .04);
+        }
+
+        .task[data-priority="high"] .prio {
+            background: var(--danger);
+        }
+
+        .task[data-priority="mid"] .prio {
+            background: var(--warn);
+        }
+
+        .task[data-priority="low"] .prio {
+            background: var(--ok);
+        }
+
+        /* Search filters */
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            border: 1px solid var(--line);
+            background: #fff;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-weight: 800;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .chip.active {
+            color: #111827;
+            border-color: rgba(124, 58, 237, .35);
+            box-shadow: 0 0 0 4px rgba(124, 58, 237, .10);
+        }
+
+        /* Settings profile */
+        .profile {
+            border: 1px solid rgba(239, 68, 68, .20);
+            background: rgba(239, 68, 68, .05);
+            padding: 12px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: rgba(37, 99, 235, .12);
+            display: grid;
+            place-items: center;
+            font-weight: 900;
+            color: var(--primary);
+        }
+
+        /* Bottom tabbar */
+        .tabbar {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 76px;
+            background: rgba(255, 255, 255, .92);
+            border-top: 1px solid var(--line);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            padding: 10px 8px 14px;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab {
+            border: 1px solid transparent;
+            background: transparent;
+            border-radius: 18px;
+            display: grid;
+            place-items: center;
+            gap: 4px;
+            cursor: pointer;
+            font-weight: 900;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .tab .ico {
+            width: 20px;
+            height: 20px;
+            display: grid;
+            place-items: center;
+        }
+
+        .tab.active {
+            background: #fff;
+            border-color: rgba(0, 0, 0, .06);
+            box-shadow: 0 10px 22px rgba(0, 0, 0, .06);
+            color: #111827;
+        }
+
+        /* Login */
+        .loginWrap {
+            height: 100%;
+            display: grid;
+            place-items: center;
+            padding: 18px;
+            background: linear-gradient(180deg, rgba(37, 99, 235, .08) 0%, rgba(124, 58, 237, .06) 60%, rgba(255, 255, 255, 1) 100%);
+        }
+
+        .logo {
+            width: 76px;
+            height: 76px;
+            border-radius: 22px;
+            background: rgba(37, 99, 235, .10);
+            border: 1px solid rgba(37, 99, 235, .20);
+            display: grid;
+            place-items: center;
+            font-weight: 1000;
+            color: var(--primary);
+            margin: 0 auto 12px;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .hr {
+            height: 1px;
+            background: var(--line);
+            margin: 6px 0;
+        }
+
+        details {
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: #fff;
+            padding: 10px 12px;
+        }
+
+        summary {
+            cursor: pointer;
+            font-weight: 900;
+        }
+
+        pre {
+            margin: 10px 0 0;
+            overflow: auto;
+            background: #0b1020;
+            color: #e5e7eb;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        /* tiny helper */
+        .spacer8 {
+            height: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="phone" id="app">
+        <div class="statusbar"></div>
+
+        <!-- APP BAR (hidden on login) -->
+        <header class="appbar" id="appbar" style="display:none">
+            <h1 id="appTitle">홈</h1>
+            <span class="pill" id="userPill">로그인 필요</span>
+        </header>
+
+        <main class="main" id="main">
+            <!-- 01 LOGIN -->
+            <section class="view active" id="view-login" data-view="login">
+                <div class="loginWrap">
+                    <div class="card" style="width:100%">
+                        <div class="logo">APP</div>
+                        <div class="center" style="margin-bottom:12px">
+                            <div style="font-weight:1000; font-size:18px;">AppName</div>
+                            <div class="muted tiny">계정에 로그인하세요</div>
+                        </div>
+
+                        <div class="stack">
+                            <input class="input" id="loginId" placeholder="아이디" autocomplete="username" />
+                            <input class="input" id="loginPw" placeholder="비밀번호" type="password"
+                                autocomplete="current-password" />
+                            <button class="btn" id="btnLogin">로그인</button>
+                            <button class="btn secondary" id="btnDemo">데모로 들어가기</button>
+
+                            <div class="center tiny">
+                                <a href="#" class="muted" id="btnForgot">비밀번호를 잊으셨나요?</a>
+                                <span class="muted">·</span>
+                                <a href="#" class="muted" id="btnSignup">회원가입</a>
+                            </div>
+                        </div>
+
+                        <div class="spacer8"></div>
+                        <details>
+                            <summary>개발 노트: ES5 vs ES6 예시 (같은 기능)</summary>
+                            <div class="tiny muted" style="margin-top:6px">할 일 목록을 필터링하는 함수를 ES5/ES6로 비교합니다.</div>
+                            <pre>// ES5
+function filterByTextES5(list, q) {
+  q = (q || '').toLowerCase();
+  return list.filter(function(item){
+    return String(item.title).toLowerCase().indexOf(q) !== -1;
+  });
+}
+
+// ES6
+const filterByTextES6 = (list, q = '') =>
+  list.filter(item => String(item.title).toLowerCase().includes(String(q).toLowerCase()));
+</pre>
+                        </details>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 02 HOME -->
+            <section class="view" id="view-home" data-view="home">
+                <div class="stack">
+                    <div class="card">
+                        <div class="row between">
+                            <div>
+                                <div style="font-weight:1000;">요약 - 오늘</div>
+                                <div class="muted tiny" id="todayLabel">—</div>
+                            </div>
+                            <span class="badge"><span class="dot" id="summaryDot"></span><span
+                                    id="summaryText">대기</span></span>
+                        </div>
+                        <div class="hr"></div>
+                        <div class="seg" id="homeSeg">
+                            <button data-filter="done" class="active">완료</button>
+                            <button data-filter="doing">진행중</button>
+                            <button data-filter="todo">대기</button>
+                        </div>
+                        <div class="spacer8"></div>
+                        <div class="card"
+                            style="padding:12px; border-radius:16px; background:rgba(22,163,74,.06); border-color:rgba(22,163,74,.18)">
+                            <div class="tiny" style="font-weight:900">오늘 처리 현황</div>
+                            <div class="row" style="margin-top:8px; gap:12px; flex-wrap:wrap" id="homeStats"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div style="font-weight:1000; margin-bottom:8px;">공지사항</div>
+                        <div class="muted tiny">• 2월 전체 공지사항 · 관리자 · 2025.02.20</div>
+                        <div class="muted tiny">• 시스템 점검 안내 · IT팀 · 2025.02.18</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="row between">
+                            <div style="font-weight:1000;">최근 업무</div>
+                            <button class="btn ghost tiny" id="btnGoTask">내 업무로</button>
+                        </div>
+                        <div class="muted tiny" id="recentTasks">—</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 03 TASK -->
+            <section class="view" id="view-task" data-view="task">
+                <div class="stack">
+                    <div class="card">
+                        <div class="row between">
+                            <div>
+                                <div style="font-weight:1000">내 업무</div>
+                                <div class="muted tiny">Red=긴급 · Orange=보통 · Green=낮음</div>
+                            </div>
+                            <button class="btn secondary" id="btnAddTask">+ 추가</button>
+                        </div>
+                    </div>
+
+                    <div class="stack" id="taskList"></div>
+                </div>
+            </section>
+
+            <!-- 04 SEARCH -->
+            <section class="view" id="view-search" data-view="search">
+                <div class="stack">
+                    <div class="card">
+                        <div style="font-weight:1000; margin-bottom:10px;">검색</div>
+                        <input class="input" id="searchInput" placeholder="(검색어를 입력하세요)" />
+                        <div class="spacer8"></div>
+                        <div class="filters" id="searchFilters">
+                            <button class="chip active" data-type="all">전체</button>
+                            <button class="chip" data-type="task">업무</button>
+                            <button class="chip" data-type="notice">공지</button>
+                        </div>
+                    </div>
+
+                    <div class="stack" id="searchResults"></div>
+                </div>
+            </section>
+
+            <!-- 05 SETTINGS -->
+            <section class="view" id="view-settings" data-view="settings">
+                <div class="stack">
+                    <div class="card">
+                        <div style="font-weight:1000; margin-bottom:10px;">설정</div>
+                        <div class="profile" id="profileBox">
+                            <div class="avatar" id="avatar">U</div>
+                            <div style="flex:1">
+                                <div style="font-weight:1000" id="profileName">홍길동</div>
+                                <div class="muted tiny" id="profileEmail">hong@company.com</div>
+                            </div>
+                            <div class="muted">›</div>
+                        </div>
+
+                        <div class="spacer8"></div>
+                        <div class="stack">
+                            <button class="btn secondary" id="btnAlarm">알림 설정</button>
+                            <button class="btn secondary" id="btnTheme">테마 / 화면</button>
+                            <button class="btn secondary" id="btnLang">언어</button>
+                        </div>
+                    </div>
+
+                    <div class="card" style="border-color: rgba(239,68,68,.18)">
+                        <div style="font-weight:1000; margin-bottom:10px;">계정</div>
+                        <button class="btn danger" id="btnLogout">로그아웃</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- TAB BAR (hidden on login) -->
+        <nav class="tabbar" id="tabbar" style="display:none">
+            <button class="tab active" data-tab="home" title="홈">
+                <div class="ico">⌂</div>
+                <div>홈</div>
+            </button>
+            <button class="tab" data-tab="task" title="내업무">
+                <div class="ico">☰</div>
+                <div>내업무</div>
+            </button>
+            <button class="tab" data-tab="search" title="검색">
+                <div class="ico">⌕</div>
+                <div>검색</div>
+            </button>
+            <button class="tab" data-tab="settings" title="설정">
+                <div class="ico">⚙</div>
+                <div>설정</div>
+            </button>
+        </nav>
+    </div>
+
+    <script>
+        /*
+          목표: "Login → Home/Task/Search/Settings" SPA
+          - 상태: in-memory (localStorage로 최소 유지)
+          - 데이터: 더미 tasks / notice
+          - 라우팅: hash 기반 (#home, #task, ...)
+        */
+
+        // ---------- State ----------
+        var STORAGE_KEY = 'wireframe_spa_state_v1';
+
+        var state = {
+            auth: { loggedIn: false, name: '홍길동', email: 'hong@company.com' },
+            ui: { view: 'login', homeFilter: 'done', searchType: 'all', searchQuery: '' },
+            tasks: [
+                { id: 't1', title: '기획서 검토', when: '오늘 - 완료', priority: 'low', done: true },
+                { id: 't2', title: '주간 보고서 작성', when: '오늘 14:00 - 진행중', priority: 'high', done: false },
+                { id: 't3', title: '팀 미팅 준비', when: '내일 10:00 - 대기', priority: 'mid', done: false },
+                { id: 't4', title: '디자인 피드백', when: '내일 - 대기', priority: 'low', done: false }
+            ],
+            notices: [
+                { id: 'n1', title: '2월 전체 공지사항', sub: '관리자 · 2025.02.20', type: 'notice' },
+                { id: 'n2', title: '시스템 점검 안내', sub: 'IT팀 · 2025.02.18', type: 'notice' }
+            ]
+        };
+
+        function loadState() {
+            try {
+                var raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return;
+                var saved = JSON.parse(raw);
+                // 최소 병합 (키가 없으면 기본 유지)
+                if (saved && typeof saved === 'object') {
+                    if (saved.auth) state.auth = Object.assign(state.auth, saved.auth);
+                    if (saved.ui) state.ui = Object.assign(state.ui, saved.ui);
+                    if (Array.isArray(saved.tasks)) state.tasks = saved.tasks;
+                }
+            } catch (e) { /* ignore */ }
+        }
+        function saveState() {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+        }
+
+        loadState();
+
+        // ---------- DOM refs ----------
+        var $ = function (sel) { return document.querySelector(sel); };
+        var $$ = function (sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); };
+
+        var appbar = $('#appbar');
+        var tabbar = $('#tabbar');
+        var appTitle = $('#appTitle');
+        var userPill = $('#userPill');
+
+        // Views
+        var views = {
+            login: $('#view-login'),
+            home: $('#view-home'),
+            task: $('#view-task'),
+            search: $('#view-search'),
+            settings: $('#view-settings')
+        };
+
+        // ---------- Helpers ----------
+        function fmtToday() {
+            var d = new Date();
+            var y = d.getFullYear();
+            var m = String(d.getMonth() + 1).padStart(2, '0');
+            var day = String(d.getDate()).padStart(2, '0');
+            return y + '.' + m + '.' + day;
+        }
+
+        function setHash(view) {
+            location.hash = '#' + view;
+        }
+
+        function isAuthed() {
+            return !!state.auth.loggedIn;
+        }
+
+        function setView(view) {
+            // Guard
+            if (view !== 'login' && !isAuthed()) view = 'login';
+
+            state.ui.view = view;
+            saveState();
+
+            Object.keys(views).forEach(function (k) {
+                views[k].classList.toggle('active', k === view);
+            });
+
+            // appbar/tabbar visibility
+            var inApp = view !== 'login';
+            appbar.style.display = inApp ? '' : 'none';
+            tabbar.style.display = inApp ? '' : 'none';
+
+            // title and pill
+            appTitle.textContent = titleOf(view);
+            userPill.textContent = isAuthed() ? (state.auth.name + ' · ' + state.auth.email) : '로그인 필요';
+
+            // tab active
+            $$('.tab').forEach(function (btn) {
+                btn.classList.toggle('active', btn.getAttribute('data-tab') === view);
+            });
+
+            // render
+            renderAll();
+        }
+
+        function titleOf(view) {
+            switch (view) {
+                case 'home': return '홈';
+                case 'task': return '내 업무';
+                case 'search': return '검색';
+                case 'settings': return '설정';
+                default: return '로그인';
+            }
+        }
+
+        function counts() {
+            var done = state.tasks.filter(function (t) { return t.done; }).length;
+            var doing = state.tasks.filter(function (t) { return !t.done && /진행중/.test(t.when); }).length;
+            var todo = state.tasks.length - done - doing;
+            return { done: done, doing: doing, todo: todo, total: state.tasks.length };
+        }
+
+        function makeEl(tag, attrs, children) {
+            var el = document.createElement(tag);
+            attrs = attrs || {};
+            Object.keys(attrs).forEach(function (k) {
+                if (k === 'class') el.className = attrs[k];
+                else if (k === 'text') el.textContent = attrs[k];
+                else el.setAttribute(k, attrs[k]);
+            });
+            (children || []).forEach(function (ch) { el.appendChild(ch); });
+            return el;
+        }
+
+        // ---------- Renderers ----------
+        function renderHome() {
+            $('#todayLabel').textContent = fmtToday();
+
+            var c = counts();
+            var filter = state.ui.homeFilter;
+            var dot = $('#summaryDot');
+            var txt = $('#summaryText');
+
+            if (filter === 'done') { dot.className = 'dot ok'; txt.textContent = '완료'; }
+            if (filter === 'doing') { dot.className = 'dot warn'; txt.textContent = '진행중'; }
+            if (filter === 'todo') { dot.className = 'dot danger'; txt.textContent = '대기'; }
+
+            // stats
+            var stats = $('#homeStats');
+            stats.innerHTML = '';
+            var items = [
+                { label: '완료', val: c.done, color: 'ok' },
+                { label: '진행중', val: c.doing, color: 'warn' },
+                { label: '대기', val: c.todo, color: 'danger' }
+            ];
+            items.forEach(function (it) {
+                var badge = makeEl('span', { class: 'badge' }, [
+                    makeEl('span', { class: 'dot ' + it.color }),
+                    makeEl('span', { text: it.label + ' ' + it.val })
+                ]);
+                stats.appendChild(badge);
+            });
+
+            // recent tasks
+            var recent = state.tasks.slice(0, 3).map(function (t) {
+                return '• ' + t.title + ' (' + t.when + ')';
+            }).join('\n');
+            $('#recentTasks').textContent = recent || '—';
+
+            // seg active
+            $$('#homeSeg button').forEach(function (b) {
+                b.classList.toggle('active', b.getAttribute('data-filter') === state.ui.homeFilter);
+            });
+        }
+
+        function renderTasks() {
+            var wrap = $('#taskList');
+            wrap.innerHTML = '';
+
+            state.tasks.forEach(function (t) {
+                var root = makeEl('div', { class: 'task' + (t.done ? ' done' : ''), 'data-priority': t.priority });
+                var check = makeEl('div', { class: 'check', title: '완료 토글' });
+                check.addEventListener('click', function () {
+                    t.done = !t.done;
+                    saveState();
+                    renderAll();
+                });
+
+                var meta = makeEl('div', { class: 'meta' }, [
+                    makeEl('div', { class: 'title', text: t.title }),
+                    makeEl('div', { class: 'sub', text: t.when })
+                ]);
+                var prio = makeEl('div', { class: 'prio', title: '우선순위' });
+
+                root.appendChild(check);
+                root.appendChild(meta);
+                root.appendChild(prio);
+                wrap.appendChild(root);
+            });
+
+            if (!state.tasks.length) {
+                wrap.appendChild(makeEl('div', { class: 'card muted tiny', text: '업무가 없습니다. + 추가로 생성해 보세요.' }));
+            }
+        }
+
+        function renderSearch() {
+            var input = $('#searchInput');
+            input.value = state.ui.searchQuery || '';
+
+            // filter active
+            $$('#searchFilters .chip').forEach(function (chip) {
+                chip.classList.toggle('active', chip.getAttribute('data-type') === state.ui.searchType);
+            });
+
+            var q = String(state.ui.searchQuery || '').trim().toLowerCase();
+            var type = state.ui.searchType;
+
+            var pool = [];
+            if (type === 'all' || type === 'task') {
+                pool = pool.concat(state.tasks.map(function (t) {
+                    return { id: t.id, type: 'task', title: t.title, sub: t.when, priority: t.priority, done: t.done };
+                }));
+            }
+            if (type === 'all' || type === 'notice') {
+                pool = pool.concat(state.notices.map(function (n) {
+                    return { id: n.id, type: 'notice', title: n.title, sub: n.sub };
+                }));
+            }
+
+            var results = pool.filter(function (item) {
+                if (!q) return true;
+                return String(item.title).toLowerCase().indexOf(q) !== -1;
+            });
+
+            var wrap = $('#searchResults');
+            wrap.innerHTML = '';
+
+            if (!results.length) {
+                wrap.appendChild(makeEl('div', { class: 'card muted tiny', text: '검색 결과가 없습니다.' }));
+                return;
+            }
+
+            results.forEach(function (item) {
+                if (item.type === 'task') {
+                    var t = makeEl('div', { class: 'task' + (item.done ? ' done' : ''), 'data-priority': item.priority });
+                    t.appendChild(makeEl('div', { class: 'check' }));
+                    t.appendChild(makeEl('div', { class: 'meta' }, [
+                        makeEl('div', { class: 'title', text: '업무 · ' + item.title }),
+                        makeEl('div', { class: 'sub', text: item.sub })
+                    ]));
+                    t.appendChild(makeEl('div', { class: 'prio' }));
+
+                    // 클릭하면 task로 이동
+                    t.addEventListener('click', function () { setHash('task'); });
+                    wrap.appendChild(t);
+                } else {
+                    var c = makeEl('div', { class: 'card' });
+                    c.appendChild(makeEl('div', { style: 'font-weight:1000', text: '공지 · ' + item.title }));
+                    c.appendChild(makeEl('div', { class: 'muted tiny', text: item.sub }));
+                    wrap.appendChild(c);
+                }
+            });
+        }
+
+        function renderSettings() {
+            $('#profileName').textContent = state.auth.name;
+            $('#profileEmail').textContent = state.auth.email;
+            $('#avatar').textContent = (state.auth.name || 'U').slice(0, 1);
+        }
+
+        function renderAll() {
+            if (state.ui.view === 'home') renderHome();
+            if (state.ui.view === 'task') renderTasks();
+            if (state.ui.view === 'search') renderSearch();
+            if (state.ui.view === 'settings') renderSettings();
+        }
+
+        // ---------- Events ----------
+        // Tabs
+        $$('.tab').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var view = btn.getAttribute('data-tab');
+                setHash(view);
+            });
+        });
+
+        // Home segmented
+        $$('#homeSeg button').forEach(function (b) {
+            b.addEventListener('click', function () {
+                state.ui.homeFilter = b.getAttribute('data-filter');
+                saveState();
+                renderHome();
+            });
+        });
+
+        // Quick move to Task
+        $('#btnGoTask').addEventListener('click', function () { setHash('task'); });
+
+        // Search input & chips
+        $('#searchInput').addEventListener('input', function (e) {
+            state.ui.searchQuery = e.target.value;
+            saveState();
+            renderSearch();
+        });
+        $$('#searchFilters .chip').forEach(function (chip) {
+            chip.addEventListener('click', function () {
+                state.ui.searchType = chip.getAttribute('data-type');
+                saveState();
+                renderSearch();
+            });
+        });
+
+        // Add task
+        $('#btnAddTask').addEventListener('click', function () {
+            var title = prompt('업무 제목을 입력하세요');
+            if (!title) return;
+            var pr = prompt('우선순위(high/mid/low) 중 하나를 입력하세요', 'mid');
+            pr = (pr || 'mid').toLowerCase();
+            if (['high', 'mid', 'low'].indexOf(pr) === -1) pr = 'mid';
+            state.tasks.unshift({
+                id: 't' + Date.now(),
+                title: title,
+                when: '오늘 - 대기',
+                priority: pr,
+                done: false
+            });
+            saveState();
+            renderAll();
+        });
+
+        // Login
+        $('#btnLogin').addEventListener('click', function () {
+            var id = String($('#loginId').value || '').trim();
+            var pw = String($('#loginPw').value || '').trim();
+            if (!id || !pw) {
+                alert('아이디/비밀번호를 입력하세요.');
+                return;
+            }
+            // 데모 인증: 아무 값이나 입력하면 로그인
+            state.auth.loggedIn = true;
+            state.auth.email = id.indexOf('@') !== -1 ? id : (id + '@company.com');
+            state.auth.name = '홍길동';
+            saveState();
+            setHash('home');
+        });
+        $('#btnDemo').addEventListener('click', function () {
+            state.auth.loggedIn = true;
+            state.auth.name = '홍길동';
+            state.auth.email = 'hong@company.com';
+            saveState();
+            setHash('home');
+        });
+
+        // Settings buttons
+        $('#btnLogout').addEventListener('click', function () {
+            if (!confirm('로그아웃 하시겠습니까?')) return;
+            state.auth.loggedIn = false;
+            state.ui.view = 'login';
+            saveState();
+            setHash('login');
+        });
+
+        function toast(msg) {
+            // 간단 토스트
+            var t = makeEl('div', {
+                class: 'card',
+                style: 'position:absolute; left:14px; right:14px; bottom:90px; z-index:10; padding:12px; border-radius:16px; background:#111827; color:#fff; border:1px solid rgba(255,255,255,.12);'
+            }, [makeEl('div', { text: msg })]);
+            $('#app').appendChild(t);
+            setTimeout(function () { t.remove(); }, 1200);
+        }
+
+        $('#btnAlarm').addEventListener('click', function () { toast('알림 설정(데모)'); });
+        $('#btnTheme').addEventListener('click', function () { toast('테마/화면(데모)'); });
+        $('#btnLang').addEventListener('click', function () { toast('언어(데모)'); });
+        $('#btnForgot').addEventListener('click', function (e) { e.preventDefault(); toast('비밀번호 찾기(데모)'); });
+        $('#btnSignup').addEventListener('click', function (e) { e.preventDefault(); toast('회원가입(데모)'); });
+
+        // Hash router
+        function resolveHash() {
+            var h = (location.hash || '#').replace('#', '');
+            if (!h) h = isAuthed() ? 'home' : 'login';
+            if (['login', 'home', 'task', 'search', 'settings'].indexOf(h) === -1) h = isAuthed() ? 'home' : 'login';
+            setView(h);
+        }
+        window.addEventListener('hashchange', resolveHash);
+
+        // initial
+        if (!location.hash) {
+            setHash(isAuthed() ? 'home' : 'login');
+        }
+        resolveHash();
+    </script>
+</body>
+
+</html>
