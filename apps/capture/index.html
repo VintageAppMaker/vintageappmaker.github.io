@@ -31,10 +31,11 @@
     }
 
     .app {
+      position: relative;
       width: 100%;
       height: 100%;
       display: grid;
-      grid-template-rows: var(--bar-height) 1fr;
+      grid-template-rows: var(--bar-height) minmax(0, 1fr);
     }
 
     .topbar {
@@ -77,9 +78,46 @@
       max-width: 48vw;
     }
 
+    .html-panel {
+      display: none;
+      position: absolute;
+      top: var(--bar-height);
+      left: 0;
+      right: 0;
+      z-index: 10;
+      padding: 14px;
+      background: #e5e7eb;
+      border-bottom: 1px solid #cbd5e1;
+      gap: 10px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16);
+    }
+
+    .html-panel.is-open {
+      display: grid;
+    }
+
+    .html-input {
+      width: 100%;
+      min-height: 180px;
+      resize: vertical;
+      padding: 12px;
+      border: 1px solid #94a3b8;
+      border-radius: 10px;
+      font: 14px/1.5 Consolas, "Courier New", monospace;
+      color: #111827;
+      background: #fff;
+    }
+
+    .panel-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
     iframe {
       width: 100%;
       height: 100%;
+      min-height: 0;
       border: 0;
       background: #fff;
     }
@@ -89,23 +127,38 @@
   <div class="app">
     <div class="topbar">
       <button id="importBtn" class="btn" type="button">가져오기</button>
+      <button id="insertHtmlBtn" class="btn" type="button">HTML 삽입</button>
       <button id="captureBtn" class="btn" type="button" disabled>이미지캡쳐</button>
       <input id="fileInput" type="file" accept=".html,.htm,text/html" hidden />
       <div id="status" class="status">HTML 파일을 선택해 주세요.</div>
+    </div>
+    <div id="htmlPanel" class="html-panel">
+      <textarea
+        id="htmlInput"
+        class="html-input"
+        placeholder="여기에 HTML을 붙여넣으세요."
+      ></textarea>
+      <div class="panel-actions">
+        <button id="applyHtmlBtn" class="btn" type="button">적용</button>
+      </div>
     </div>
     <iframe id="viewer" title="HTML Viewer" sandbox="allow-same-origin allow-scripts"></iframe>
   </div>
 
   <script>
     const importBtn = document.getElementById("importBtn");
+    const insertHtmlBtn = document.getElementById("insertHtmlBtn");
+    const applyHtmlBtn = document.getElementById("applyHtmlBtn");
     const captureBtn = document.getElementById("captureBtn");
     const fileInput = document.getElementById("fileInput");
+    const htmlPanel = document.getElementById("htmlPanel");
+    const htmlInput = document.getElementById("htmlInput");
     const statusEl = document.getElementById("status");
     const viewer = document.getElementById("viewer");
 
     let loadedFileName = "capture";
 
-        function setStatus(message) {
+    function setStatus(message) {
       statusEl.textContent = message;
     }
 
@@ -113,8 +166,18 @@
       return name.replace(/\.[^.]+$/, "").replace(/[^a-zA-Z0-9가-힣_-]/g, "_") || "capture";
     }
 
+    function applyHtmlToViewer(htmlText, fileName, successMessage) {
+      captureBtn.disabled = true;
 
+      viewer.onload = () => {
+        ensureScrollbarHiddenInIframe();
+        captureBtn.disabled = false;
+        setStatus(successMessage);
+      };
 
+      loadedFileName = sanitizeFileName(fileName);
+      viewer.srcdoc = htmlText;
+    }
     function ensureScrollbarHiddenInIframe() {
       const iframeDoc = viewer.contentDocument;
       if (!iframeDoc || !iframeDoc.head) {
@@ -125,7 +188,7 @@
       if (!styleEl) {
         styleEl = iframeDoc.createElement("style");
         styleEl.id = "codex-hide-scrollbar-style";
-        styleEl.textContent =         `
+        styleEl.textContent = `
           html, body {
             -ms-overflow-style: none !important;
             scrollbar-width: none !important;
@@ -252,7 +315,19 @@
       setStatus("캡처 중... 100%");
       return canvas;
     }
-    importBtn.addEventListener("click", () => fileInput.click());
+
+    importBtn.addEventListener("click", () => {
+      htmlPanel.classList.remove("is-open");
+      fileInput.click();
+    });
+
+    insertHtmlBtn.addEventListener("click", () => {
+      const isOpen = htmlPanel.classList.toggle("is-open");
+      setStatus(isOpen ? "HTML 코드를 붙여넣고 적용하세요." : "HTML 입력폼을 닫았습니다.");
+      if (isOpen) {
+        htmlInput.focus();
+      }
+    });
 
     fileInput.addEventListener("change", async (event) => {
       const file = event.target.files && event.target.files[0];
@@ -266,14 +341,7 @@
 
       try {
         const htmlText = await file.text();
-
-        viewer.onload = () => {
-          ensureScrollbarHiddenInIframe();
-          captureBtn.disabled = false;
-          setStatus(`로드 완료: ${file.name}`);
-        };
-
-        viewer.srcdoc = htmlText;
+        applyHtmlToViewer(htmlText, file.name, `로드 완료: ${file.name}`);
       } catch (error) {
         setStatus(`불러오기 실패: ${error.message}`);
       } finally {
@@ -281,9 +349,22 @@
       }
     });
 
+    applyHtmlBtn.addEventListener("click", () => {
+      const htmlText = htmlInput.value.trim();
+      if (!htmlText) {
+        setStatus("붙여넣은 HTML이 없습니다.");
+        return;
+      }
+
+      applyHtmlToViewer(htmlText, "inserted_html.html", "붙여넣은 HTML을 적용했습니다.");
+      htmlPanel.classList.remove("is-open");
+    });
+
     captureBtn.addEventListener("click", async () => {
       captureBtn.disabled = true;
       importBtn.disabled = true;
+      insertHtmlBtn.disabled = true;
+      applyHtmlBtn.disabled = true;
 
       try {
         const canvas = await captureFullIframe();
@@ -294,6 +375,8 @@
       } finally {
         captureBtn.disabled = false;
         importBtn.disabled = false;
+        insertHtmlBtn.disabled = false;
+        applyHtmlBtn.disabled = false;
       }
     });
   </script>
