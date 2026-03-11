@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가짜 성취감의 감옥 - Narrative Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Outfit:wght@300;600;800&family=Pretendard:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        story: {
+                            bg: '#fdfcfb',
+                            accent: '#4a5568',
+                            muted: '#718096',
+                            highlight: '#2d3748',
+                            card: 'rgba(255, 255, 255, 0.7)'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Pretendard', 'ui-sans-serif', 'system-ui'],
+                        serif: ['Noto Serif KR', 'serif'],
+                        display: ['Outfit', 'Pretendard', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 1.2s ease-out forwards',
+                        'slide-up': 'slideUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(180deg, #fdfcfb 0%, #e2e8f0 100%);
+            min-height: 100vh;
+            word-break: keep-all;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .story-image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transition: transform 0.5s ease;
+        }
+        .story-image-container:hover img {
+            transform: scale(1.02);
+        }
+        audio::-webkit-media-controls-panel {
+            background-color: #f1f5f9;
+        }
+        .custom-audio-wrapper {
+            box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+        .book-nav {
+            position: fixed;
+            left: 50%;
+            bottom: max(20px, env(safe-area-inset-bottom));
+            transform: translateX(-50%);
+            width: min(560px, calc(100% - 32px));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(241, 245, 249, 0.58));
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+            z-index: 60;
+            pointer-events: auto;
+        }
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 110px;
+            padding: 0.8rem 1rem;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: #1f2937;
+            background: #ffffff;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+        }
+        .nav-btn.primary {
+            background: #2d3748;
+            color: #ffffff;
+            border-color: #2d3748;
+        }
+        .toc-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.48);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 70;
+            padding: 24px;
+        }
+        .toc-overlay.open {
+            display: flex;
+        }
+        .toc-panel {
+            width: min(420px, 100%);
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 28px;
+            padding: 28px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+        }
+        .toc-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .toc-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            border-radius: 16px;
+            text-decoration: none;
+            color: #1f2937;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+        .toc-link.active {
+            background: #2d3748;
+            color: #ffffff;
+            border-color: #2d3748;
+        }
+    </style>
+</head>
+<body class="font-sans text-story-highlight antialiased">
+
+    <!-- Main Container -->
+    <main class="max-w-2xl mx-auto px-6 py-12 md:py-24 flex flex-col items-center">
+        
+        <!-- Header Section -->
+        <header class="w-full mb-12 opacity-0 animate-fade-in text-center">
+            <span class="inline-block px-4 py-1.5 mb-6 text-xs font-bold tracking-widest uppercase text-story-muted border border-story-muted/20 rounded-full">
+                Narrative Journey
+            </span>
+            <h1 class="font-display text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-tight">
+                가짜 성취감의 감옥
+            </h1>
+            <div class="mt-6 w-12 h-1 bg-story-accent mx-auto rounded-full"></div>
+        </header>
+
+        <!-- Main Content Area -->
+        <article class="w-full space-y-12 animate-slide-up" style="animation-delay: 0.3s;">
+            
+            <!-- Story Image -->
+            <div class="story-image-container flex justify-center w-full">
+                <img src='2.jpg' alt='가짜 성취감의 감옥을 형상화한 이미지' class="max-w-full h-auto" />
+            </div>
+
+            <!-- Story Text -->
+            <section class="glass-effect p-8 md:p-12 rounded-3xl space-y-8">
+                <div class="prose prose-slate max-w-none">
+                    <p class="font-serif text-lg md:text-xl leading-relaxed text-slate-700 first-letter:text-5xl first-letter:font-bold first-letter:mr-3 first-letter:float-left first-letter:text-slate-900">
+                        시간이 흐를수록 지훈의 눈은 핏발이 섰고 얼굴은 수척해졌다. 게임 속 캐릭터는 화려한 장비와 레벨을 갖춰갔지만, 현실의 지훈은 점점 무너져 내렸다. '9999'라는 숫자가 적힌 무거운 쇠사슬이 그의 영혼을 짓눌렀다. 
+                    </p>
+                    <p class="font-serif text-lg md:text-xl leading-relaxed text-slate-700">
+                        그것은 '가짜 성취감'이라는 이름의 감옥이었다. 숫자가 올라갈수록 기뻐야 하는데, 이상하게도 그의 마음은 점점 더 공허해졌고, 자신도 모르는 사이에 그는 보상이라는 마약에 취해 자제력을 잃은 중독자가 되어가고 있었다.
+                    </p>
+                </div>
+            </section>
+
+        </article>
+
+        <!-- Audio Player Section -->
+        <section class="w-full mt-16 animate-slide-up" style="animation-delay: 0.6s;">
+            <div class="custom-audio-wrapper bg-white/80 p-6 rounded-2xl border border-slate-200">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-slate-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">Narration</h3>
+                        <p class="text-xs text-slate-500">Listen to the story</p>
+                    </div>
+                </div>
+                <audio controls class="w-full">
+                    <source src='2.wav' type="audio/wav">
+                    Your browser does not support the audio element.
+                </audio>
+            </div>
+        </section>
+
+    </main>
+
+    <nav class="book-nav" aria-label="페이지 이동">
+        <a href="1.html" class="nav-btn">이전</a>
+        <button type="button" class="nav-btn primary" id="tocButton" aria-haspopup="dialog" aria-controls="tocOverlay" aria-expanded="false">목차</button>
+        <a href="3.html" class="nav-btn">다음</a>
+    </nav>
+
+    <div class="toc-overlay" id="tocOverlay" role="dialog" aria-modal="true" aria-labelledby="tocTitle">
+        <div class="toc-panel">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <p class="text-sm uppercase tracking-[0.2em] text-story-muted">Story Index</p>
+                    <h2 id="tocTitle" class="text-2xl font-semibold mt-2">목차</h2>
+                </div>
+                <button type="button" class="nav-btn" id="tocClose">닫기</button>
+            </div>
+            <div class="toc-list">
+                <a href="1.html" class="toc-link"><span>1. 숫자의 덫</span><span>이동</span></a>
+                <a href="2.html" class="toc-link active"><span>2. 가짜 성취감의 감옥</span><span>현재</span></a>
+                <a href="3.html" class="toc-link"><span>3. 가짜 세상의 각성</span><span>이동</span></a>
+                <a href="4.html" class="toc-link"><span>4. 진짜 삶을 찾아서</span><span>이동</span></a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Subtle scroll reveal effect for sections
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100');
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-slide-up').forEach(el => observer.observe(el));
+
+        const tocOverlay = document.getElementById('tocOverlay');
+        const tocButton = document.getElementById('tocButton');
+        const tocClose = document.getElementById('tocClose');
+
+        const closeToc = () => {
+            tocOverlay.classList.remove('open');
+            tocButton.setAttribute('aria-expanded', 'false');
+        };
+
+        tocButton.addEventListener('click', () => {
+            tocOverlay.classList.add('open');
+            tocButton.setAttribute('aria-expanded', 'true');
+        });
+
+        tocClose.addEventListener('click', closeToc);
+        tocOverlay.addEventListener('click', (event) => {
+            if (event.target === tocOverlay) closeToc();
+        });
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeToc();
+        });
+    </script>
+</body>
+</html>

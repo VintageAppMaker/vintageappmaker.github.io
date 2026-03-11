@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가짜 세상의 각성 - Refined Storytelling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Pretendard:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: '#F9FAFB',
+                            surface: '#FFFFFF',
+                            accent: '#4B6584',
+                            text: '#1F2937',
+                            muted: '#6B7280'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Pretendard', 'sans-serif'],
+                        serif: ['Noto Serif KR', 'serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 1.2s ease-out forwards',
+                        'slide-up': 'slideUp 0.8s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F9FAFB;
+            color: #1F2937;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .story-content p {
+            line-height: 2;
+            letter-spacing: -0.01em;
+            word-break: keep-all;
+        }
+        audio::-webkit-media-controls-panel {
+            background-color: #F3F4F6;
+        }
+        .image-glow {
+            box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+        .book-nav {
+            position: fixed;
+            left: 50%;
+            bottom: max(20px, env(safe-area-inset-bottom));
+            transform: translateX(-50%);
+            width: min(560px, calc(100% - 32px));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(241, 245, 249, 0.58));
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+            z-index: 60;
+            pointer-events: auto;
+        }
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 110px;
+            padding: 0.8rem 1rem;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: #1f2937;
+            background: #ffffff;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+        }
+        .nav-btn.primary {
+            background: #2d3748;
+            color: #ffffff;
+            border-color: #2d3748;
+        }
+        .toc-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.48);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 70;
+            padding: 24px;
+        }
+        .toc-overlay.open {
+            display: flex;
+        }
+        .toc-panel {
+            width: min(420px, 100%);
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 28px;
+            padding: 28px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+        }
+        .toc-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .toc-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            border-radius: 16px;
+            text-decoration: none;
+            color: #1f2937;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+        .toc-link.active {
+            background: #2d3748;
+            color: #ffffff;
+            border-color: #2d3748;
+        }
+    </style>
+</head>
+<body class="font-sans">
+
+    <div class="min-h-screen flex flex-col items-center py-12 px-6 md:py-24">
+        
+        <!-- Main Content Container -->
+        <main class="w-full max-w-3xl flex flex-col items-center">
+            
+            <!-- Header Section -->
+            <header class="w-full mb-12 md:mb-20 text-center opacity-0 animate-fade-in">
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-brand-text mb-4 font-sans">
+                    가짜 세상의 각성
+                </h1>
+                <div class="h-1 w-16 bg-brand-accent mx-auto rounded-full opacity-50"></div>
+            </header>
+
+            <!-- Image Section -->
+            <section class="w-full mb-12 md:mb-16 opacity-0 animate-slide-up" style="animation-delay: 0.2s;">
+                <div class="relative group overflow-hidden rounded-2xl image-glow bg-gray-200 aspect-video flex items-center justify-center">
+                    <style>
+                        /* Custom styling for the provided image tag */
+                        .story-img-container img {
+                            width: 100%;
+                            height: 100%;
+                            object-fit: cover;
+                            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+                        }
+                        .story-img-container:hover img {
+                            transform: scale(1.03);
+                        }
+                    </style>
+                    <div class="story-img-container w-full h-full">
+                        <img src='3.jpg' alt='가짜 세상의 각성을 시각화한 이미지' />
+                    </div>
+                </div>
+            </section>
+
+            <!-- Story Text Section -->
+            <article class="w-full mb-16 md:mb-24 opacity-0 animate-slide-up" style="animation-delay: 0.4s;">
+                <div class="story-content font-serif text-lg md:text-xl text-gray-700 space-y-8 leading-relaxed">
+                    <p>
+                        그러던 어느 날 새벽, 여느 때처럼 기계적으로 버튼을 누르던 지훈의 시야가 흐려졌다. 화면 속엔 전 세계 1위라는 찬란한 타이틀이 떠 있었지만, 꺼진 화면 속에 비친 자신의 모습은 너무나도 초라했다.
+                    </p>
+                    <p>
+                        가족과의 대화, 창밖의 계절 변화, 자신의 건강... 숫자를 쫓느라 놓쳐버린 수많은 소중한 것들이 주마등처럼 스쳐 지나갔다. 지훈의 눈에서 뜨거운 눈물 한 방울이 흘러내렸다. 그것은 후회였고, 동시에 자신을 옥죄던 가짜 세상으로부터의 '각성'이었다.
+                    </p>
+                </div>
+            </article>
+
+            <!-- Audio Player Section -->
+            <section class="w-full max-w-2xl opacity-0 animate-slide-up" style="animation-delay: 0.6s;">
+                <div class="glass-panel rounded-3xl p-6 md:p-8 shadow-sm transition-all hover:shadow-md">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-bold uppercase tracking-widest text-brand-muted">Narrative Audio</span>
+                        <div class="flex space-x-1">
+                            <span class="w-1 h-3 bg-brand-accent animate-pulse"></span>
+                            <span class="w-1 h-5 bg-brand-accent animate-pulse" style="animation-delay: 0.1s"></span>
+                            <span class="w-1 h-4 bg-brand-accent animate-pulse" style="animation-delay: 0.2s"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full">
+                        <style>
+                            audio {
+                                width: 100%;
+                                height: 40px;
+                                filter: sepia(10%) saturate(70%) grayscale(20%);
+                            }
+                        </style>
+                        <audio controls src='3.wav' class="w-full">
+                            Your browser does not support the audio element.
+                        </audio>
+                    </div>
+                    
+                    <p class="text-center text-sm text-brand-muted mt-4 font-sans italic">
+                        천천히 눈을 감고 이야기를 들어보세요
+                    </p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <nav class="book-nav" aria-label="페이지 이동">
+        <a href="2.html" class="nav-btn">이전</a>
+        <button type="button" class="nav-btn primary" id="tocButton" aria-haspopup="dialog" aria-controls="tocOverlay" aria-expanded="false">목차</button>
+        <a href="4.html" class="nav-btn">다음</a>
+    </nav>
+
+    <div class="toc-overlay" id="tocOverlay" role="dialog" aria-modal="true" aria-labelledby="tocTitle">
+        <div class="toc-panel">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <p class="text-sm uppercase tracking-[0.2em] text-brand-muted">Story Index</p>
+                    <h2 id="tocTitle" class="text-2xl font-semibold mt-2">목차</h2>
+                </div>
+                <button type="button" class="nav-btn" id="tocClose">닫기</button>
+            </div>
+            <div class="toc-list">
+                <a href="1.html" class="toc-link"><span>1. 숫자의 덫</span><span>이동</span></a>
+                <a href="2.html" class="toc-link"><span>2. 가짜 성취감의 감옥</span><span>이동</span></a>
+                <a href="3.html" class="toc-link active"><span>3. 가짜 세상의 각성</span><span>현재</span></a>
+                <a href="4.html" class="toc-link"><span>4. 진짜 삶을 찾아서</span><span>이동</span></a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple scroll reveal logic for smoother experience
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-slide-up');
+                        entry.target.style.opacity = '1';
+                    }
+                });
+            }, observerOptions);
+
+            // In case elements were already in viewport
+            document.querySelectorAll('.animate-slide-up').forEach(el => {
+                el.style.opacity = '1';
+            });
+        });
+
+        const tocOverlay = document.getElementById('tocOverlay');
+        const tocButton = document.getElementById('tocButton');
+        const tocClose = document.getElementById('tocClose');
+
+        const closeToc = () => {
+            tocOverlay.classList.remove('open');
+            tocButton.setAttribute('aria-expanded', 'false');
+        };
+
+        tocButton.addEventListener('click', () => {
+            tocOverlay.classList.add('open');
+            tocButton.setAttribute('aria-expanded', 'true');
+        });
+
+        tocClose.addEventListener('click', closeToc);
+        tocOverlay.addEventListener('click', (event) => {
+            if (event.target === tocOverlay) closeToc();
+        });
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeToc();
+        });
+    </script>
+</body>
+</html>

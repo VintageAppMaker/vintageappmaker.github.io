@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>숫자의 덫 - A Narrative Experience</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Outfit:wght@300;600&family=Pretendard:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        story: {
+                            bg: '#f8f9fa',
+                            card: '#ffffff',
+                            accent: '#4a5568',
+                            text: '#2d3748',
+                            muted: '#718096',
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Outfit', 'Pretendard', 'sans-serif'],
+                        body: ['Noto Serif KR', 'serif'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 1s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: radial-gradient(circle at top left, #f1f5f9 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+        }
+        .audio-custom::-webkit-media-controls-panel {
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #1a202c 0%, #4a5568 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .image-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 1rem;
+            object-fit: cover;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .book-nav {
+            position: fixed;
+            left: 50%;
+            bottom: max(20px, env(safe-area-inset-bottom));
+            transform: translateX(-50%);
+            width: min(560px, calc(100% - 32px));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(241, 245, 249, 0.58));
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+            z-index: 60;
+            pointer-events: auto;
+        }
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 110px;
+            padding: 0.8rem 1rem;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: #1f2937;
+            background: #ffffff;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+        }
+        .nav-btn.primary {
+            background: #2d3748;
+            color: #ffffff;
+            border-color: #2d3748;
+        }
+        .nav-btn.disabled {
+            opacity: 0.45;
+            pointer-events: none;
+        }
+        .toc-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.48);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 70;
+            padding: 24px;
+        }
+        .toc-overlay.open {
+            display: flex;
+        }
+        .toc-panel {
+            width: min(420px, 100%);
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 28px;
+            padding: 28px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+        }
+        .toc-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .toc-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            border-radius: 16px;
+            text-decoration: none;
+            color: #1f2937;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+        .toc-link.active {
+            background: #2d3748;
+            color: #ffffff;
+            border-color: #2d3748;
+        }
+    </style>
+</head>
+<body class="font-display text-story-text selection:bg-story-accent selection:text-white overflow-x-hidden">
+
+    <!-- Progress Bar (Subtle interaction) -->
+    <div class="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
+        <div id="progress" class="h-full bg-story-accent transition-all duration-300 w-0"></div>
+    </div>
+
+    <main class="max-w-3xl mx-auto px-6 py-16 md:py-24 flex flex-col items-center">
+        
+        <!-- Header Section -->
+        <header class="w-full mb-12 md:mb-20 text-center animate-fade-in-up">
+            <h1 class="text-4xl md:text-6xl font-semibold tracking-tight text-gradient mb-4">
+                숫자의 덫
+            </h1>
+            <div class="w-16 h-1 bg-story-accent mx-auto opacity-30 rounded-full"></div>
+        </header>
+
+        <!-- Main Content Area -->
+        <section class="w-full space-y-12 md:space-y-16">
+            
+            <!-- Story Image -->
+            <div class="image-container animate-fade-in-up transition-transform duration-700 hover:scale-[1.01]" style="animation-delay: 0.2s;">
+                <img src='1.jpg' alt='숫자의 덫 이미지' />
+            </div>
+
+            <!-- Story Text -->
+            <article class="glass-card p-8 md:p-12 rounded-3xl animate-fade-in-up" style="animation-delay: 0.4s;">
+                <div class="font-body text-lg md:text-xl leading-relaxed md:leading-loose text-story-text space-y-6">
+                    <p class="first-letter:text-4xl first-letter:font-display first-letter:mr-1 first-letter:float-left first-letter:text-story-accent">
+                        어느 날부터인가 중년의 주인공 '지훈'에게 유일한 낙은 퇴근 후 켜는 작은 게임기였다. 처음엔 그저 일상의 스트레스를 잊기 위한 '휴식'이었다. 
+                    </p>
+                    <p>
+                        하지만 어느 순간부터 그의 머릿속엔 오로지 숫자만이 가득 차기 시작했다. 랭킹 1위, 레벨 99, 경험치 +5000. 남들보다 높은 숫자를 가져야만 안심이 되었고, 그 숫자가 자신의 가치를 증명한다고 믿었다. 
+                    </p>
+                    <p>
+                        휴식을 얻으려 시작한 게임이었지만, 지훈은 화면 속 숫자에 연연하며 식은땀을 흘리는 전쟁터의 군인이 되어 있었다.
+                    </p>
+                </div>
+            </article>
+
+        </section>
+
+        <!-- Audio Player Section -->
+        <footer class="w-full mt-16 md:mt-24 animate-fade-in-up" style="animation-delay: 0.6s;">
+            <div class="bg-white/40 backdrop-blur-md rounded-2xl p-6 border border-white/50 shadow-sm flex flex-col items-center gap-4">
+                <span class="text-xs uppercase tracking-widest text-story-muted font-semibold">Narrative Audio</span>
+                <div class="w-full">
+                    <audio src='1.wav' class="w-full audio-custom" controls></audio>
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <nav class="book-nav" aria-label="페이지 이동">
+        <span class="nav-btn disabled" aria-disabled="true">이전</span>
+        <button type="button" class="nav-btn primary" id="tocButton" aria-haspopup="dialog" aria-controls="tocOverlay" aria-expanded="false">목차</button>
+        <a href="2.html" class="nav-btn">다음</a>
+    </nav>
+
+    <div class="toc-overlay" id="tocOverlay" role="dialog" aria-modal="true" aria-labelledby="tocTitle">
+        <div class="toc-panel">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <p class="text-sm uppercase tracking-[0.2em] text-story-muted">Story Index</p>
+                    <h2 id="tocTitle" class="text-2xl font-semibold mt-2">목차</h2>
+                </div>
+                <button type="button" class="nav-btn" id="tocClose">닫기</button>
+            </div>
+            <div class="toc-list">
+                <a href="1.html" class="toc-link active"><span>1. 숫자의 덫</span><span>현재</span></a>
+                <a href="2.html" class="toc-link"><span>2. 가짜 성취감의 감옥</span><span>이동</span></a>
+                <a href="3.html" class="toc-link"><span>3. 가짜 세상의 각성</span><span>이동</span></a>
+                <a href="4.html" class="toc-link"><span>4. 진짜 삶을 찾아서</span><span>이동</span></a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Progress bar logic
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('progress').style.width = scrolled + "%";
+        });
+
+        // Simple Reveal Observer
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100');
+                    entry.target.classList.remove('opacity-0');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-fade-in-up').forEach(el => {
+            observer.observe(el);
+        });
+
+        const tocOverlay = document.getElementById('tocOverlay');
+        const tocButton = document.getElementById('tocButton');
+        const tocClose = document.getElementById('tocClose');
+
+        const closeToc = () => {
+            tocOverlay.classList.remove('open');
+            tocButton.setAttribute('aria-expanded', 'false');
+        };
+
+        tocButton.addEventListener('click', () => {
+            tocOverlay.classList.add('open');
+            tocButton.setAttribute('aria-expanded', 'true');
+        });
+
+        tocClose.addEventListener('click', closeToc);
+        tocOverlay.addEventListener('click', (event) => {
+            if (event.target === tocOverlay) closeToc();
+        });
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeToc();
+        });
+    </script>
+</body>
+</html>

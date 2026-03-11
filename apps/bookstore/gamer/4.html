@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>진짜 삶을 찾아서 - Refined Storytelling</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Pretendard:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: '#F9F7F5',
+                            card: '#FFFFFF',
+                            accent: '#5E72E4',
+                            text: '#2D3436',
+                            muted: '#636E72'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Pretendard', 'sans-serif'],
+                        serif: ['Noto Serif KR', 'serif'],
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 1.2s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F9F7F5;
+            color: #2D3436;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-player {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+        }
+        .story-content p {
+            margin-bottom: 2rem;
+            line-height: 2;
+            word-break: keep-all;
+        }
+        .img-container img {
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.08);
+            transition: transform 0.5s ease;
+        }
+        .img-container img:hover {
+            transform: scale(1.02);
+        }
+        audio::-webkit-media-controls-panel {
+            background-color: #f1f3f4;
+        }
+        .book-nav {
+            position: fixed;
+            left: 50%;
+            bottom: max(20px, env(safe-area-inset-bottom));
+            transform: translateX(-50%);
+            width: min(560px, calc(100% - 32px));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.72), rgba(241, 245, 249, 0.58));
+            backdrop-filter: blur(18px) saturate(140%);
+            -webkit-backdrop-filter: blur(18px) saturate(140%);
+            border: 1px solid rgba(255, 255, 255, 0.55);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+            z-index: 60;
+            pointer-events: auto;
+        }
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 110px;
+            padding: 0.8rem 1rem;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: #1f2937;
+            background: #ffffff;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+        }
+        .nav-btn.primary {
+            background: #2d3748;
+            color: #ffffff;
+            border-color: #2d3748;
+        }
+        .nav-btn.disabled {
+            opacity: 0.45;
+            pointer-events: none;
+        }
+        .toc-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.48);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 70;
+            padding: 24px;
+        }
+        .toc-overlay.open {
+            display: flex;
+        }
+        .toc-panel {
+            width: min(420px, 100%);
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 28px;
+            padding: 28px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+        }
+        .toc-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .toc-link {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            border-radius: 16px;
+            text-decoration: none;
+            color: #1f2937;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+        .toc-link.active {
+            background: #2d3748;
+            color: #ffffff;
+            border-color: #2d3748;
+        }
+    </style>
+</head>
+<body class="font-sans selection:bg-brand-accent selection:text-white">
+
+    <div class="max-w-3xl mx-auto px-6 py-16 md:py-24">
+        
+        <!-- Header Section -->
+        <header class="text-center mb-16 opacity-0 animate-fade-in-up">
+            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-brand-text mb-4">
+                진짜 삶을 찾아서
+            </h1>
+            <div class="w-16 h-1 bg-brand-accent mx-auto rounded-full"></div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="space-y-12">
+            
+            <!-- Story Image -->
+            <div class="img-container opacity-0 animate-fade-in-up" style="animation-delay: 0.3s;">
+                <img src='4.jpg' alt='media_1' />
+            </div>
+
+            <!-- Story Text -->
+            <article class="story-content text-lg md:text-xl font-serif text-brand-text/90 opacity-0 animate-fade-in-up" style="animation-delay: 0.6s;">
+                <p>
+                    다음 날 아침, 지훈은 창을 열고 맑은 공기를 들이마셨다. 그리고 책상 위에 놓인 게임기를 조용히 상자 안에 넣었다. 한때는 목숨보다 중요해 보였던 'Level'과 'EXP' 조각들이 연기처럼 흩어져 먼지가 되어 사라졌다. 지훈은 깨달았다. 게임이 즐거움을 넘어 고통이 되는 순간, 그것은 더 이상 놀이가 아니라 독이라는 것을.
+                </p>
+                
+                <div class="my-12 flex justify-center italic text-brand-accent font-semibold text-2xl md:text-3xl">
+                    "이제야 진짜 내 삶이 보이네."
+                </div>
+
+                <p>
+                    상자를 닫고 일어선 지훈의 얼굴에는 오랜만에 진정한 평화가 깃들었다. 그는 이제 숫자가 아닌, 자신의 마음이 들려주는 진짜 행복의 소리에 귀를 기울이기로 했다.
+                </p>
+            </article>
+
+        </main>
+
+        <!-- Audio Player Section -->
+        <section class="mt-20 pt-12 border-t border-gray-200 opacity-0 animate-fade-in-up" style="animation-delay: 0.9s;">
+            <div class="glass-player p-6 md:p-8 shadow-xl">
+                <div class="flex flex-col items-center gap-4">
+                    <div class="flex items-center gap-2 text-brand-muted mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="text-sm font-medium uppercase tracking-widest">Story Narration</span>
+                    </div>
+                    <div class="w-full">
+                        <audio src='4.wav' controls class="w-full"></audio>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Background Decoration -->
+    <div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none overflow-hidden">
+        <div class="absolute -top-24 -left-24 w-96 h-96 bg-brand-accent opacity-5 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-yellow-600 opacity-[0.03] rounded-full blur-3xl"></div>
+    </div>
+
+    <nav class="book-nav" aria-label="페이지 이동">
+        <a href="3.html" class="nav-btn">이전</a>
+        <button type="button" class="nav-btn primary" id="tocButton" aria-haspopup="dialog" aria-controls="tocOverlay" aria-expanded="false">목차</button>
+        <span class="nav-btn disabled" aria-disabled="true">다음</span>
+    </nav>
+
+    <div class="toc-overlay" id="tocOverlay" role="dialog" aria-modal="true" aria-labelledby="tocTitle">
+        <div class="toc-panel">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <p class="text-sm uppercase tracking-[0.2em] text-brand-muted">Story Index</p>
+                    <h2 id="tocTitle" class="text-2xl font-semibold mt-2">목차</h2>
+                </div>
+                <button type="button" class="nav-btn" id="tocClose">닫기</button>
+            </div>
+            <div class="toc-list">
+                <a href="1.html" class="toc-link"><span>1. 숫자의 덫</span><span>이동</span></a>
+                <a href="2.html" class="toc-link"><span>2. 가짜 성취감의 감옥</span><span>이동</span></a>
+                <a href="3.html" class="toc-link"><span>3. 가짜 세상의 각성</span><span>이동</span></a>
+                <a href="4.html" class="toc-link active"><span>4. 진짜 삶을 찾아서</span><span>현재</span></a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tocOverlay = document.getElementById('tocOverlay');
+        const tocButton = document.getElementById('tocButton');
+        const tocClose = document.getElementById('tocClose');
+
+        const closeToc = () => {
+            tocOverlay.classList.remove('open');
+            tocButton.setAttribute('aria-expanded', 'false');
+        };
+
+        tocButton.addEventListener('click', () => {
+            tocOverlay.classList.add('open');
+            tocButton.setAttribute('aria-expanded', 'true');
+        });
+
+        tocClose.addEventListener('click', closeToc);
+        tocOverlay.addEventListener('click', (event) => {
+            if (event.target === tocOverlay) closeToc();
+        });
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeToc();
+        });
+    </script>
+
+</body>
+</html>
