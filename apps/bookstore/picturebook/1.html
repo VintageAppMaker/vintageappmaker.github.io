@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Narration Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#1a202c', // Charcoal Grey
+                            primary: '#2d3748', // Deep Muted Blue
+                            accent: '#14b8a6', // Soft Teal
+                            bg: '#f8fafc', // Crisp White/Grey
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Montserrat', 'sans-serif'],
+                        body: ['Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #2d3748;
+            font-family: 'Noto Sans KR', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease;
+        }
+        .image-container img:hover {
+            transform: scale(1.01);
+        }
+        audio::-webkit-media-controls-panel {
+            background-color: #f1f5f9;
+        }
+        .fade-in {
+            animation: fadeIn 1s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .script-content p {
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+            color: #334155;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-12 px-6">
+
+    <!-- Header -->
+    <header class="w-full max-w-4xl text-center mb-16 fade-in">
+        <div class="inline-block px-4 py-1 mb-4 text-xs font-bold tracking-widest text-brand-accent uppercase bg-teal-50 rounded-full">
+            AI Narrative Vision
+        </div>
+        <h1 class="text-4xl md:text-5xl font-display font-bold text-brand-dark tracking-tight">
+            Image Narration Assistant
+        </h1>
+        <div class="h-1 w-20 bg-brand-accent mx-auto mt-6 rounded-full"></div>
+    </header>
+
+    <main class="w-full max-w-4xl space-y-20">
+        
+        <!-- Image Section -->
+        <section class="image-container flex justify-center fade-in" style="animation-delay: 0.2s;">
+            <div class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-brand-accent to-blue-500 rounded-xl blur opacity-10 group-hover:opacity-20 transition duration-1000"></div>
+                <div class="relative">
+                    <img src='1.jpg' alt='Captured Urban Scene' class="block mx-auto border border-slate-200">
+                </div>
+            </div>
+        </section>
+
+        <!-- Script Section -->
+        <section class="fade-in" style="animation-delay: 0.4s;">
+            <div class="max-w-[70ch] mx-auto bg-white p-8 md:p-12 rounded-3xl shadow-sm border border-slate-100 relative">
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-6 py-2 rounded-full border border-slate-100 shadow-sm text-sm font-medium text-slate-400 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m-6-8h6" />
+                    </svg>
+                    Narrative Script
+                </div>
+                
+                <div class="script-content text-lg md:text-xl font-light text-slate-700">
+                    <p>도시가 푸른 빛에 잠기는 시간, 블루 아워가 시작됩니다. <br>식어가는 황혼 아래, 앙상한 겨울 나뭇가지들이 짙은 인디고색 하늘을 배경으로 섬세한 실루엣을 그려냅니다.</p>
+
+                    <p>길가에는 세월의 흔적이 묻은 초록색 천막의 포장마차들이 자리를 잡고 있습니다. 곧 들이닥칠 저녁 인파를 기다리는, 무심하고도 익숙한 도시의 풍경입니다.</p>
+
+                    <p>어둠을 가르는 강렬한 가로등 하나가 눈부신 빛의 줄기를 뿜어내고, 그 빛은 포장마차의 차가운 금속 프레임에 부딪혀 날카롭게 반사됩니다. 그 옆으로는 선명한 주황색 라바콘과 알록달록한 공사 가림막들이 빨강, 하양, 파랑의 리듬을 만들며 보행로와 작업 공간을 경계 짓습니다.</p>
+
+                    <p>저 멀리 고층 빌딩의 창문에서 새어 나오는 부드운 불빛과 네온사인은 이 거대한 도시의 박동이 멈추지 않았음을 속삭입니다. 인도 위, 그림자 속을 조용히 지나는 사람들 사이로 낮게 깔리는 차 소리와 헤드라이트의 잔상이 시각적인 리듬을 더합니다.</p>
+
+                    <p class="mb-0 italic text-brand-primary font-medium">본격적인 밤의 활기가 깨어나기 전, 거친 일상의 현장 속에 깃든 짧은 정적. 이것은 도시가 다시 움직이기 위해 숨을 고르는, 치열하고도 고요한 기다림의 순간입니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Audio Player Section -->
+        <section class="flex flex-col items-center space-y-6 fade-in pb-12" style="animation-delay: 0.6s;">
+            <div class="text-sm font-semibold text-slate-400 uppercase tracking-widest">Audio Narration</div>
+            <div class="w-full max-w-md bg-white p-4 rounded-2xl shadow-lg border border-slate-100 flex items-center justify-center">
+                <audio src='1.wav' controls class="w-full outline-none"></audio>
+            </div>
+            <p class="text-xs text-slate-400">The Korean descriptive script has been converted into an audio narration.</p>
+        </section>
+
+    </main>
+
+    <!-- Script for subtle interaction -->
+    <script>
+        // Subtle scroll reveal effect
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = "1";
+                    entry.target.style.transform = "translateY(0)";
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
