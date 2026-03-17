@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Core: Scope & Closure Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        secondary: '#6366f1',
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        pulseSoft: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.8' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03);
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            position: relative;
+        }
+        .code-label {
+            position: absolute;
+            top: 0;
+            right: 1.5rem;
+            background: #3b82f6;
+            color: white;
+            padding: 2px 12px;
+            font-size: 0.7rem;
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            font-weight: 600;
+        }
+        .scope-node {
+            border: 2px dashed #cbd5e1;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+        .scope-node:hover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.02);
+        }
+        .connector {
+            width: 2px;
+            height: 24px;
+            background: #cbd5e1;
+            margin: 0 auto;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .bento-item { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .bento-item:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -8px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white leading-relaxed">
+
+    <!-- Header Section -->
+    <header class="max-w-6xl mx-auto px-6 pt-16 pb-12 text-center animate-fade-in-up">
+        <div class="inline-block px-4 py-1.5 mb-6 text-sm font-semibold tracking-wide text-accent uppercase bg-blue-50 rounded-full border border-blue-100">
+            JavaScript Masterclass
+        </div>
+        <h1 class="font-display text-4xl md:text-6xl font-700 text-slate-900 mb-6 tracking-tight">
+            Scope & <span class="text-accent">Closure</span>
+        </h1>
+        <p class="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto font-light">
+            자바스크립트 개발자이자 강사가 들려주는 일상 비유 가이드.<br class="hidden md:block"> 복잡한 개념을 가장 쉽고 우아하게 이해해보세요.
+        </p>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-24">
+        
+        <!-- Section 1: Scope -->
+        <section class="mb-20">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 rounded-2xl bg-accent flex items-center justify-center text-white shadow-lg shadow-blue-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 class="font-display text-3xl font-bold text-slate-900">1. 스코프 (Scope)</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <!-- Analogy Card -->
+                <div class="glass-card p-8 rounded-3xl bento-item">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="text-accent">●</span> 변수가 살 수 있는 "동네"
+                    </h3>
+                    <p class="text-slate-600 mb-8 leading-relaxed">
+                        스코프는 변수나 함수가 어디까지 영향을 미칠 수 있는지, 즉 <strong>"접근 가능한 범위"</strong>를 말합니다. 모든 변수를 한곳에 두면 이름 충돌이 발생하므로 동네(영역)를 나누어 관리합니다.
+                    </p>
+                    
+                    <!-- Visual Diagram -->
+                    <div class="space-y-2 max-w-sm mx-auto">
+                        <div class="scope-node bg-white text-center">
+                            <span class="text-xs font-bold text-slate-400 block mb-1 uppercase tracking-widest">Global</span>
+                            <span class="font-semibold text-slate-800">전역 스코프: 광장</span>
+                            <p class="text-[10px] text-slate-400 mt-1">누구나 접근 가능</p>
+                        </div>
+                        <div class="connector"></div>
+                        <div class="scope-node bg-slate-50 border-slate-300 text-center ml-8">
+                            <span class="text-xs font-bold text-slate-400 block mb-1 uppercase tracking-widest">Local</span>
+                            <span class="font-semibold text-slate-800">지역 스코프: 우리 집</span>
+                            <p class="text-[10px] text-slate-400 mt-1">집 안 식구만 접근 가능</p>
+                        </div>
+                        <div class="connector"></div>
+                        <div class="scope-node bg-slate-100 border-slate-400 text-center ml-16">
+                            <span class="text-xs font-bold text-slate-400 block mb-1 uppercase tracking-widest">Local Block</span>
+                            <span class="font-semibold text-slate-800">지역 스코프: 내 방</span>
+                            <p class="text-[10px] text-slate-400 mt-1">나만 접근 가능</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Code Example -->
+                <div class="space-y-6">
+                    <div class="code-block shadow-xl">
+                        <div class="code-label">JavaScript</div>
+<pre><code>let gVar = "광장의 분수"; // 전역 (Global)
+
+function myHome() {
+  let lVar = "우리 집 TV"; // 지역 (Local)
+  
+  console.log(gVar); // 접근 가능 (집에서 광장이 보임)
+  console.log(lVar); // 접근 가능 (내 집 물건임)
+}
+
+myHome();
+console.log(gVar); // 접근 가능
+// console.log(lVar); // 에러! (광장에서 남의 집 TV 못 봄)</code></pre>
+                    </div>
+                    <div class="p-6 bg-blue-50 border-l-4 border-accent rounded-r-xl">
+                        <p class="text-slate-700 text-sm italic">
+                            "안에서 밖은 볼 수 있지만, 밖에서 안은 들여다볼 수 없습니다."
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Closure -->
+        <section class="mb-20">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 rounded-2xl bg-secondary flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h2 class="font-display text-3xl font-bold text-slate-900">2. 클로저 (Closure)</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+                <!-- Code Example -->
+                <div class="order-2 lg:order-1 flex flex-col justify-center">
+                    <div class="code-block shadow-xl">
+                        <div class="code-label" style="background: #6366f1;">Closure Example</div>
+<pre><code>function createCounter() {
+  let count = 0; // 외부 함수의 변수 (은닉)
+
+  return function() { // 내부 함수 (클로저)
+    count++; // 태어난 곳의 환경을 기억함
+    return count;
+  };
+}
+
+const myCounter = createCounter(); 
+
+console.log(myCounter()); // 1
+console.log(myCounter()); // 2
+console.log(myCounter()); // 3</code></pre>
+                    </div>
+                </div>
+
+                <!-- Analogy Card -->
+                <div class="order-1 lg:order-2 glass-card p-8 rounded-3xl bento-item bg-indigo-50/30">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <span class="text-secondary">●</span> "과거를 기억하는 함수"
+                    </h3>
+                    <p class="text-slate-600 mb-6">
+                        클로저는 함수가 생성될 때 자신이 태어난 환경(스코프)을 <strong>"기억"</strong>했다가 나중에 호출될 때 그 기억을 꺼내 쓰는 기능입니다.
+                    </p>
+                    
+                    <!-- Diagram -->
+                    <div class="relative py-4">
+                        <div class="flex flex-col gap-4">
+                            <div class="flex items-center gap-4">
+                                <div class="w-8 h-8 rounded-full bg-secondary/20 text-secondary flex items-center justify-center font-bold shrink-0">1</div>
+                                <div class="p-3 bg-white rounded-xl border border-indigo-100 flex-1 text-sm shadow-sm">
+                                    외부 함수 실행 종료
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="w-8 h-8 rounded-full bg-secondary/20 text-secondary flex items-center justify-center font-bold shrink-0">2</div>
+                                <div class="p-3 bg-white rounded-xl border border-indigo-100 flex-1 text-sm shadow-sm font-semibold">
+                                    [내부 함수]가 외부 변수를 꽉 잡고 있음!
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="w-8 h-8 rounded-full bg-secondary/20 text-secondary flex items-center justify-center font-bold shrink-0">3</div>
+                                <div class="p-3 bg-white rounded-xl border border-indigo-100 flex-1 text-sm shadow-sm">
+                                    호출 시마다 저장된 기억을 꺼내 사용
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-slate-500 text-sm mt-4 bg-white/50 p-4 rounded-xl border border-white">
+                        <strong>결과:</strong> 외부에서는 <code>count</code>를 직접 건드릴 수 없지만, <code>myCounter</code>를 통해서는 안전하게 데이터를 유지/관리할 수 있습니다 (상태 보존 및 은닉).
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Summary Table -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.2s">
+            <div class="glass-card rounded-[2rem] overflow-hidden">
+                <div class="bg-slate-900 px-8 py-6">
+                    <h2 class="font-display text-2xl font-bold text-white">요약 정리 (Summary)</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200">
+                                <th class="px-8 py-5 font-bold text-slate-700 uppercase tracking-wider text-sm">개념</th>
+                                <th class="px-8 py-5 font-bold text-slate-700 uppercase tracking-wider text-sm">일상 비유</th>
+                                <th class="px-8 py-5 font-bold text-slate-700 uppercase tracking-wider text-sm">핵심 특징</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-8 py-6 font-bold text-slate-900">전역 스코프</td>
+                                <td class="px-8 py-6 text-slate-600">마을 광장</td>
+                                <td class="px-8 py-6">어디서든 누구나 접근 가능</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-8 py-6 font-bold text-slate-900">지역 스코프</td>
+                                <td class="px-8 py-6 text-slate-600">개인 주택</td>
+                                <td class="px-8 py-6">울타리(<code>{ }</code>) 안에서만 접근 가능</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="px-8 py-6 font-bold text-slate-900 text-secondary">클로저</td>
+                                <td class="px-8 py-6 text-slate-600">도시락 가방</td>
+                                <td class="px-8 py-6 font-medium">함수가 끝난 뒤에도 태어난 동네의 물건을 챙겨 다니는 것</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final Quote -->
+        <div class="mt-16 text-center">
+            <div class="inline-block p-1 bg-gradient-to-r from-accent to-secondary rounded-2xl">
+                <div class="bg-white px-8 py-6 rounded-xl">
+                    <p class="text-slate-700 font-medium italic">
+                        "스코프는 <span class="text-accent font-bold">어디까지 보이나?</span>의 문제이고,<br class="md:hidden"> 클로저는 <span class="text-secondary font-bold">환경을 어떻게 살려두나?</span>의 지혜입니다."
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "JavaScript Scope and Closure Guide",
+      "description": "Learn JS Scope and Closure through real-life analogies for better understanding.",
+      "author": {
+        "@type": "Person",
+        "name": "JS Instructor"
+      }
+    }
+    </script>
+</body>
+</html>

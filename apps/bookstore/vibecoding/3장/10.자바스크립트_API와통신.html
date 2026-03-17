@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 이해하기: 시스템을 연결하는 다리</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        codebg: '#1e293b'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        pulseSoft: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.7' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+        .card-shadow {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-shadow:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 30px -10px rgba(0, 0, 0, 0.1);
+        }
+        .code-block {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+        .flow-line {
+            height: 2px;
+            background: linear-gradient(90deg, #3b82f6 0%, #cbd5e1 100%);
+            position: relative;
+        }
+        .flow-arrow::after {
+            content: '';
+            position: absolute;
+            right: -2px;
+            top: -4px;
+            width: 10px;
+            height: 10px;
+            border-top: 2px solid #3b82f6;
+            border-right: 2px solid #3b82f6;
+            transform: rotate(45deg);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white antialiased">
+
+    <!-- Hero Section -->
+    <header class="relative py-16 px-6 overflow-hidden">
+        <div class="max-w-5xl mx-auto relative z-10 text-center animate-fade-in-up">
+            <span class="inline-block px-4 py-1.5 mb-6 text-sm font-semibold tracking-wider text-accent uppercase bg-blue-50 rounded-full border border-blue-100">Development Guide</span>
+            <h1 class="text-4xl md:text-6xl font-bold font-display text-slate-900 mb-6 tracking-tight">
+                API: 시스템을 연결하는 <span class="text-accent italic">약속된 다리</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                복잡한 내부 구현을 몰라도 괜찮습니다. <br class="hidden md:block">정해진 주문 방식에 맞춰 요청하고 데이터를 받으면 충분하니까요.
+            </p>
+        </div>
+        <!-- Decorative background elements -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none opacity-20">
+            <div class="absolute top-10 left-10 w-64 h-64 bg-accent rounded-full blur-3xl animate-float"></div>
+            <div class="absolute bottom-10 right-10 w-80 h-80 bg-slate-300 rounded-full blur-3xl opacity-50"></div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 pb-24">
+        
+        <!-- 1. Analogy Section -->
+        <section class="mb-16">
+            <div class="glass-card rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-10">
+                <div class="md:w-1/2">
+                    <h2 class="text-2xl md:text-3xl font-bold font-display text-slate-900 mb-6 flex items-center gap-3">
+                        <span class="w-8 h-8 flex items-center justify-center bg-accent text-white rounded-lg text-sm">01</span>
+                        API가 필요한 이유
+                    </h2>
+                    <p class="text-slate-600 leading-relaxed mb-4">
+                        식당에서 손님이 주방의 요리 과정을 다 알 필요가 없는 것처럼, 프로그래밍에서도 외부 시스템의 복잡한 내부 코드를 모두 이해할 필요는 없습니다.
+                    </p>
+                    <p class="text-slate-600 leading-relaxed">
+                        기상청의 날씨 정보나 구글 지도를 쓰고 싶을 때, 그들이 정해놓은 <strong>'주문 방식(API)'</strong>에 맞춰 요청만 하면 필요한 데이터를 즉시 받을 수 있습니다.
+                    </p>
+                </div>
+                <div class="md:w-1/2 w-full grid grid-cols-2 gap-4">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center">
+                        <div class="text-4xl mb-3">👨‍🍳</div>
+                        <div class="font-bold text-slate-800">주문 방식</div>
+                        <div class="text-sm text-slate-500">API Endpoint</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center">
+                        <div class="text-4xl mb-3">📋</div>
+                        <div class="font-bold text-slate-800">메뉴판</div>
+                        <div class="text-sm text-slate-500">Documentation</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center">
+                        <div class="text-4xl mb-3">💁‍♂️</div>
+                        <div class="font-bold text-slate-800">점원</div>
+                        <div class="text-sm text-slate-500">API Interface</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm text-center">
+                        <div class="text-4xl mb-3">🍲</div>
+                        <div class="font-bold text-slate-800">완성된 요리</div>
+                        <div class="text-sm text-slate-500">Data Response</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Workflow Diagram -->
+        <section class="mb-16">
+            <h2 class="text-2xl md:text-3xl font-bold font-display text-slate-900 mb-8 px-2 flex items-center gap-3">
+                <span class="w-8 h-8 flex items-center justify-center bg-accent text-white rounded-lg text-sm">02</span>
+                API 통신의 핵심 워크플로우
+            </h2>
+            
+            <div class="bg-white border border-slate-200 rounded-3xl p-8 md:p-12 overflow-x-auto shadow-sm">
+                <div class="min-w-[700px] flex flex-col gap-12">
+                    <!-- Steps Flow -->
+                    <div class="flex justify-between items-center text-center">
+                        <!-- Step 1 -->
+                        <div class="w-48">
+                            <div class="bg-slate-900 text-white p-6 rounded-2xl mb-4 card-shadow">
+                                <div class="text-xs uppercase opacity-60 mb-1">User</div>
+                                <div class="font-bold">클라이언트 / 나</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Connector -->
+                        <div class="flex-1 flex flex-col items-center px-4 relative">
+                            <div class="text-[10px] font-bold text-accent uppercase mb-2">1. Request (GET/POST)</div>
+                            <div class="flow-line w-full flow-arrow"></div>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="w-48">
+                            <div class="bg-accent text-white p-6 rounded-2xl mb-4 card-shadow">
+                                <div class="text-xs uppercase opacity-60 mb-1">Bridge</div>
+                                <div class="font-bold">API / 점원</div>
+                            </div>
+                        </div>
+
+                        <!-- Connector -->
+                        <div class="flex-1 flex flex-col items-center px-4 relative">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mb-2">2. Delivery</div>
+                            <div class="flow-line w-full flow-arrow"></div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="w-48">
+                            <div class="bg-slate-100 text-slate-800 p-6 rounded-2xl mb-4 border border-slate-200 card-shadow">
+                                <div class="text-xs uppercase text-slate-400 mb-1">System</div>
+                                <div class="font-bold">서버 / 주방</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Return Flow -->
+                    <div class="flex flex-row-reverse justify-between items-center text-center">
+                        <!-- Start Step 3 (Right) -->
+                        <div class="w-48 invisible"></div>
+                        
+                        <!-- Connector (Reverse) -->
+                        <div class="flex-1 flex flex-col items-center px-4 relative transform translate-x-[-200px]">
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mb-2">3. Processing</div>
+                            <div class="h-[2px] w-full bg-slate-200 relative">
+                                <div class="absolute left-[-2px] top-[-4px] w-10 h-10 border-top-2 border-left-2 rotate-[225deg]"></div>
+                                <div class="absolute left-[-2px] top-[-4px] w-10 h-10 border-t-2 border-l-2 border-slate-400 transform -rotate-45"></div>
+                            </div>
+                        </div>
+
+                        <!-- Reusing Central Box (API/점원) Logic Visually -->
+                        <div class="w-48 invisible"></div>
+
+                        <!-- Final Return Connector -->
+                        <div class="flex-1 flex flex-col items-center px-4 relative">
+                            <div class="text-[10px] font-bold text-green-500 uppercase mb-2">4. Response (JSON)</div>
+                            <div class="h-[2px] w-full bg-gradient-to-l from-accent to-green-500 relative">
+                                <div class="absolute left-[-2px] top-[-4px] w-2.5 h-2.5 border-t-2 border-l-2 border-green-500 transform -rotate-45"></div>
+                            </div>
+                        </div>
+
+                        <!-- Final Target (Client) -->
+                        <div class="w-48 invisible"></div>
+                    </div>
+                </div>
+
+                <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                        <h4 class="font-bold text-slate-900 mb-1 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span> GET
+                        </h4>
+                        <p class="text-sm text-slate-500">정보를 가져올 때 사용 (예: 게시글 읽기, 날씨 조회)</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                        <h4 class="font-bold text-slate-900 mb-1 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-purple-500"></span> POST
+                        </h4>
+                        <p class="text-sm text-slate-500">정보를 보낼 때 사용 (예: 글쓰기, 로그인, 회원가입)</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-100">
+                        <h4 class="font-bold text-slate-900 mb-1 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span> JSON
+                        </h4>
+                        <p class="text-sm text-slate-500">데이터를 주고받는 대중적인 텍스트 기반 형식</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Hands-on Section -->
+        <section class="mb-16">
+            <div class="flex justify-between items-end mb-8 px-2">
+                <h2 class="text-2xl md:text-3xl font-bold font-display text-slate-900 flex items-center gap-3">
+                    <span class="w-8 h-8 flex items-center justify-center bg-accent text-white rounded-lg text-sm">03</span>
+                    지금 바로 테스트하기
+                </h2>
+                <span class="hidden md:block text-xs font-mono text-slate-400">Chrome DevTools Console</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div class="lg:col-span-4 space-y-4">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <div class="w-6 h-6 rounded bg-slate-100 flex items-center justify-center text-xs text-slate-500">1</div>
+                            실습 방법
+                        </div>
+                        <ol class="space-y-3 text-sm text-slate-600">
+                            <li class="flex gap-2">
+                                <span class="text-accent font-bold">01.</span>
+                                <span>브라우저에서 <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-xs font-sans">F12</kbd>를 눌러 <strong>개발자 도구</strong>를 엽니다.</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="text-accent font-bold">02.</span>
+                                <span>상단 탭에서 <strong>Console(콘솔)</strong>을 클릭합니다.</span>
+                            </li>
+                            <li class="flex gap-2">
+                                <span class="text-accent font-bold">03.</span>
+                                <span>오른쪽 코드를 복사해서 붙여넣고 <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-300 rounded text-xs font-sans">Enter</kbd>를 누르세요.</span>
+                            </li>
+                        </ol>
+                    </div>
+                    
+                    <div class="bg-blue-600 p-6 rounded-2xl text-white shadow-lg shadow-blue-200 animate-pulse-soft">
+                        <div class="text-sm opacity-80 mb-1 italic">Tip</div>
+                        <div class="font-semibold leading-snug">무료 테스트용 API를 활용해 실제 서버 통신을 경험할 수 있습니다.</div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-8">
+                    <div class="code-block group relative">
+                        <div class="absolute right-4 top-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="copyCode()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-1.5 rounded-md border border-slate-500 transition-colors">Copy Code</button>
+                        </div>
+<pre id="practiceCode"><code>// 무료 테스트용 API 주소에서 '1번 할 일' 정보를 가져오는 예제입니다.
+fetch('https://jsonplaceholder.typicode.com/todos/1')
+  .then(response => response.json()) // 응답을 JSON 형식으로 변환
+  .then(data => {
+    console.log("받아온 데이터:", data);
+    alert("제목: " + data.title); // 알림창으로 제목 출력
+  })
+  .catch(error => console.error("통신 에러:", error));</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Explanation Section -->
+        <section>
+            <h2 class="text-2xl md:text-3xl font-bold font-display text-slate-900 mb-8 px-2 flex items-center gap-3">
+                <span class="w-8 h-8 flex items-center justify-center bg-accent text-white rounded-lg text-sm">04</span>
+                코드 상세 설명
+            </h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-8 rounded-3xl bg-white border border-slate-200 card-shadow">
+                    <div class="font-mono text-accent font-bold mb-3">fetch('URL')</div>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        해당 주소(서버)로 데이터를 가지러 가라는 명령입니다. 기본적으로 정보를 요청하는 <span class="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded">GET</span> 방식이 사용됩니다.
+                    </p>
+                </div>
+                <div class="p-8 rounded-3xl bg-white border border-slate-200 card-shadow">
+                    <div class="font-mono text-accent font-bold mb-3">.then(response => response.json())</div>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        서버 응답이 도착하면, 그 원시 데이터를 우리가 읽기 쉬운 <span class="px-1.5 py-0.5 bg-green-50 text-green-600 rounded font-bold">JSON 객체</span>로 변환하는 약속(Promise) 단계입니다.
+                    </p>
+                </div>
+                <div class="p-8 rounded-3xl bg-white border border-slate-200 card-shadow">
+                    <div class="font-mono text-accent font-bold mb-3">.then(data => { ... })</div>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        변환이 완료된 실제 데이터(<code class="font-mono text-pink-500">data</code>)를 가공하는 구간입니다. 화면에 출력하거나 특정 로직을 처리하는 핵심 로직이 들어갑니다.
+                    </p>
+                </div>
+                <div class="p-8 rounded-3xl bg-white border border-slate-200 card-shadow">
+                    <div class="font-mono text-accent font-bold mb-3">.catch(error => ...)</div>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        네트워크 장애, 잘못된 주소 등으로 통신이 실패했을 때를 대비한 안전망입니다. 에러 원인을 파악할 수 있게 도와줍니다.
+                    </p>
+                </div>
+            </div>
+
+            <div class="mt-12 p-8 rounded-3xl bg-slate-900 text-slate-300">
+                <div class="flex items-center gap-4 mb-4">
+                    <div class="p-3 bg-slate-800 rounded-2xl">
+                        <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">결론: API의 가치</h3>
+                </div>
+                <p class="leading-relaxed">
+                    API를 활용하면 복잡한 데이터베이스를 직접 구축하지 않아도, 외부의 양질의 데이터를 내 웹사이트나 앱에 쉽게 가져와 사용할 수 있습니다. 이는 개발 속도를 획기적으로 높이고 더 강력한 서비스를 만드는 원동력이 됩니다.
+                </p>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        function copyCode() {
+            const codeText = document.querySelector('#practiceCode code').innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                const btn = event.target;
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied!';
+                btn.classList.add('bg-green-600');
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove('bg-green-600');
+                }, 2000);
+            });
+        }
+
+        // Simple Fade-in Observer
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in-up');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            section.style.opacity = '0';
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>

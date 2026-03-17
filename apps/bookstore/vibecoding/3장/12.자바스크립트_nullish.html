@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Guide: Nullish Coalescing Operator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        success: '#10b981',
+                        warning: '#f59e0b'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+        .code-container {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            font-family: 'Fira Code', monospace;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+        .flow-line {
+            width: 2px;
+            background: linear-gradient(to bottom, #3b82f6, #cbd5e1);
+            height: 40px;
+            margin: 0 auto;
+        }
+        .tag {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white pb-20">
+
+    <!-- Hero Section -->
+    <header class="relative overflow-hidden pt-16 pb-12 px-6">
+        <div class="max-w-5xl mx-auto relative z-10 animate-fade-in-up">
+            <span class="tag bg-accent/10 text-accent mb-4 inline-block">JavaScript Essentials</span>
+            <h1 class="text-4xl md:text-6xl font-display font-bold text-slate-900 leading-tight mb-6">
+                Nullish Coalescing <br/>
+                <span class="text-accent underline decoration-slate-200 underline-offset-8">연산자 (??) 가이드</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed">
+                데이터가 비어있을 때 안전하게 기본값을 지정하는 현대적인 방법. <br class="hidden md:block"/>
+                기존의 논리 연산자(OR)가 가진 한계를 완벽하게 보완합니다.
+            </p>
+        </div>
+        <!-- Abstract Decoration -->
+        <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-pulse-slow"></div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6">
+        <div class="bento-grid">
+            
+            <!-- Why We Need It -->
+            <section class="col-span-12 md:col-span-7 glass-card p-8 rounded-3xl shadow-sm hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900">1. 필요한 이유</h2>
+                </div>
+                <p class="text-slate-600 leading-loose">
+                    서버 통신이나 사용자 입력 중 값이 <code class="bg-slate-100 px-1.5 rounded text-slate-900 font-semibold">null</code> 또는 <code class="bg-slate-100 px-1.5 rounded text-slate-900 font-semibold">undefined</code>인 경우가 많습니다. 이러한 상황에서 오류를 방지하고 화면이 깨지지 않도록 하는 <strong class="text-slate-900">"안전장치"</strong>가 필요합니다.
+                </p>
+                <div class="mt-6 p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-start gap-4">
+                    <span class="text-2xl">💡</span>
+                    <p class="text-sm text-slate-500">값이 없으면 이 기본값을 대신 써라! 라고 명시적으로 지정하여 프로그램의 안정성을 높입니다.</p>
+                </div>
+            </section>
+
+            <!-- Logic Diagram -->
+            <section class="col-span-12 md:col-span-5 glass-card p-8 rounded-3xl shadow-sm border-accent/20 bg-white/50">
+                <h2 class="text-xl font-bold text-slate-900 mb-8 flex items-center gap-2">
+                    <span class="w-2 h-2 bg-accent rounded-full"></span> 2. 핵심 로직 도식
+                </h2>
+                <div class="flex flex-col items-center text-center">
+                    <div class="w-full max-w-[200px] p-3 rounded-xl bg-slate-800 text-white font-mono text-sm shadow-lg">
+                        [데이터 A] ?? [기본값 B]
+                    </div>
+                    <div class="flow-line"></div>
+                    <div class="p-4 rounded-2xl border-2 border-slate-200 bg-white shadow-sm italic text-sm text-slate-600 relative">
+                        A가 null 또는 <br/> undefined인가?
+                        <div class="absolute -left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-300">Logic</div>
+                    </div>
+                    <div class="flex gap-8 mt-4">
+                        <div class="flex flex-col items-center">
+                            <div class="h-8 w-px bg-success/30"></div>
+                            <div class="text-xs font-bold text-success mb-1">YES</div>
+                            <div class="px-4 py-2 bg-success/10 text-success rounded-lg font-bold text-xs border border-success/20">
+                                [기본값 B] 사용
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="h-8 w-px bg-slate-300"></div>
+                            <div class="text-xs font-bold text-slate-400 mb-1">NO</div>
+                            <div class="px-4 py-2 bg-slate-100 text-slate-600 rounded-lg font-bold text-xs border border-slate-200">
+                                [데이터 A] 사용
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Definitions -->
+            <section class="col-span-12 md:col-span-4 bg-slate-900 p-8 rounded-3xl text-white shadow-xl">
+                <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                    <span class="text-accent">#</span> 상태 구분
+                </h2>
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-accent font-bold text-sm mb-2">Nullish 값 (정말로 비어있음)</h3>
+                        <ul class="space-y-2 opacity-80">
+                            <li class="flex items-center gap-2 font-mono text-sm">
+                                <span class="w-1.5 h-1.5 bg-accent rounded-full"></span> null
+                            </li>
+                            <li class="flex items-center gap-2 font-mono text-sm">
+                                <span class="w-1.5 h-1.5 bg-accent rounded-full"></span> undefined
+                            </li>
+                        </ul>
+                    </div>
+                    <hr class="border-slate-800"/>
+                    <div>
+                        <h3 class="text-slate-400 font-bold text-sm mb-2">일반 Falsy 값 (정상 데이터 취급)</h3>
+                        <ul class="space-y-2 opacity-80">
+                            <li class="flex items-center gap-2 font-mono text-sm">
+                                <span class="w-1.5 h-1.5 bg-slate-600 rounded-full"></span> 0 (숫자 영)
+                            </li>
+                            <li class="flex items-center gap-2 font-mono text-sm">
+                                <span class="w-1.5 h-1.5 bg-slate-600 rounded-full"></span> "" (빈 문자열)
+                            </li>
+                            <li class="flex items-center gap-2 font-mono text-sm">
+                                <span class="w-1.5 h-1.5 bg-slate-600 rounded-full"></span> false (거짓)
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Practical Examples -->
+            <section class="col-span-12 md:col-span-8 glass-card p-8 rounded-3xl shadow-sm">
+                <h2 class="text-2xl font-bold text-slate-900 mb-6">3. 실무 코드 예제</h2>
+                <div class="space-y-6">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-500 mb-3 ml-1 uppercase tracking-wider">Example 01: 데이터가 존재하지 않을 때</p>
+                        <div class="code-container">
+<pre>
+let value = null;
+let result = value ?? "기본값";
+
+console.log(result); 
+// 출력: "기본값"
+</pre>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-slate-500 mb-3 ml-1 uppercase tracking-wider">Example 02: 0이나 빈 문자열이 데이터일 때</p>
+                        <div class="code-container">
+<pre>
+let score = 0;
+let finalScore = score ?? 100;
+
+console.log(finalScore); 
+// 출력: 0 
+// (0은 nullish가 아니므로 그대로 사용됨)
+</pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Comparison Table -->
+            <section class="col-span-12 glass-card p-8 rounded-3xl shadow-sm overflow-hidden">
+                <h2 class="text-2xl font-bold text-slate-900 mb-6">4. 왜 ?? 인가? (OR 연산자 || 와의 차이)</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="border-b border-slate-100 text-left">
+                                <th class="py-4 px-4 text-slate-400 font-semibold text-sm">연산자</th>
+                                <th class="py-4 px-4 text-slate-400 font-semibold text-sm">기본값 선택 기준</th>
+                                <th class="py-4 px-4 text-slate-400 font-semibold text-sm">숫자 0의 처리</th>
+                                <th class="py-4 px-4 text-slate-400 font-semibold text-sm">실무 적합성</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                                <td class="py-5 px-4 font-mono font-bold text-slate-400">|| (OR)</td>
+                                <td class="py-5 px-4 text-slate-600">Falsy한 모든 값</td>
+                                <td class="py-5 px-4 text-warning font-semibold">기본값으로 덮어씀</td>
+                                <td class="py-5 px-4 text-slate-400">데이터 손실 위험</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50/50 transition-colors">
+                                <td class="py-5 px-4 font-mono font-bold text-accent">?? (Nullish)</td>
+                                <td class="py-5 px-4 text-slate-900 font-semibold text-slate-800">null, undefined만</td>
+                                <td class="py-5 px-4 text-success font-semibold">0을 데이터로 보존</td>
+                                <td class="py-5 px-4 text-slate-900 font-bold italic">가장 안전함 (권장)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-8 p-6 bg-accent/5 rounded-2xl border border-accent/10">
+                    <h4 class="font-bold text-slate-900 mb-2">💡 결론</h4>
+                    <p class="text-slate-600 leading-relaxed text-sm">
+                        교재 34~35페이지의 설명처럼, 게임 점수가 <code class="bg-white px-1 text-slate-900">0</code>점일 때 <code class="font-bold text-accent">??</code>를 사용하면 <code class="font-bold">0</code>을 정상적으로 표시할 수 있습니다. 
+                        반면 <code class="bg-white px-1 text-slate-400">||</code>를 사용하면 <code class="font-bold text-slate-400">0</code>을 "데이터 없음"으로 오해해 기본값으로 덮어씌우는 오류가 발생합니다.
+                    </p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer-like element (No legal footer as per instructions, just a subtle end marker) -->
+    <div class="max-w-5xl mx-auto px-6 mt-12 flex justify-center">
+        <div class="h-1 w-12 bg-slate-200 rounded-full"></div>
+    </div>
+
+    <script>
+        // Optional interactivity for the diagram
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("Guide Loaded: Nullish Coalescing Operator");
+        });
+    </script>
+</body>
+</html>

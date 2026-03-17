@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Core Guide: 조건문과 반복문</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        codebg: '#1e293b'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-subtle': 'pulseSubtle 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        pulseSubtle: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.8' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+        .card-shadow {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-shadow:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1);
+        }
+        .flow-line {
+            width: 2px;
+            background: linear-gradient(to bottom, #3b82f6, #e2e8f0);
+            height: 40px;
+            margin: 0 auto;
+        }
+        pre {
+            tab-size: 2;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent/30 selection:text-slate-900 leading-relaxed">
+
+    <!-- Hero Section -->
+    <header class="relative overflow-hidden pt-16 pb-20 px-6">
+        <div class="max-w-5xl mx-auto text-center relative z-10 animate-fade-in-up">
+            <span class="inline-block px-4 py-1.5 mb-6 text-xs font-bold tracking-widest text-accent uppercase bg-blue-50 border border-blue-100 rounded-full">Development Manual</span>
+            <h1 class="text-5xl md:text-7xl font-display font-bold text-slate-900 mb-6 tracking-tight">
+                Flow Control in <span class="text-accent">JS</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto font-light">
+                자바스크립트의 핵심인 조건문과 반복문을 통해 <br class="hidden md:block">
+                컴퓨터에게 판단력을 부여하고 효율적인 작업을 지시하는 법을 배웁니다.
+            </p>
+        </div>
+        <!-- Decorative Elements -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full pointer-events-none overflow-hidden">
+            <div class="absolute top-[-10%] right-[-5%] w-96 h-96 bg-blue-100/50 rounded-full blur-3xl opacity-60 animate-float"></div>
+            <div class="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-slate-200/50 rounded-full blur-3xl opacity-60"></div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-24">
+        
+        <!-- 1. Conditional Statements Section -->
+        <section class="mb-20">
+            <div class="flex items-center gap-4 mb-10">
+                <div class="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white font-display text-xl font-bold shadow-lg shadow-slate-200">01</div>
+                <h2 class="text-3xl font-display font-bold text-slate-900">조건문 (Conditional Statements)</h2>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Why it matters -->
+                <div class="lg:col-span-5 glass-card p-8 rounded-[2rem] card-shadow">
+                    <h3 class="text-xl font-bold mb-4 text-slate-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        필요한 이유
+                    </h3>
+                    <p class="text-slate-600 leading-relaxed mb-8">
+                        프로그램은 항상 유연해야 합니다. 사용자의 입력이나 시스템의 상태와 같은 <span class="text-accent font-semibold underline decoration-2 underline-offset-4">특정한 조건에 따라 다른 결과</span>를 도출하기 위해 사용합니다.
+                    </p>
+                    
+                    <!-- Logic Flow Diagram -->
+                    <div class="bg-white/50 rounded-2xl p-6 border border-slate-100">
+                        <div class="text-center">
+                            <div class="inline-block px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-mono">시작</div>
+                            <div class="flow-line"></div>
+                            <div class="inline-block px-6 py-4 border-2 border-accent rounded-xl bg-white shadow-sm relative">
+                                <span class="text-sm font-bold">점수 >= 70?</span>
+                                <div class="absolute -left-12 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400">NO</div>
+                                <div class="absolute -right-12 top-1/2 -translate-y-1/2 text-[10px] font-bold text-accent">YES</div>
+                            </div>
+                            <div class="flex justify-between mt-0 px-4">
+                                <div class="w-px h-10 bg-slate-200 ml-auto mr-16"></div>
+                                <div class="w-px h-10 bg-accent mr-auto ml-16"></div>
+                            </div>
+                            <div class="flex justify-between items-start gap-4">
+                                <div class="flex-1 p-3 bg-slate-100 rounded-lg text-[12px] font-medium text-slate-500 italic">불합격 메시지</div>
+                                <div class="flex-1 p-3 bg-blue-50 border border-blue-100 rounded-lg text-[12px] font-bold text-accent">합격 메시지</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Example and Code -->
+                <div class="lg:col-span-7 flex flex-col gap-6">
+                    <div class="bg-codebg rounded-[2rem] p-8 shadow-2xl relative overflow-hidden group">
+                        <div class="absolute top-4 right-6 flex gap-1.5">
+                            <div class="w-3 h-3 rounded-full bg-red-500/30"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500/30"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500/30"></div>
+                        </div>
+                        <h4 class="text-slate-400 text-xs font-mono mb-6 uppercase tracking-widest">Example: if-else</h4>
+                        <pre class="text-slate-100 font-mono text-sm sm:text-base">
+<span class="text-pink-400">const</span> score = <span class="text-orange-300">71</span>;
+
+<span class="text-pink-400">if</span> (score >= <span class="text-orange-300">70</span>) {
+  <span class="text-slate-400">// 조건이 참(true)일 때 실행</span>
+  console.<span class="text-blue-300">log</span>(<span class="text-green-300">"합격입니다."</span>); 
+} <span class="text-pink-400">else</span> {
+  <span class="text-slate-400">// 조건이 거짓(false)일 때 실행</span>
+  console.<span class="text-blue-300">log</span>(<span class="text-green-300">"불합격입니다."</span>);
+}</pre>
+                    </div>
+
+                    <div class="glass-card p-6 rounded-3xl border-l-4 border-l-accent">
+                        <h4 class="font-bold text-slate-900 mb-2">코드 해설</h4>
+                        <ul class="space-y-2 text-sm text-slate-600">
+                            <li class="flex items-start gap-2">
+                                <span class="text-accent mt-1">•</span>
+                                <span><code class="bg-slate-100 px-1 rounded text-slate-800 font-mono">if (조건)</code>은 괄호 안의 논리가 참인지 판별합니다.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-accent mt-1">•</span>
+                                <span>현재 <code class="bg-slate-100 px-1 rounded text-slate-800 font-mono">score</code>가 71이므로 조건문은 참이 되어 첫 번째 블록이 실행됩니다.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Loops Section -->
+        <section class="mb-20">
+            <div class="flex items-center gap-4 mb-10">
+                <div class="w-12 h-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white font-display text-xl font-bold shadow-lg shadow-slate-200">02</div>
+                <h2 class="text-3xl font-display font-bold text-slate-900">반복문 (Loops)</h2>
+            </div>
+
+            <div class="bento-grid">
+                <!-- Intro Card -->
+                <div class="col-span-12 lg:col-span-4 glass-card p-8 rounded-[2rem] card-shadow flex flex-col justify-center">
+                    <h3 class="text-xl font-bold mb-4 text-slate-800">노가다 대신하기</h3>
+                    <p class="text-slate-600 leading-relaxed">
+                        수백, 수천 개의 데이터를 일일이 코드로 작성하는 것은 불가능에 가깝습니다. 반복문은 단 몇 줄의 코드로 <span class="text-accent font-semibold">대량의 연산을 자동화</span>합니다.
+                    </p>
+                </div>
+
+                <!-- Table Card -->
+                <div class="col-span-12 lg:col-span-8 overflow-hidden bg-white border border-slate-200 rounded-[2rem] shadow-sm">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50/50 border-b border-slate-100">
+                                <th class="p-6 text-sm font-bold text-slate-400 uppercase tracking-wider">종류</th>
+                                <th class="p-6 text-sm font-bold text-slate-400 uppercase tracking-wider">사용 대상</th>
+                                <th class="p-6 text-sm font-bold text-slate-400 uppercase tracking-wider">특징</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-6 font-mono font-bold text-accent">for</td>
+                                <td class="p-6 text-slate-700">숫자, 고정 횟수</td>
+                                <td class="p-6 text-slate-500 text-sm">정확한 반복 횟수 제어 가능</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-6 font-mono font-bold text-accent">while</td>
+                                <td class="p-6 text-slate-700">조건 기반 반복</td>
+                                <td class="p-6 text-slate-500 text-sm">조건이 참인 동안 끝없이 반복</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-6 font-mono font-bold text-accent">for-of</td>
+                                <td class="p-6 text-slate-700">배열 (Array)</td>
+                                <td class="p-6 text-slate-500 text-sm">배열 요소를 하나씩 순회</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Code Examples -->
+                <div class="col-span-12 lg:col-span-6 bg-codebg rounded-[2rem] p-8 shadow-xl">
+                    <h4 class="text-slate-400 text-xs font-mono mb-6 uppercase tracking-widest">Basic for loop</h4>
+                    <pre class="text-slate-100 font-mono text-sm leading-relaxed">
+<span class="text-slate-400">// 0부터 2까지 반복 (3회)</span>
+<span class="text-pink-400">for</span> (<span class="text-pink-400">let</span> i = <span class="text-orange-300">0</span>; i < <span class="text-orange-300">3</span>; i++) {
+  console.<span class="text-blue-300">log</span>(<span class="text-green-300">"현재 번호:"</span>, i);
+}
+
+<span class="text-slate-400">// 출력 결과:
+// 현재 번호: 0
+// 현재 번호: 1
+// 현재 번호: 2</span></pre>
+                </div>
+
+                <div class="col-span-12 lg:col-span-6 bg-codebg rounded-[2rem] p-8 shadow-xl">
+                    <h4 class="text-slate-400 text-xs font-mono mb-6 uppercase tracking-widest">for-of loop</h4>
+                    <pre class="text-slate-100 font-mono text-sm leading-relaxed">
+<span class="text-pink-400">const</span> fruits = [<span class="text-green-300">"사과"</span>, <span class="text-green-300">"바나나"</span>, <span class="text-green-300">"포도"</span>];
+
+<span class="text-pink-400">for</span> (<span class="text-pink-400">const</span> fruit <span class="text-pink-400">of</span> fruits) {
+  console.<span class="text-blue-300">log</span>(<span class="text-green-300">"과일 이름:"</span>, fruit);
+}
+
+<span class="text-slate-400">// 출력 결과:
+// 과일 이름: 사과
+// 과일 이름: 바나나
+// 과일 이름: 포도</span></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Instructor's Tip -->
+        <section class="animate-pulse-subtle">
+            <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-[2.5rem] p-10 md:p-14 text-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-10 opacity-10">
+                    <svg class="w-40 h-40" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                </div>
+                
+                <div class="relative z-10">
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="px-3 py-1 bg-accent rounded text-[10px] font-bold tracking-widest uppercase">Expert Tip</span>
+                        <h2 class="text-2xl md:text-3xl font-display font-bold">강사의 팁: 컴퓨팅 사고로 바라보기</h2>
+                    </div>
+                    
+                    <p class="text-slate-300 text-lg mb-10 max-w-3xl font-light">
+                        바이브 코딩(Vibe Coding) 관점에서 조건문과 반복문을 잘 쓰려면 <span class="text-white font-medium">"문제를 쪼개는 능력(분해)"</span>이 중요합니다.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
+                            <h4 class="text-accent font-bold mb-3 flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs">1</span>
+                                반복 (Iteration)
+                            </h4>
+                            <p class="text-sm text-slate-400 leading-relaxed">
+                                "리스트에 있는 모든 항목에 대해 동일한 박스를 그려라." <br>
+                                <span class="text-slate-200 mt-2 block">→ <code class="font-mono text-accent">for-of</code> 활용</span>
+                            </p>
+                        </div>
+                        <div class="bg-white/5 rounded-2xl p-6 border border-white/10">
+                            <h4 class="text-accent font-bold mb-3 flex items-center gap-2">
+                                <span class="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-xs">2</span>
+                                조건 (Condition)
+                            </h4>
+                            <p class="text-sm text-slate-400 leading-relaxed">
+                                "단, 품절된 항목은 회색으로 보여라." <br>
+                                <span class="text-slate-200 mt-2 block">→ <code class="font-mono text-accent">if</code> 활용</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <p class="mt-10 text-slate-400 text-sm italic">
+                        이처럼 로직을 말로 먼저 설계한 뒤 코드로 옮기면 훨씬 쉽게 프로그램을 만들 수 있습니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Simple Interactivity Script -->
+    <script>
+        // Subtle scroll reveal effect
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in-up');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            section.style.opacity = '0';
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Collection Guide | 자바스크립트 컬렉션 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        brand: {
+                            primary: '#4f46e5',
+                            secondary: '#7c3aed',
+                            accent: '#06b6d4'
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-15px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            position: relative;
+        }
+        .code-keyword { color: #c678dd; }
+        .code-func { color: #61afef; }
+        .code-string { color: #98c379; }
+        .code-comment { color: #5c6370; font-style: italic; }
+        .code-const { color: #d19a66; }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+        
+        @media (max-width: 768px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .step-node {
+            position: relative;
+            z-index: 1;
+        }
+        .step-node::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -2rem;
+            width: 2rem;
+            height: 2px;
+            background: #e2e8f0;
+            z-index: -1;
+        }
+        @media (max-width: 1024px) {
+            .step-node::after { display: none; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f8fafc; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-brand-primary selection:text-white antialiased">
+
+    <!-- Hero Section -->
+    <header class="relative pt-16 pb-20 px-6 overflow-hidden">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-40">
+            <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[60%] bg-brand-primary/10 blur-[100px] rounded-full"></div>
+            <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[60%] bg-brand-accent/10 blur-[100px] rounded-full"></div>
+        </div>
+        
+        <div class="max-w-5xl mx-auto text-center animate-fade-in-up">
+            <span class="px-4 py-1.5 rounded-full bg-white border border-slate-200 text-brand-primary text-sm font-bold tracking-wider uppercase mb-6 inline-block shadow-sm">
+                JavaScript Essentials
+            </span>
+            <h1 class="text-5xl md:text-7xl font-display font-bold text-slate-900 mb-6 tracking-tight">
+                Data <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-brand-secondary">Collections</span>
+            </h1>
+            <p class="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                자바스크립트에서 데이터를 다룰 때 가장 중요한 '컬렉션'에 대해 알아보겠습니다. 상황에 맞는 바구니를 선택하는 것이 고수의 지름길입니다.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-24 space-y-24">
+        
+        <!-- Logic Flowchart Section -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-display font-bold mb-4">어떤 바구니를 써야 할까요?</h2>
+                <div class="h-1 w-20 bg-brand-primary mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center justify-center">
+                <!-- Node 1 -->
+                <div class="glass-card p-8 rounded-3xl text-center border-t-4 border-t-brand-primary step-node">
+                    <div class="w-14 h-14 bg-brand-primary/10 rounded-2xl flex items-center justify-center text-brand-primary mx-auto mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Array (배열)</h3>
+                    <p class="text-slate-500 text-sm">데이터를 순서대로 나열하고 싶을 때 사용하세요.</p>
+                </div>
+                <!-- Node 2 -->
+                <div class="glass-card p-8 rounded-3xl text-center border-t-4 border-t-brand-secondary step-node">
+                    <div class="w-14 h-14 bg-brand-secondary/10 rounded-2xl flex items-center justify-center text-brand-secondary mx-auto mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Set (셋)</h3>
+                    <p class="text-slate-500 text-sm">중복 없는 유일한 값들의 집합이 필요할 때 좋습니다.</p>
+                </div>
+                <!-- Node 3 -->
+                <div class="glass-card p-8 rounded-3xl text-center border-t-4 border-t-brand-accent">
+                    <div class="w-14 h-14 bg-brand-accent/10 rounded-2xl flex items-center justify-center text-brand-accent mx-auto mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-xl mb-2">Map (맵)</h3>
+                    <p class="text-slate-500 text-sm">키와 값의 쌍으로 데이터를 빠르게 찾을 때 유리합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Summary Table Section -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.4s;">
+            <div class="glass-card rounded-[2.5rem] overflow-hidden">
+                <div class="bg-slate-900 text-white p-8 md:p-12">
+                    <h2 class="text-2xl font-bold mb-2">한눈에 보는 핵심 요약</h2>
+                    <p class="text-slate-400">데이터 구조의 특징과 비유를 통해 쉽게 이해해 보세요.</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100/50 border-b border-slate-200">
+                                <th class="p-6 font-bold text-slate-600">타입</th>
+                                <th class="p-6 font-bold text-slate-600">핵심 특징</th>
+                                <th class="p-6 font-bold text-slate-600">비유</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-6"><span class="font-bold text-brand-primary">Array (배열)</span></td>
+                                <td class="p-6">순서가 있고, 중복을 허용함</td>
+                                <td class="p-6"><span class="px-3 py-1 rounded-full bg-slate-200 text-xs font-semibold">번호표가 있는 대기 줄</span></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-6"><span class="font-bold text-brand-secondary">Set (셋)</span></td>
+                                <td class="p-6">중복을 절대 허용하지 않음</td>
+                                <td class="p-6"><span class="px-3 py-1 rounded-full bg-slate-200 text-xs font-semibold">중복 입장이 안 되는 파티장</span></td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-6"><span class="font-bold text-brand-accent">Map (맵)</span></td>
+                                <td class="p-6">키(Key)와 값(Value)이 한 쌍임</td>
+                                <td class="p-6"><span class="px-3 py-1 rounded-full bg-slate-200 text-xs font-semibold">사물함 번호와 내용물</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detailed Breakdown -->
+        <section class="space-y-16">
+            
+            <!-- Array -->
+            <div class="bento-grid">
+                <div class="col-span-1 md:col-span-5 flex flex-col justify-center">
+                    <div class="inline-flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-brand-primary text-white flex items-center justify-center font-bold">1</div>
+                        <span class="text-brand-primary font-bold tracking-widest text-sm">ARRAY</span>
+                    </div>
+                    <h3 class="text-3xl font-display font-bold text-slate-900 mb-6">순서가 중요한 데이터 바구니</h3>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        가장 많이 쓰이는 컬렉션입니다. 넣은 순서대로 번호(인덱스)가 매겨집니다. <code class="bg-slate-100 px-1.5 py-0.5 rounded text-brand-primary">push</code>를 통해 데이터를 추가하고 인덱스로 접근할 수 있습니다.
+                    </p>
+                </div>
+                <div class="col-span-1 md:col-span-7">
+                    <div class="code-block shadow-2xl">
+<pre class="font-mono">
+<span class="code-comment">// 배열 생성</span>
+<span class="code-keyword">const</span> fruits = [<span class="code-string">"사과"</span>, <span class="code-string">"바나나"</span>];
+
+<span class="code-comment">// 데이터 추가</span>
+fruits.<span class="code-func">push</span>(<span class="code-string">"포도"</span>);
+fruits.<span class="code-func">push</span>(<span class="code-string">"사과"</span>); <span class="code-comment">// 중복 데이터 추가 가능</span>
+
+<span class="code-func">console.log</span>(fruits); 
+<span class="code-comment">// 출력: ["사과", "바나나", "포도", "사과"]</span>
+
+<span class="code-comment">// 특정 위치의 데이터 가져오기 (0번부터 시작)</span>
+<span class="code-func">console.log</span>(fruits[<span class="code-const">1</span>]); <span class="code-comment">// 출력: "바나나"</span>
+</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Set -->
+            <div class="bento-grid">
+                <div class="col-span-1 md:col-span-7 order-2 md:order-1">
+                    <div class="code-block shadow-2xl border-l-4 border-brand-secondary">
+<pre class="font-mono">
+<span class="code-comment">// Set 생성</span>
+<span class="code-keyword">const</span> lotto = <span class="code-keyword">new</span> <span class="code-func">Set</span>();
+
+<span class="code-comment">// 데이터 추가</span>
+lotto.<span class="code-func">add</span>(<span class="code-const">7</span>);
+lotto.<span class="code-func">add</span>(<span class="code-const">21</span>);
+lotto.<span class="code-func">add</span>(<span class="code-const">7</span>); <span class="code-comment">// 이미 있는 7은 무시됨</span>
+
+<span class="code-func">console.log</span>(lotto); <span class="code-comment">// 출력: Set(2) { 7, 21 }</span>
+<span class="code-func">console.log</span>(lotto.size); <span class="code-comment">// 출력: 2</span>
+
+<span class="code-comment">// 데이터가 있는지 확인</span>
+<span class="code-func">console.log</span>(lotto.<span class="code-func">has</span>(<span class="code-const">7</span>)); <span class="code-comment">// 출력: true</span>
+</pre>
+                    </div>
+                </div>
+                <div class="col-span-1 md:col-span-5 order-1 md:order-2 flex flex-col justify-center">
+                    <div class="inline-flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-brand-secondary text-white flex items-center justify-center font-bold">2</div>
+                        <span class="text-brand-secondary font-bold tracking-widest text-sm">SET</span>
+                    </div>
+                    <h3 class="text-3xl font-display font-bold text-slate-900 mb-6">중복은 거부하는 바구니</h3>
+                    <p class="text-slate-600 leading-relaxed">
+                        유일한 값들만 모으고 싶을 때 사용합니다. 똑같은 데이터를 여러 번 <code class="bg-slate-100 px-1.5 py-0.5 rounded text-brand-secondary">add</code>해도 하나만 남습니다. 데이터의 존재 여부를 확인할 때 속도가 매우 빠릅니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Map -->
+            <div class="bento-grid">
+                <div class="col-span-1 md:col-span-5 flex flex-col justify-center">
+                    <div class="inline-flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-brand-accent text-white flex items-center justify-center font-bold">3</div>
+                        <span class="text-brand-accent font-bold tracking-widest text-sm">MAP</span>
+                    </div>
+                    <h3 class="text-3xl font-display font-bold text-slate-900 mb-6">이름표가 붙은 바구니</h3>
+                    <p class="text-slate-600 leading-relaxed mb-6">
+                        데이터를 저장할 때 별칭(Key)을 붙여서 저장합니다. 일반 객체보다 데이터 추가/삭제가 빈번한 경우 성능이 더 우수합니다.
+                    </p>
+                </div>
+                <div class="col-span-1 md:col-span-7">
+                    <div class="code-block shadow-2xl border-l-4 border-brand-accent">
+<pre class="font-mono">
+<span class="code-comment">// Map 생성</span>
+<span class="code-keyword">const</span> userMap = <span class="code-keyword">new</span> <span class="code-func">Map</span>();
+
+<span class="code-comment">// 키-값 쌍으로 저장 (set 메서드)</span>
+userMap.<span class="code-func">set</span>(<span class="code-string">"id"</span>, <span class="code-string">"vintage_maker"</span>);
+userMap.<span class="code-func">set</span>(<span class="code-string">"level"</span>, <span class="code-const">5</span>);
+
+<span class="code-comment">// 데이터 가져오기 (get 메서드)</span>
+<span class="code-func">console.log</span>(userMap.<span class="code-func">get</span>(<span class="code-string">"id"</span>)); <span class="code-comment">// 출력: "vintage_maker"</span>
+
+<span class="code-comment">// 데이터 존재 확인</span>
+<span class="code-func">console.log</span>(userMap.<span class="code-func">has</span>(<span class="code-string">"level"</span>)); <span class="code-comment">// 출력: true</span>
+
+<span class="code-comment">// 데이터 삭제</span>
+userMap.<span class="code-func">delete</span>(<span class="code-string">"level"</span>);
+</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final Summary Banner -->
+        <section class="animate-fade-in-up">
+            <div class="relative rounded-[3rem] p-8 md:p-16 bg-slate-900 text-white overflow-hidden text-center group">
+                <div class="absolute inset-0 bg-gradient-to-br from-brand-primary/20 to-brand-secondary/20 opacity-50"></div>
+                
+                <div class="relative z-10 max-w-2xl mx-auto">
+                    <h2 class="text-3xl font-display font-bold mb-8">마지막 핵심 정리</h2>
+                    <ul class="text-left space-y-4 mb-10">
+                        <li class="flex items-center gap-4 group/item">
+                            <span class="w-2 h-2 rounded-full bg-brand-primary group-hover/item:scale-150 transition-transform"></span>
+                            <span>데이터를 <strong class="text-brand-primary">순서대로</strong> 나열하려면? <strong class="text-slate-100">Array</strong></span>
+                        </li>
+                        <li class="flex items-center gap-4 group/item">
+                            <span class="w-2 h-2 rounded-full bg-brand-secondary group-hover/item:scale-150 transition-transform"></span>
+                            <span><strong class="text-brand-secondary">중복을 제거</strong>하고 관리하려면? <strong class="text-slate-100">Set</strong></span>
+                        </li>
+                        <li class="flex items-center gap-4 group/item">
+                            <span class="w-2 h-2 rounded-full bg-brand-accent group-hover/item:scale-150 transition-transform"></span>
+                            <span><strong class="text-brand-accent">이름표(Key)</strong>로 관리하려면? <strong class="text-slate-100">Map</strong></span>
+                        </li>
+                    </ul>
+                    <p class="text-slate-400 italic">
+                        "이 세 가지만 정확히 구분해도 자바스크립트 데이터 관리의 절반은 완성입니다!"
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Interactions Script -->
+    <script>
+        document.querySelectorAll('.glass-card, .code-block').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                el.style.transform = 'translateY(-5px) scale(1.01)';
+                el.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

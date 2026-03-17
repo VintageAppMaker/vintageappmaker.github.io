@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>코딩 기초 가이드: 변수, 상수, 주석</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        variable: '#6366f1',
+                        constant: '#ef4444',
+                        comment: '#10b981'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+        .card-shadow {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-shadow:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+        .flow-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .keyword-tag {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white leading-relaxed">
+
+    <!-- Header Section -->
+    <header class="max-w-6xl mx-auto pt-16 pb-8 px-6 text-center animate-fade-in-up">
+        <h1 class="font-display text-4xl md:text-6xl font-bold tracking-tight text-slate-900 mb-4">
+            Programming <span class="text-accent">Essentials</span>
+        </h1>
+        <p class="text-slate-500 text-lg md:text-xl max-w-2xl mx-auto">
+            프로그래밍의 가장 기본이 되는 세 가지 기초 개념:<br class="hidden md:block"> 변수, 상수, 그리고 주석을 쉽고 명확하게 알아봅니다.
+        </p>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-24">
+        <div class="bento-grid">
+            
+            <!-- 1. Variables Section (Large Card) -->
+            <section class="col-span-12 lg:col-span-7 glass-card p-8 rounded-[2rem] card-shadow animate-fade-in-up" style="animation-delay: 0.1s;">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 bg-variable/10 text-variable rounded-2xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="keyword-tag bg-variable/10 text-variable mb-1 block w-fit uppercase">Variable</span>
+                        <h2 class="text-2xl font-bold text-slate-900">1. 변수 (let, var)</h2>
+                    </div>
+                </div>
+
+                <p class="text-slate-600 mb-8">
+                    프로그램을 만들 때 이름, 나이, 점수와 같이 <strong>언제든지 변할 수 있는 데이터</strong>를 저장하고 관리하기 위해 필요합니다. 데이터를 담아두는 '이름표가 붙은 상자'라고 생각하면 쉽습니다.
+                </p>
+
+                <!-- Visualization Flow -->
+                <div class="bg-slate-100/50 rounded-2xl p-6 mb-8 border border-slate-200">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="flex flex-col items-center">
+                            <div class="w-20 h-20 bg-white border-2 border-variable border-dashed rounded-xl flex items-center justify-center text-variable font-bold shadow-sm mb-2">age</div>
+                            <span class="text-xs text-slate-400 font-semibold uppercase">상자 선언</span>
+                        </div>
+                        <div class="flow-arrow rotate-90 md:rotate-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-20 h-20 bg-variable text-white rounded-xl flex items-center justify-center text-xl font-bold shadow-lg mb-2 animate-pulse-slow">25</div>
+                            <span class="text-xs text-slate-400 font-semibold uppercase">초기값 대입</span>
+                        </div>
+                        <div class="flow-arrow rotate-90 md:rotate-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-20 h-20 bg-slate-800 text-white rounded-xl flex items-center justify-center text-xl font-bold shadow-lg mb-2">30</div>
+                            <span class="text-xs text-slate-400 font-semibold uppercase">값 교체 가능</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-block group">
+                    <div class="flex justify-between items-center mb-2 opacity-50 group-hover:opacity-100 transition-opacity">
+                        <span class="text-xs font-mono">javascript example</span>
+                    </div>
+                    <code class="block">
+                        <span class="text-variable">let</span> age = <span class="text-orange-300">25</span>; <span class="text-slate-500">// 상자에 25 저장</span><br>
+                        age = <span class="text-orange-300">30</span>; <span class="text-slate-500">// 값을 30으로 변경</span><br>
+                        <span class="text-emerald-400">console</span>.log(age); <span class="text-slate-500">// 결과: 30</span>
+                    </code>
+                </div>
+                <p class="mt-4 text-sm text-slate-400 italic">
+                    * 참고: 매뉴얼(11p)에 따르면 현재는 오류 방지를 위해 <code class="bg-slate-200 px-1 rounded text-slate-700">let</code> 사용을 강력히 권장합니다.
+                </p>
+            </section>
+
+            <!-- 2. Constants Section (Medium Card) -->
+            <section class="col-span-12 lg:col-span-5 glass-card p-8 rounded-[2rem] card-shadow animate-fade-in-up" style="animation-delay: 0.2s;">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 bg-constant/10 text-constant rounded-2xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <span class="keyword-tag bg-constant/10 text-constant mb-1 block w-fit uppercase">Constant</span>
+                        <h2 class="text-2xl font-bold text-slate-900">2. 상수 (const)</h2>
+                    </div>
+                </div>
+
+                <p class="text-slate-600 mb-6">
+                    절대로 변해서는 안 되는 <strong>고정된 값</strong>(예: 생년월일, 수학의 파이값 등)을 보관합니다. 실수로 값을 바꾸는 것을 방지해주는 '잠긴 상자'입니다.
+                </p>
+
+                <div class="relative bg-white/50 border border-constant/20 rounded-2xl p-6 mb-6 overflow-hidden">
+                    <div class="absolute top-2 right-4 opacity-10">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    </div>
+                    <div class="space-y-4 relative z-10">
+                        <div class="flex items-center gap-4">
+                            <div class="px-3 py-1 bg-constant text-white text-xs font-bold rounded-full">LOCK</div>
+                            <div class="font-mono text-slate-700">BIRTHDAY = "1990-01-01"</div>
+                        </div>
+                        <div class="h-px bg-slate-200 w-full"></div>
+                        <div class="flex items-center gap-4 opacity-50">
+                            <div class="px-3 py-1 bg-slate-400 text-white text-xs font-bold rounded-full">CHANGE</div>
+                            <div class="font-mono text-slate-400 line-through">BIRTHDAY = "2000-01-01"</div>
+                            <span class="text-constant font-bold">❌ Error!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="code-block">
+                    <code class="block">
+                        <span class="text-constant">const</span> BDAY = <span class="text-orange-300">"1990-01-01"</span>;<br>
+                        <span class="text-slate-500">// BDAY = "2000-01-01";</span><br>
+                        <span class="text-constant">TypeError:</span> Assignment to constant...
+                    </code>
+                </div>
+            </section>
+
+            <!-- 3. Comments Section (Full Width) -->
+            <section class="col-span-12 glass-card p-8 rounded-[2rem] card-shadow animate-fade-in-up" style="animation-delay: 0.3s;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                    <div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 bg-comment/10 text-comment rounded-2xl flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <span class="keyword-tag bg-comment/10 text-comment mb-1 block w-fit uppercase">Comment</span>
+                                <h2 class="text-2xl font-bold text-slate-900">3. 주석 (Comment)</h2>
+                            </div>
+                        </div>
+                        <p class="text-slate-600 mb-6">
+                            코드는 컴퓨터가 읽는 것이지만, <strong>주석은 사람이 읽기 위해 작성</strong>합니다. 나중에 내가 혹은 동료가 코드를 이해하기 쉽게 도와주는 '코드 속의 메모장'입니다. 컴퓨터는 이 부분을 완벽하게 무시합니다.
+                        </p>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-4 p-4 rounded-xl bg-slate-100 border-l-4 border-comment">
+                                <span class="font-mono font-bold text-comment">//</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">한 줄 주석</h4>
+                                    <p class="text-xs text-slate-500">코드 옆이나 위에 간단한 메모를 할 때 사용</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-4 p-4 rounded-xl bg-slate-100 border-l-4 border-comment">
+                                <span class="font-mono font-bold text-comment">/* */</span>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">여러 줄 주석</h4>
+                                    <p class="text-xs text-slate-500">기능이 복잡할 때 상세한 설명을 작성</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col justify-center">
+                        <div class="code-block mb-4">
+                            <code class="block">
+                                <span class="text-comment">// 이 아래는 점수를 저장하는 변수입니다</span><br>
+                                <span class="text-variable">let</span> score = <span class="text-orange-300">100</span>;<br><br>
+                                <span class="text-comment">/*<br>
+                                &nbsp;* 여러 줄의 설명이 필요할 때<br>
+                                &nbsp;* 이렇게 작성할 수 있습니다.<br>
+                                &nbsp;*/</span>
+                            </code>
+                        </div>
+                        <div class="flex items-center gap-4 px-6 py-4 bg-white/50 border border-slate-200 rounded-2xl">
+                            <div class="shrink-0 w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center text-white">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" /></svg>
+                            </div>
+                            <p class="text-sm text-slate-500">
+                                <strong>Tip:</strong> 매뉴얼(82p)에서는 <code class="bg-slate-200 px-1 rounded text-slate-700">/** ... */</code> 형태의 JSDoc을 사용하여 더 체계적인 정보를 기록하는 법을 권장합니다.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Final Summary (Small Highlight) -->
+            <section class="col-span-12 bg-slate-900 text-white p-10 rounded-[2rem] flex flex-col md:flex-row items-center justify-between gap-8 animate-fade-in-up" style="animation-delay: 0.4s;">
+                <div class="max-w-xl">
+                    <h3 class="font-display text-3xl font-bold mb-4">핵심 요약</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-3">
+                            <span class="w-6 h-6 rounded-full bg-variable flex items-center justify-center text-[10px] font-bold">01</span>
+                            <span class="text-slate-300"><strong class="text-white">변수(let):</strong> 변할 수 있는 값, 상자 속 내용 교체 가능</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="w-6 h-6 rounded-full bg-constant flex items-center justify-center text-[10px] font-bold">02</span>
+                            <span class="text-slate-300"><strong class="text-white">상수(const):</strong> 변하지 않는 고정값, 자물쇠가 걸린 상자</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <span class="w-6 h-6 rounded-full bg-comment flex items-center justify-center text-[10px] font-bold">03</span>
+                            <span class="text-slate-300"><strong class="text-white">주석(//):</strong> 사람을 위한 메모, 컴퓨터는 무시</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="shrink-0 animate-float">
+                    <div class="w-32 h-32 bg-accent/20 border-2 border-accent/40 rounded-3xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "JS 기초 가이드: 상수, 변수, 주석",
+      "description": "프로그래밍 기초 개념인 변수(let), 상수(const), 주석(Comment)에 대한 초보자 가이드",
+      "author": {
+        "@type": "Person",
+        "name": "AI Web Developer"
+      }
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자바스크립트 입문 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        jsyellow: '#F7DF1E'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        pulseSoft: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.7' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        }
+        .card-shadow {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            font-family: 'Courier New', Courier, monospace;
+            position: relative;
+            overflow: hidden;
+        }
+        .code-tag { color: #94a3b8; }
+        .code-attr { color: #3b82f6; }
+        .code-string { color: #10b981; }
+        .code-comment { color: #64748b; font-style: italic; }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .flow-line {
+            width: 2px;
+            background: linear-gradient(to bottom, #3b82f6, #cbd5e1);
+            height: 40px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white pb-20">
+
+    <!-- Hero Section -->
+    <header class="relative overflow-hidden pt-16 pb-12 px-6">
+        <div class="max-w-4xl mx-auto text-center animate-fade-in-up">
+            <div class="inline-block px-4 py-1.5 mb-6 text-sm font-semibold tracking-wide text-accent uppercase bg-blue-50 rounded-full border border-blue-100">
+                Beginner's Guide
+            </div>
+            <h1 class="font-display text-4xl md:text-6xl font-bold text-slate-900 mb-6 leading-tight">
+                JavaScript <br><span class="text-accent">웹의 생명력을 불어넣다</span>
+            </h1>
+            <p class="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                자바스크립트의 설정 방법부터 기본 구조까지, <br class="hidden md:block"> 입문자를 위해 알기 쉽게 정리한 가이드입니다.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 space-y-16">
+        
+        <!-- Section 1: Why JavaScript -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="glass-card rounded-3xl p-8 md:p-12 border-l-8 border-l-accent">
+                <div class="flex flex-col md:flex-row items-center gap-10">
+                    <div class="flex-1">
+                        <h2 class="font-display text-2xl md:text-3xl font-bold mb-4 text-slate-900">1. 설정이 필요한 이유</h2>
+                        <p class="text-slate-600 leading-relaxed mb-6">
+                            현대 인터넷 서비스의 대부분(Notion, Google Docs, YouTube 등)은 자바스크립트로 구축되어 있습니다. 
+                            별도의 설치 없이 브라우저만 있으면 즉시 실행 가능하다는 점이 가장 큰 강점입니다.
+                        </p>
+                        <div class="flex flex-wrap gap-3">
+                            <span class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-sm text-slate-500 font-medium">#동적페이지</span>
+                            <span class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-sm text-slate-500 font-medium">#유저상호작용</span>
+                            <span class="px-3 py-1 bg-white border border-slate-200 rounded-lg text-sm text-slate-500 font-medium">#즉시실행</span>
+                        </div>
+                    </div>
+                    <div class="w-24 h-24 md:w-32 md:h-32 bg-jsyellow rounded-2xl flex items-center justify-center shadow-xl animate-float">
+                        <span class="text-4xl md:text-5xl font-bold text-slate-900">JS</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Flow Visualization -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.4s;">
+            <div class="text-center mb-10">
+                <h2 class="font-display text-2xl font-bold text-slate-900">2. 핵심 동작 구조</h2>
+                <p class="text-slate-500 mt-2">브라우저가 자바스크립트를 처리하는 3단계 과정</p>
+            </div>
+            
+            <div class="flex flex-col items-center">
+                <!-- Step 1 -->
+                <div class="glass-card card-shadow rounded-2xl p-6 w-full max-w-md text-center">
+                    <div class="w-10 h-10 bg-accent text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4">1</div>
+                    <h3 class="font-bold text-slate-800 mb-1">HTML 문서 작성</h3>
+                    <p class="text-sm text-slate-500">&lt;script&gt; 태그 내부에 코드를 삽입합니다.</p>
+                </div>
+                
+                <div class="flow-line"></div>
+                
+                <!-- Step 2 -->
+                <div class="glass-card card-shadow rounded-2xl p-6 w-full max-w-md text-center">
+                    <div class="w-10 h-10 bg-accent text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4">2</div>
+                    <h3 class="font-bold text-slate-800 mb-1">브라우저 로드</h3>
+                    <p class="text-sm text-slate-500">브라우저가 HTML을 읽다 태그를 만나면 해석을 시작합니다.</p>
+                </div>
+                
+                <div class="flow-line"></div>
+                
+                <!-- Step 3 -->
+                <div class="glass-card card-shadow rounded-2xl p-6 w-full max-w-md text-center border-b-4 border-b-accent">
+                    <div class="w-10 h-10 bg-accent text-white rounded-full flex items-center justify-center font-bold mx-auto mb-4">3</div>
+                    <h3 class="font-bold text-slate-800 mb-1">DOM 제어</h3>
+                    <p class="text-sm text-slate-500">HTML 요소(DOM)를 조작하여 화면을 동적으로 변경합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Code Example -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.6s;">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <div class="space-y-6">
+                    <h2 class="font-display text-3xl font-bold text-slate-900">3. 간단한 예제</h2>
+                    <p class="text-slate-600 leading-relaxed">
+                        가장 기본적인 방법은 HTML 파일 내부에 직접 작성하는 것입니다. 
+                        아래 코드를 복사하여 HTML 파일로 저장한 뒤 브라우저로 열어보세요.
+                    </p>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <div class="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent shrink-0"></div>
+                            <span class="text-slate-700"><strong>&lt;script&gt; 태그</strong>: 코드의 시작과 끝을 알립니다.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent shrink-0"></div>
+                            <span class="text-slate-700"><strong>console.log()</strong>: 개발자 도구 콘솔에 내용을 출력합니다.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <div class="mt-1.5 w-1.5 h-1.5 rounded-full bg-accent shrink-0"></div>
+                            <span class="text-slate-700"><strong>alert()</strong>: 사용자 화면에 경고창을 띄웁니다.</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="code-block shadow-2xl">
+                    <div class="flex gap-2 mb-4">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    </div>
+                    <pre class="text-sm leading-relaxed overflow-x-auto"><code><span class="code-tag">&lt;!DOCTYPE html&gt;</span>
+<span class="code-tag">&lt;html&gt;</span>
+<span class="code-tag">&lt;head&gt;</span>
+    <span class="code-tag">&lt;title&gt;</span>JS Setup Example<span class="code-tag">&lt;/title&gt;</span>
+<span class="code-tag">&lt;/head&gt;</span>
+<span class="code-tag">&lt;body&gt;</span>
+    <span class="code-tag">&lt;h1&gt;</span>안녕하세요!<span class="code-tag">&lt;/h1&gt;</span>
+    
+    <span class="code-tag">&lt;script&gt;</span>
+        <span class="code-comment">// 이 부분이 자바스크립트 코드입니다.</span>
+        console.log(<span class="code-string">"Hello, JavaScript!"</span>);
+        alert(<span class="code-string">"자바스크립트가 설정되었습니다."</span>);
+    <span class="code-tag">&lt;/script&gt;</span>
+<span class="code-tag">&lt;/body&gt;</span>
+<span class="code-tag">&lt;/html&gt;</span></code></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Debugging & Tools -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.8s;">
+            <div class="glass-card rounded-3xl p-8 md:p-12 overflow-hidden relative">
+                <div class="absolute top-0 right-0 -mt-8 -mr-8 w-48 h-48 bg-blue-50 rounded-full blur-3xl opacity-50"></div>
+                
+                <h2 class="font-display text-2xl md:text-3xl font-bold mb-8 text-slate-900">4. 실행 및 디버깅 방법</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white/50 p-6 rounded-2xl border border-slate-100">
+                        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            브라우저 개발자 도구 활용
+                        </h3>
+                        <ol class="space-y-3 text-sm text-slate-600">
+                            <li class="flex gap-2"><strong>1.</strong> <span>Chrome 브라우저에서 HTML 파일을 엽니다.</span></li>
+                            <li class="flex gap-2"><strong>2.</strong> <span><strong>F12</strong> 또는 <strong>Cmd + Opt + I</strong>를 누릅니다.</span></li>
+                            <li class="flex gap-2"><strong>3.</strong> <span><strong>Console</strong> 탭에서 실행 결과를 확인합니다.</span></li>
+                        </ol>
+                    </div>
+
+                    <div class="bg-white/50 p-6 rounded-2xl border border-slate-100">
+                        <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                            온라인 에디터 사용
+                        </h3>
+                        <p class="text-sm text-slate-600 mb-4">별도의 설정 없이 웹에서 바로 테스트하고 싶다면 온라인 컴파일러를 사용하세요.</p>
+                        <a href="https://www.programiz.com/javascript/online-compiler/)를" target="_blank" class="inline-flex items-center text-sm font-semibold text-accent hover:underline">
+                            Programiz 바로가기
+                            <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA / Final Interaction -->
+        <section class="animate-fade-in-up text-center pt-8" style="animation-delay: 1s;">
+            <button onclick="runDemo()" class="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold shadow-xl hover:bg-accent transition-colors duration-300 transform active:scale-95 group">
+                직접 실행해보기
+                <span class="ml-2 group-hover:translate-x-1 inline-block transition-transform">→</span>
+            </button>
+            <p id="demo-status" class="mt-4 text-sm text-slate-400 font-medium"></p>
+        </section>
+
+    </main>
+
+    <script>
+        // Interactive Demo Logic
+        function runDemo() {
+            const status = document.getElementById('demo-status');
+            console.log("Hello, JavaScript! - 데모 실행됨");
+            status.innerText = "콘솔(F12)을 확인해보세요! 'Hello, JavaScript!'가 출력되었습니다.";
+            status.classList.add('animate-pulse-soft');
+            
+            setTimeout(() => {
+                alert("자바스크립트가 설정되었습니다! \n이 알림창이 보인다면 성공입니다.");
+            }, 500);
+        }
+
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100');
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            section.classList.add('transition-all', 'duration-1000');
+        });
+    </script>
+</body>
+</html>

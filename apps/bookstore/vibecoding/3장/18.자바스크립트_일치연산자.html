@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript 일치 연산자 (===) 완벽 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-subtle': 'pulseSubtle 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        pulseSubtle: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.8' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+            line-height: 1.7;
+            overflow-x: auto;
+            border-left: 4px solid #3b82f6;
+        }
+        .comparison-table th {
+            background: #f1f5f9;
+            font-weight: 700;
+        }
+        .step-node {
+            position: relative;
+            z-index: 10;
+        }
+        .step-line::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            width: 2px;
+            height: 2rem;
+            background: #cbd5e1;
+            transform: translateX(-50%);
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white leading-relaxed">
+
+    <!-- Header Section -->
+    <header class="relative pt-16 pb-12 px-6 overflow-hidden">
+        <div class="max-w-4xl mx-auto text-center relative z-10 animate-fade-in-up">
+            <span class="inline-block px-4 py-1.5 mb-6 text-sm font-semibold tracking-wider text-accent uppercase bg-blue-50 rounded-full border border-blue-100">
+                JavaScript Essentials
+            </span>
+            <h1 class="text-4xl md:text-6xl font-bold font-display text-slate-900 mb-6 tracking-tight">
+                일치 연산자 <span class="text-accent">(===)</span> 가이드
+            </h1>
+            <p class="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto font-light">
+                동적 타이핑의 함정을 피하고, 더 안전하고 예측 가능한 코드를 작성하기 위한 핵심 비교 연산법을 알아봅니다.
+            </p>
+        </div>
+        <!-- Decorative Elements -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-0 opacity-20 pointer-events-none">
+            <div class="absolute top-10 left-10 w-64 h-64 bg-accent/20 rounded-full blur-3xl animate-float"></div>
+            <div class="absolute bottom-0 right-10 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl animate-float" style="animation-delay: -3s;"></div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 pb-24 space-y-12">
+        
+        <!-- Section 1: Why we need it -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.1s;">
+            <div class="glass-card p-8 md:p-10 rounded-3xl border border-slate-200 shadow-sm">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 flex items-center justify-center bg-slate-900 text-white rounded-xl shadow-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-slate-900">1. 필요한 이유</h2>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 items-start">
+                    <div class="space-y-4">
+                        <p class="text-slate-600">
+                            JavaScript는 <span class="font-bold text-slate-800">동적 타이핑(Dynamic Typing)</span> 언어입니다. 변수의 타입을 실행 중에 결정하므로 편리하지만, 비교 시 <span class="underline decoration-warning decoration-2 underline-offset-4 font-semibold text-slate-800">암묵적 형변환(Implicit Type Conversion)</span>이라는 복병을 만납니다.
+                        </p>
+                        <p class="text-slate-600 italic">
+                            "대충 비슷하면 같다"라고 판정하는 일반 비교 연산자(==)는 서비스의 치명적인 논리 오류(결제, 인증 등)를 야기할 수 있습니다.
+                        </p>
+                    </div>
+                    <div class="bg-slate-100 p-6 rounded-2xl border border-slate-200">
+                        <div class="flex items-start gap-3 text-sm text-slate-700">
+                            <span class="mt-1 flex-shrink-0 w-5 h-5 bg-warning/20 text-warning rounded-full flex items-center justify-center font-bold">!</span>
+                            <p><span class="font-bold">논리적 오류 방지:</span> 숫자 5와 문자 "5"를 동일하게 취급하면 데이터의 무결성이 깨집니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Flowchart Visual -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="glass-card p-8 md:p-10 rounded-3xl border border-slate-200 shadow-sm bg-white/40">
+                <h2 class="text-2xl font-bold text-slate-900 mb-8 text-center">비교 연산의 메커니즘 도식</h2>
+                
+                <div class="flex flex-col md:flex-row justify-center items-center gap-8 md:gap-16">
+                    <!-- Flow 1: == -->
+                    <div class="flex flex-col items-center w-full max-w-xs p-6 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+                        <span class="text-sm font-bold text-slate-400 mb-4 tracking-widest uppercase">Loose Equality</span>
+                        <div class="w-16 h-16 bg-slate-200 text-slate-600 rounded-full flex items-center justify-center text-2xl font-bold mb-4">==</div>
+                        <div class="text-center space-y-2">
+                            <div class="step-node step-line bg-white px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium">값(Value)이 같은가?</div>
+                            <div class="pt-6">
+                                <div class="bg-success/10 text-success px-4 py-2 rounded-lg text-sm font-bold border border-success/20">같으면 TRUE 반환</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hidden md:block text-slate-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                    </div>
+
+                    <!-- Flow 2: === -->
+                    <div class="flex flex-col items-center w-full max-w-xs p-6 bg-blue-50 rounded-2xl border border-accent/20 ring-4 ring-blue-50">
+                        <span class="text-sm font-bold text-accent mb-4 tracking-widest uppercase">Strict Equality</span>
+                        <div class="w-16 h-16 bg-accent text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4 shadow-lg animate-pulse-subtle">===</div>
+                        <div class="text-center space-y-2">
+                            <div class="step-node step-line bg-white px-4 py-2 rounded-lg border border-blue-200 text-sm font-medium">값(Value)이 같은가?</div>
+                            <div class="step-node step-line pt-6 bg-white px-4 py-2 rounded-lg border border-blue-200 text-sm font-medium">타입(Type)도 같은가?</div>
+                            <div class="pt-6">
+                                <div class="bg-accent text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md">둘 다 만족해야 TRUE</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Summary -->
+                <div class="mt-12 overflow-hidden rounded-2xl border border-slate-200">
+                    <table class="w-full text-left border-collapse comparison-table">
+                        <thead>
+                            <tr class="text-slate-600">
+                                <th class="p-4 border-b border-slate-200">연산자</th>
+                                <th class="p-4 border-b border-slate-200 text-center">값 비교</th>
+                                <th class="p-4 border-b border-slate-200 text-center">타입 비교</th>
+                                <th class="p-4 border-b border-slate-200">결과 판정</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="p-4 font-bold text-slate-500 text-lg">==</td>
+                                <td class="p-4 text-center text-success">✅</td>
+                                <td class="p-4 text-center text-rose-500">❌</td>
+                                <td class="p-4 text-slate-600 text-sm">하나라도 맞으면 같다고 봄 (느슨한 비교)</td>
+                            </tr>
+                            <tr class="bg-blue-50/30 hover:bg-blue-50 transition-colors">
+                                <td class="p-4 font-bold text-accent text-lg">===</td>
+                                <td class="p-4 text-center text-success">✅</td>
+                                <td class="p-4 text-center text-success">✅</td>
+                                <td class="p-4 text-slate-900 font-semibold text-sm italic">둘 다 일치해야 같다고 봄 (엄격한 비교)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Examples -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.3s;">
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Code Block -->
+                <div class="glass-card p-8 rounded-3xl border border-slate-200">
+                    <h3 class="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                        핵심 예제 코드
+                    </h3>
+                    <div class="code-block">
+<pre>
+// 1. 숫자와 문자의 비교
+console.log(5 == "5");    // true  (값이 비슷하니 OK)
+console.log(5 === "5");   // false (Number vs String)
+
+// 2. 특수 데이터의 비교
+console.log(null == undefined);   // true  (의미가 비슷함)
+console.log(null === undefined);  // false (타입이 다름)
+
+// 3. 불리언(Boolean) 비교
+console.log(0 == false);  // true  (0은 Falsy값)
+console.log(0 === false); // false (Number vs Boolean)
+</pre>
+                    </div>
+                </div>
+
+                <!-- Explanation -->
+                <div class="glass-card p-8 rounded-3xl border border-slate-200 flex flex-col justify-center">
+                    <h3 class="text-xl font-bold text-slate-900 mb-6">심층 분석</h3>
+                    <div class="space-y-6">
+                        <div class="relative pl-6 border-l-2 border-slate-200">
+                            <p class="font-bold text-slate-800 text-sm mb-1">5 === "5" 가 false인 이유</p>
+                            <p class="text-slate-600 text-sm leading-relaxed">
+                                왼쪽 5는 <span class="bg-slate-100 px-1.5 py-0.5 rounded font-mono">Number</span>, 오른쪽 "5"는 <span class="bg-slate-100 px-1.5 py-0.5 rounded font-mono">String</span>입니다. 일치 연산자는 이 '데이터의 성격'을 따지기에 '다름'으로 결론 내립니다.
+                            </p>
+                        </div>
+                        <div class="relative pl-6 border-l-2 border-slate-200">
+                            <p class="font-bold text-slate-800 text-sm mb-1">0 === false 가 false인 이유</p>
+                            <p class="text-slate-600 text-sm leading-relaxed">
+                                JS에서 0은 거짓으로 간주(Falsy)되지만, 엄밀히 말해 0은 <span class="bg-slate-100 px-1.5 py-0.5 rounded font-mono">숫자</span>이고 false는 <span class="bg-slate-100 px-1.5 py-0.5 rounded font-mono">논리값</span>입니다. 타입의 벽을 넘지 못해 안전하게 처리됩니다.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Instructor's Tip -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.4s;">
+            <div class="bg-slate-900 text-white p-8 md:p-10 rounded-3xl relative overflow-hidden shadow-2xl">
+                <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
+                    <div class="flex-shrink-0">
+                        <div class="w-20 h-20 bg-accent rounded-2xl flex items-center justify-center rotate-3 shadow-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.364-6.364l-.707-.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M12 7a5 5 0 015 5 5 5 0 01-5 5 5 5 0 01-5-5 5 5 0 015-5z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <h4 class="text-accent font-bold tracking-widest text-sm uppercase">💡 강사의 팁</h4>
+                        <p class="text-xl md:text-2xl font-semibold text-slate-100">
+                            "현업에서는 예외적인 상황을 제외하고는 항상 <span class="text-accent underline underline-offset-8">일치 연산자(===)를 사용</span>하는 것을 권장합니다."
+                        </p>
+                        <p class="text-slate-400 text-sm">
+                            그래야만 예측하지 못한 형변환으로 인한 버그를 원천 봉쇄할 수 있습니다. <span class="text-slate-500 font-medium">(참조: 매뉴얼 35페이지)</span>
+                        </p>
+                    </div>
+                </div>
+                <!-- Abstract background pattern -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Optional: Simple scroll reveal effect
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100');
+                    entry.target.classList.remove('opacity-0');
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            section.classList.add('transition-all', 'duration-1000', 'opacity-0', 'translate-y-10');
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>

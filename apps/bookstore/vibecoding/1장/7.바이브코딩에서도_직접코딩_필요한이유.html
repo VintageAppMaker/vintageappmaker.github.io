@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>코딩 학습의 정석: 직접 타이핑하는 이유</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-subtle': 'pulseSubtle 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        pulseSubtle: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.8' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        }
+        .card-shadow {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .code-block {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            border: 1px solid #334155;
+        }
+        .flow-node {
+            position: relative;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            z-index: 10;
+        }
+        .arrow-right::after {
+            content: '→';
+            position: absolute;
+            right: -1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .arrow-right::after {
+                content: '↓';
+                right: 50%;
+                bottom: -1.5rem;
+                top: auto;
+                transform: translateX(50%);
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white leading-relaxed">
+
+    <!-- Hero Section -->
+    <header class="relative overflow-hidden pt-16 pb-12 px-6">
+        <div class="max-w-5xl mx-auto text-center relative z-10 animate-fade-in-up">
+            <span class="inline-block py-1 px-3 mb-4 text-xs font-bold tracking-widest text-accent bg-blue-50 border border-blue-100 rounded-full uppercase">Programming Instructor Guide</span>
+            <h1 class="text-4xl md:text-6xl font-display font-bold text-slate-900 mb-6 leading-tight">
+                왜 코딩은 반드시 <br><span class="text-accent italic">직접 손으로</span> 해야 할까?
+            </h1>
+            <p class="text-lg text-slate-600 max-w-2xl mx-auto">
+                "눈으로만 보고 이해하면 되는 것 아닌가요?"라는 질문에 대한 명쾌한 해답과 
+                실무 경험 기반의 학습 가이드를 제안합니다.
+            </p>
+        </div>
+        <!-- Decorative background elements -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-0 opacity-10 pointer-events-none">
+            <div class="absolute top-10 left-10 w-64 h-64 bg-accent rounded-full blur-3xl animate-float"></div>
+            <div class="absolute bottom-10 right-10 w-64 h-64 bg-blue-400 rounded-full blur-3xl animate-float" style="animation-delay: 2s;"></div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 pb-24 space-y-20">
+        
+        <!-- Section 1: Core Reasons -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.2s;">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center font-bold">01</div>
+                <h2 class="text-2xl font-display font-bold text-slate-900">코딩을 반드시 해야 하는 이유</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Card 1 -->
+                <div class="glass-card p-8 rounded-2xl card-shadow">
+                    <div class="w-12 h-12 bg-blue-100 text-accent rounded-lg flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900">이해와 구현의 격차</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        자바스크립트의 <code class="bg-slate-100 px-1 rounded text-accent">var</code> 호이스팅이나 스코프 문제는 눈으로 볼 땐 쉽지만, 직접 짜보지 않으면 내가 언제 실수를 저지를지 알 수 없습니다.
+                    </p>
+                </div>
+                <!-- Card 2 -->
+                <div class="glass-card p-8 rounded-2xl card-shadow">
+                    <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-lg flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900">AI 도구의 제어권</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        최근 유행하는 '바이브 코딩'도 원리를 모르면 AI 결과의 정오를 검증할 수 없습니다. <strong>"AI는 의도가 아니라 명세를 따른다"</strong>는 점을 기억하세요.
+                    </p>
+                </div>
+                <!-- Card 3 -->
+                <div class="glass-card p-8 rounded-2xl card-shadow">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.364-5.636l-.707-.707m1.414 14.142l-.707-.707M15.857 14.285a3 3 0 11-3.714 0M12 21V8.25" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900">컴퓨팅 사고력</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        문제를 쪼개고(분해), 핵심만 남기는(추상화) 과정은 직접 타이핑하며 디버깅하는 고통의 시간 속에서 비로소 내 것이 됩니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Flowcharts -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.4s;">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center font-bold">02</div>
+                <h2 class="text-2xl font-display font-bold text-slate-900">핵심 개념 도식화</h2>
+            </div>
+
+            <div class="space-y-12">
+                <!-- Bad Case -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+                    <h3 class="text-center font-bold text-slate-400 mb-8 uppercase tracking-widest text-sm">[ 눈으로만 볼 때: 지식의 휘발 ]</h3>
+                    <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12">
+                        <div class="flow-node bg-slate-100 border border-slate-200 w-48 arrow-right">이론 습득</div>
+                        <div class="flow-node bg-slate-100 border border-slate-200 w-48 arrow-right text-slate-500">"다 아는 것 같음"</div>
+                        <div class="flow-node bg-slate-100 border border-slate-200 w-48 arrow-right">실제 문제 발생</div>
+                        <div class="flow-node bg-red-50 text-red-600 border border-red-100 w-48 font-bold">당황 및 포기</div>
+                    </div>
+                </div>
+
+                <!-- Good Case -->
+                <div class="bg-slate-900 rounded-3xl p-10 shadow-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4">
+                        <span class="bg-accent/20 text-accent text-xs px-2 py-1 rounded border border-accent/30 animate-pulse-subtle">Recommended Path</span>
+                    </div>
+                    <h3 class="text-center font-bold text-slate-400 mb-10 uppercase tracking-widest text-sm">[ 직접 코딩할 때: 지식의 내재화 ]</h3>
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative">
+                        <!-- Connecting Line (Desktop) -->
+                        <div class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-slate-700 -translate-y-1/2 z-0"></div>
+                        
+                        <div class="flow-node bg-slate-800 text-slate-200 border border-slate-700 w-full md:w-40">이론 습득</div>
+                        <div class="flow-node bg-accent text-white w-full md:w-40 shadow-lg shadow-accent/20">직접 코딩</div>
+                        <div class="flow-node bg-warning text-white w-full md:w-40">오류/디버깅</div>
+                        <div class="flow-node bg-success text-white w-full md:w-40">원인 파악/해결</div>
+                        <div class="flow-node bg-slate-800 text-slate-200 border border-slate-700 w-full md:w-40 italic">실력 향상</div>
+                    </div>
+                    <p class="mt-12 text-center text-slate-400 text-sm italic">
+                        "직접 코딩을 하면 <span class="text-accent">'오류'라는 스승</span>을 만나게 되고, 이를 해결하는 과정에서 실력이 폭발적으로 성장합니다."
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Practical Example -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.6s;">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center font-bold">03</div>
+                <h2 class="text-2xl font-display font-bold text-slate-900">간단한 예제: '오늘 할 일' 리스트</h2>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-8 items-start">
+                <!-- Logic -->
+                <div class="space-y-6">
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-accent">
+                        <h4 class="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" />
+                            </svg>
+                            구현 로직 (작업 명세)
+                        </h4>
+                        <ul class="space-y-3 text-slate-600 text-sm">
+                            <li class="flex items-start gap-2">
+                                <span class="bg-slate-200 text-slate-700 w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] mt-0.5">1</span>
+                                <span><code class="text-accent font-bold">&lt;input&gt;</code> 창에서 글자를 입력받는다.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="bg-slate-200 text-slate-700 w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] mt-0.5">2</span>
+                                <span>'추가' 버튼 클릭 시 배열에 데이터를 담는다.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="bg-slate-200 text-slate-700 w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] mt-0.5">3</span>
+                                <span>화면의 <code class="text-accent font-bold">&lt;ul&gt;</code> 태그 안에 리스트를 출력한다.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="bg-slate-200 text-slate-700 w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center text-[10px] mt-0.5">4</span>
+                                <span><code class="text-accent font-bold">localStorage</code>에 저장해 영속성을 유지한다.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100">
+                        <h4 class="font-bold text-blue-900 mb-2">💡 직접 해야만 배우는 것들</h4>
+                        <ul class="text-sm text-blue-800 space-y-2 list-disc list-inside">
+                            <li>DOM 제어의 미묘한 디테일 (value vs text)</li>
+                            <li>사용자 예외 상황 대응 (빈 값 처리 등)</li>
+                            <li>코드가 화면을 바꾸는 성취감의 경험</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Code Block -->
+                <div class="relative group">
+                    <div class="absolute -top-3 right-6 bg-slate-700 text-slate-300 text-[10px] px-2 py-1 rounded uppercase tracking-widest font-bold">Javascript</div>
+                    <div class="code-block shadow-xl">
+<pre><code>// 버튼 클릭 시 실행될 함수
+function addTodo() {
+  const input = document.getElementById('todoInput');
+  const text = input.value; // 1. 입력값 받기
+
+  // 예외 처리: 직접 해봐야 중요성을 깨닫는 구간
+  if(text === "") {
+    return alert("내용을 입력하세요!"); 
+  }
+
+  const li = document.createElement('li'); // 2. 요소 생성
+  li.textContent = text;
+  
+  // 3. 화면 표시
+  document.getElementById('todoList').appendChild(li); 
+  input.value = ""; // 입력창 비우기
+}</code></pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final Message -->
+        <section class="bg-accent rounded-[3rem] p-12 text-center text-white animate-fade-in-up" style="animation-delay: 0.8s;">
+            <div class="max-w-2xl mx-auto">
+                <h2 class="text-3xl font-display font-bold mb-6">"코딩은 요리책을 읽는 것이 아니라, <br>직접 칼을 드는 과정입니다."</h2>
+                <p class="text-blue-100 mb-8 opacity-90">
+                    직접 해봐야 맛(결과)을 보고 간(로직)을 맞출 수 있습니다. <br>
+                    지금 바로 에디터를 열고 단 한 줄이라도 코드를 입력해 보세요!
+                </p>
+                <button class="bg-white text-accent px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform shadow-lg">
+                    지금 학습 시작하기
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Simple micro-interaction for cards
+        document.querySelectorAll('.card-shadow').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.borderColor = 'rgba(59, 130, 246, 0.5)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.borderColor = 'rgba(226, 232, 240, 0.8)';
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>웹앱 바이브 코딩(Vibe Coding) 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        vibe: '#6366f1'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+        .card-shadow {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-shadow:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.1);
+            border-color: #3b82f6;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .flow-line {
+            position: relative;
+        }
+        .flow-line::after {
+            content: '↓';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #94a3b8;
+            font-size: 1.2rem;
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            background: #475569;
+            color: white;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .copy-btn:hover { background: #64748b; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white pb-20">
+
+    <!-- Hero Section -->
+    <header class="relative pt-20 pb-12 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 relative z-10 text-center">
+            <div class="inline-block px-4 py-1.5 mb-6 text-sm font-semibold tracking-wide text-accent uppercase bg-blue-50 rounded-full animate-fade-in-up">
+                AI Driven Development
+            </div>
+            <h1 class="text-5xl md:text-7xl font-display font-bold text-slate-900 mb-6 tracking-tight animate-fade-in-up">
+                Vibe Coding <span class="text-accent underline decoration-slate-200">Guide</span>
+            </h1>
+            <p class="max-w-2xl mx-auto text-lg text-slate-600 leading-relaxed animate-fade-in-up" style="animation-delay: 0.1s;">
+                "정답을 묻지 말고, 지금 만들 것을 지시하라." <br>
+                AI와의 소통을 최적화하여 1인 개발의 속도를 극대화하는 바이브 코딩 핵심 전략입니다.
+            </p>
+        </div>
+        <!-- Decorative bg blobs -->
+        <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50 animate-pulse-slow"></div>
+        <div class="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/3 w-80 h-80 bg-indigo-100 rounded-full blur-3xl opacity-50 animate-float"></div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-6">
+        
+        <!-- Section 1: Definition & Flow -->
+        <section class="mb-20">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                <div class="md:col-span-5 space-y-6">
+                    <h2 class="text-3xl font-display font-bold text-slate-900 flex items-center">
+                        <span class="w-8 h-8 bg-accent text-white rounded-lg flex items-center justify-center mr-3 text-base">01</span>
+                        바이브 코딩의 본질
+                    </h2>
+                    <div class="glass-card p-6 rounded-2xl border-l-4 border-l-accent">
+                        <p class="text-slate-700 leading-relaxed">
+                            바이브 코딩은 AI에게 정답을 구걸하는 것이 아닙니다. 
+                            <strong>명확한 문법적 지시(Command)</strong>를 통해 즉각적인 결과물을 도출하는 <b>프로토타이핑 중심</b>의 기법입니다.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Flowchart -->
+                <div class="md:col-span-7 bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                    <div class="flex flex-col items-center space-y-8">
+                        <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="p-4 bg-slate-100 rounded-xl text-center border border-slate-200 flow-line">
+                                <span class="block text-xs font-bold text-slate-400 mb-1">STEP 1</span>
+                                <span class="font-bold text-slate-800">Clear Role</span>
+                            </div>
+                            <div class="p-4 bg-slate-100 rounded-xl text-center border border-slate-200 flow-line">
+                                <span class="block text-xs font-bold text-slate-400 mb-1">STEP 2</span>
+                                <span class="font-bold text-slate-800">Direct Command</span>
+                            </div>
+                            <div class="p-4 bg-slate-100 rounded-xl text-center border border-slate-200 flow-line">
+                                <span class="block text-xs font-bold text-slate-400 mb-1">STEP 3</span>
+                                <span class="font-bold text-slate-800">Single Output</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-accent text-white p-5 rounded-xl text-center font-bold shadow-lg shadow-blue-200">
+                            🚀 즉시 실행 가능한 결과물 (Prototype)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Checklist (Bento Grid) -->
+        <section class="mb-20">
+            <h2 class="text-3xl font-display font-bold text-slate-900 mb-10 flex items-center">
+                <span class="w-8 h-8 bg-accent text-white rounded-lg flex items-center justify-center mr-3 text-base">02</span>
+                실무 행동 수칙 (Checklist)
+            </h2>
+            <div class="bento-grid">
+                <!-- Card 1 -->
+                <div class="col-span-12 md:col-span-4 glass-card p-8 rounded-3xl card-shadow">
+                    <div class="w-12 h-12 bg-blue-50 text-accent rounded-xl flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">단일 HTML 원칙</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">CSS와 JS를 한 파일에 통합하여 의존성 오류 없이 즉시 실행하세요.</p>
+                </div>
+                <!-- Card 2 -->
+                <div class="col-span-12 md:col-span-4 glass-card p-8 rounded-3xl card-shadow">
+                    <div class="w-12 h-12 bg-indigo-50 text-vibe rounded-xl flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">State-Logic-View</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">구조가 단순할수록 AI는 오류 없는 코드를 작성합니다.</p>
+                </div>
+                <!-- Card 3 -->
+                <div class="col-span-12 md:col-span-4 glass-card p-8 rounded-3xl card-shadow">
+                    <div class="w-12 h-12 bg-slate-100 text-slate-700 rounded-xl flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">JSON & LocalStorage</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">데이터는 JSON으로, 영속성은 LocalStorage로 간단히 해결합니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Prompt Structure -->
+        <section class="mb-20">
+            <h2 class="text-3xl font-display font-bold text-slate-900 mb-10 flex items-center">
+                <span class="w-8 h-8 bg-accent text-white rounded-lg flex items-center justify-center mr-3 text-base">03</span>
+                프롬프트 구조 (The 5 Blocks)
+            </h2>
+            <div class="bg-slate-900 text-white rounded-3xl p-8 md:p-12 overflow-hidden relative">
+                <div class="relative z-10 grid grid-cols-1 lg:grid-cols-5 gap-6">
+                    <div class="p-6 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
+                        <span class="text-blue-400 font-bold text-xs uppercase block mb-2">Block 01</span>
+                        <h4 class="text-lg font-bold mb-2">역할 (Role)</h4>
+                        <p class="text-slate-400 text-xs">AI의 페르소나를 정의하여 군더더기 없는 답변 유도</p>
+                    </div>
+                    <div class="p-6 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
+                        <span class="text-blue-400 font-bold text-xs uppercase block mb-2">Block 02</span>
+                        <h4 class="text-lg font-bold mb-2">목적 (Goal)</h4>
+                        <p class="text-slate-400 text-xs">최종 결과물을 한 문장으로 명확히 선언</p>
+                    </div>
+                    <div class="p-6 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
+                        <span class="text-blue-400 font-bold text-xs uppercase block mb-2">Block 03</span>
+                        <h4 class="text-lg font-bold mb-2">제약 (Constraints)</h4>
+                        <p class="text-slate-400 text-xs">환경, 라이브러리, 분량 등의 기술적 경계 설정</p>
+                    </div>
+                    <div class="p-6 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
+                        <span class="text-blue-400 font-bold text-xs uppercase block mb-2">Block 04</span>
+                        <h4 class="text-lg font-bold mb-2">형식 (Format)</h4>
+                        <p class="text-slate-400 text-xs">코드블록만 출력할지, 마크다운을 쓸지 결정</p>
+                    </div>
+                    <div class="p-6 bg-white/10 rounded-2xl border border-white/10 backdrop-blur-sm">
+                        <span class="text-blue-400 font-bold text-xs uppercase block mb-2">Block 05</span>
+                        <h4 class="text-lg font-bold mb-2">지침 (Behavior)</h4>
+                        <p class="text-slate-400 text-xs">코딩 스타일, 예외 처리, 디버깅 로그 등 명시</p>
+                    </div>
+                </div>
+                <!-- Abstract BG pattern -->
+                <div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 20px 20px;"></div>
+            </div>
+        </section>
+
+        <!-- Section 4: Keywords & Examples -->
+        <section class="mb-20">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-10 gap-4">
+                <h2 class="text-3xl font-display font-bold text-slate-900 flex items-center">
+                    <span class="w-8 h-8 bg-accent text-white rounded-lg flex items-center justify-center mr-3 text-base">04</span>
+                    키워드 & 실전 예제
+                </h2>
+                <div class="flex gap-2">
+                    <span class="px-3 py-1 bg-slate-200 text-slate-700 text-xs font-bold rounded-full">#바로동작</span>
+                    <span class="px-3 py-1 bg-slate-200 text-slate-700 text-xs font-bold rounded-full">#단일파일</span>
+                    <span class="px-3 py-1 bg-slate-200 text-slate-700 text-xs font-bold rounded-full">#거칠어도_된다</span>
+                </div>
+            </div>
+
+            <!-- Examples Tabs/Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Example 1 -->
+                <div class="flex flex-col h-full">
+                    <div class="flex-grow p-6 bg-white rounded-t-3xl border border-slate-200 border-b-0">
+                        <h3 class="font-bold text-slate-900 mb-4 flex items-center">
+                            <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                            버튼 클릭 카운터
+                        </h3>
+                        <p class="text-slate-500 text-sm mb-4">가장 기초적인 상태 관리 프로토타입</p>
+                        <div class="code-block text-[10px] leading-tight max-h-40">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <pre>너는 빠르게 작동하는 프로토타입을 만드는 코딩 파트너다. HTML과 JavaScript만 사용해 버튼을 누를 때마다 숫자가 증가하는 간단한 웹앱을 만든다.</pre>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-b-3xl border border-slate-200 text-center">
+                        <button class="text-accent text-sm font-semibold hover:underline" onclick="toggleModal('prompt1')">전체 보기</button>
+                    </div>
+                </div>
+
+                <!-- Example 2 -->
+                <div class="flex flex-col h-full">
+                    <div class="flex-grow p-6 bg-white rounded-t-3xl border border-slate-200 border-b-0">
+                        <h3 class="font-bold text-slate-900 mb-4 flex items-center">
+                            <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                            오늘 할 일 3개 체크
+                        </h3>
+                        <p class="text-slate-500 text-sm mb-4">UI 상호작용 및 스타일 제어</p>
+                        <div class="code-block text-[10px] leading-tight max-h-40">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <pre>너는 설계 설명 없이 바로 화면을 만드는 코딩 파트너다. HTML과 JavaScript로 체크박스 3개가 있는 오늘 할 일 화면을 만든다. 체크하면 취소선이 그어진다.</pre>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-b-3xl border border-slate-200 text-center">
+                        <button class="text-accent text-sm font-semibold hover:underline" onclick="toggleModal('prompt2')">전체 보기</button>
+                    </div>
+                </div>
+
+                <!-- Example 3 -->
+                <div class="flex flex-col h-full">
+                    <div class="flex-grow p-6 bg-white rounded-t-3xl border border-slate-200 border-b-0">
+                        <h3 class="font-bold text-slate-900 mb-4 flex items-center">
+                            <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                            URL 파라미터 로더
+                        </h3>
+                        <p class="text-slate-500 text-sm mb-4">동적 데이터 렌더링</p>
+                        <div class="code-block text-[10px] leading-tight max-h-40">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <pre>너는 빠르게 결과를 보여주는 HTML/JS 파트너다. index.html?title=약속 형식의 URL 파라미터를 읽어 화면에 출력하는 페이지를 만든다.</pre>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-b-3xl border border-slate-200 text-center">
+                        <button class="text-accent text-sm font-semibold hover:underline" onclick="toggleModal('prompt3')">전체 보기</button>
+                    </div>
+                </div>
+
+                <!-- Example 4 -->
+                <div class="flex flex-col h-full">
+                    <div class="flex-grow p-6 bg-white rounded-t-3xl border border-slate-200 border-b-0">
+                        <h3 class="font-bold text-slate-900 mb-4 flex items-center">
+                            <span class="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+                            localStorage 메모장
+                        </h3>
+                        <p class="text-slate-500 text-sm mb-4">브라우저 내 데이터 저장</p>
+                        <div class="code-block text-[10px] leading-tight max-h-40">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <pre>HTML과 JavaScript로 메모 입력 화면을 만든다. 저장 버튼 클릭 시 localStorage에 저장하며 새로고침해도 유지된다.</pre>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-b-3xl border border-slate-200 text-center">
+                        <button class="text-accent text-sm font-semibold hover:underline" onclick="toggleModal('prompt4')">전체 보기</button>
+                    </div>
+                </div>
+
+                <!-- Example 5 -->
+                <div class="flex flex-col h-full">
+                    <div class="flex-grow p-6 bg-white rounded-t-3xl border border-slate-200 border-b-0">
+                        <h3 class="font-bold text-slate-900 mb-4 flex items-center">
+                            <span class="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+                            프린트 전용 문서
+                        </h3>
+                        <p class="text-slate-500 text-sm mb-4">특수 목적용 화면 설계</p>
+                        <div class="code-block text-[10px] leading-tight max-h-40">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <pre>HTML/JS로 제목/내용 입력 시 프린트용 한 페이지 문서를 보여준다. print 시 버튼은 숨긴다.</pre>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-b-3xl border border-slate-200 text-center">
+                        <button class="text-accent text-sm font-semibold hover:underline" onclick="toggleModal('prompt5')">전체 보기</button>
+                    </div>
+                </div>
+
+                <!-- Example 6 -->
+                <div class="flex flex-col h-full">
+                    <div class="flex-grow p-6 bg-white rounded-t-3xl border border-slate-200 border-b-0">
+                        <h3 class="font-bold text-slate-900 mb-4 flex items-center">
+                            <span class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></span>
+                            랜덤 문장 표시기
+                        </h3>
+                        <p class="text-slate-500 text-sm mb-4">데이터 배열 활용 로직</p>
+                        <div class="code-block text-[10px] leading-tight max-h-40">
+                            <button class="copy-btn" onclick="copyToClipboard(this)">Copy</button>
+                            <pre>미리 정의된 문장 목록 중 하나를 버튼 클릭 시 랜덤으로 보여주는 화면을 만든다. 문장은 JS 배열로 하드코딩한다.</pre>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-b-3xl border border-slate-200 text-center">
+                        <button class="text-accent text-sm font-semibold hover:underline" onclick="toggleModal('prompt6')">전체 보기</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for Full Prompt -->
+    <div id="promptModal" class="fixed inset-0 z-50 flex items-center justify-center p-6 hidden">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="toggleModal()"></div>
+        <div class="relative bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-fade-in-up">
+            <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 id="modalTitle" class="text-xl font-bold text-slate-900">프롬프트 상세보기</h3>
+                <button onclick="toggleModal()" class="text-slate-400 hover:text-slate-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-8">
+                <div id="modalContent" class="code-block text-sm">
+                    <!-- Content will be injected here -->
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button onclick="copyModalContent()" class="px-6 py-2.5 bg-accent text-white rounded-xl font-bold hover:bg-blue-600 transition-colors shadow-lg shadow-blue-200">
+                        클립보드에 복사
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const promptData = {
+            prompt1: `너는 빠르게 작동하는 프로토타입을 만드는 코딩 파트너다.\n\nHTML과 JavaScript만 사용해\n버튼을 누를 때마다 숫자가 증가하는 간단한 웹앱을 만든다.\n\n제약:\n- 단일 HTML 파일\n- 외부 라이브러리 금지\n- file:// 환경에서도 동작\n\n출력:\n- 설명 없이 전체 HTML 코드만 출력\n\n지침:\n- 단순함과 가독성을 우선한다`,
+            prompt2: `너는 설계 설명 없이 바로 화면을 만드는 코딩 파트너다.\n\nHTML과 JavaScript로\n체크박스 3개가 있는 오늘 할 일 화면을 만든다.\n체크하면 취소선이 그어진다.\n\n제약:\n- 단일 HTML 파일\n- CSS는 최소한만 사용\n- localStorage는 사용하지 않는다\n\n출력:\n- 전체 HTML 코드만 출력`,
+            prompt3: `너는 빠르게 결과를 보여주는 HTML/JS 파트너다.\n\nfile:///index.html?title=약속&msg=점심12시\n형식의 URL 파라미터를 읽어\n화면에 제목과 내용을 출력하는 페이지를 만든다.\n\n제약:\n- 서버 사용 금지\n- 단일 HTML 파일\n\n출력:\n- 전체 HTML 코드만 출력`,
+            prompt4: `HTML과 JavaScript로\n간단한 메모 입력 화면을 만든다.\n\n기능:\n- 입력 후 저장 버튼 클릭\n- 새로고침해도 메모 유지\n\n제약:\n- localStorage만 사용\n- UI는 최소 구성\n- 단일 HTML 파일\n\n출력:\n- 코드만 출력`,
+            prompt5: `HTML과 JavaScript로\n제목과 내용을 입력하면\n프린트용 한 페이지 문서 형태로 보여주는 화면을 만든다.\n\n조건:\n- 화면은 심플\n- print 시 불필요한 버튼은 숨긴다\n\n출력:\n- 전체 HTML 코드만 출력`,
+            prompt6: `HTML과 JavaScript로\n미리 정의된 문장 목록 중 하나를\n버튼 클릭 시 랜덤으로 보여주는 화면을 만든다.\n\n제약:\n- 문장은 JS 배열로 하드코딩\n- 단일 HTML 파일\n\n출력:\n- 코드만 출력`
+        };
+
+        function toggleModal(id) {
+            const modal = document.getElementById('promptModal');
+            const content = document.getElementById('modalContent');
+            
+            if (id) {
+                content.innerHTML = `<button class="copy-btn" onclick="copyToClipboard(this)">Copy</button><pre class="whitespace-pre-wrap">${promptData[id]}</pre>`;
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function copyToClipboard(btn) {
+            const text = btn.nextElementSibling.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied!';
+                btn.classList.replace('bg-slate-700', 'bg-green-600');
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.replace('bg-green-600', 'bg-slate-700');
+                }, 2000);
+            });
+        }
+
+        function copyModalContent() {
+            const text = document.querySelector('#modalContent pre').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('프롬프트가 클립보드에 복사되었습니다.');
+            });
+        }
+
+        // Scroll Reveal Animation Simple Implementation
+        window.addEventListener('scroll', () => {
+            const cards = document.querySelectorAll('.card-shadow');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                if (rect.top < window.innerHeight - 50) {
+                    card.classList.add('opacity-100');
+                    card.classList.remove('opacity-0');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

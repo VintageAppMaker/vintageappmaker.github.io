@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자바스크립트 비동기 프로그래밍 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        success: '#10b981',
+                        warning: '#f59e0b',
+                        danger: '#ef4444'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            overflow-x: auto;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+        .step-node {
+            position: relative;
+            z-index: 10;
+        }
+        .step-line::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            width: 2px;
+            height: 2rem;
+            background: #cbd5e1;
+            transform: translateX(-50%);
+        }
+        .step-line-horizontal {
+            height: 2px;
+            background: #cbd5e1;
+            flex-grow: 1;
+            margin: 0 1rem;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white pb-20">
+
+    <!-- Hero Section -->
+    <header class="max-w-5xl mx-auto px-6 pt-16 pb-12 text-center animate-fade-in-up">
+        <h1 class="font-display text-4xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight">
+            Asynchronous <span class="text-accent">Programming</span>
+        </h1>
+        <p class="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+            비동기 프로그래밍은 자바스크립트의 핵심입니다. <br class="hidden md:block">
+            일상의 행동과 비교하여 그 원리를 쉽고 명확하게 파헤쳐 봅니다.
+        </p>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 space-y-12">
+        
+        <!-- Section 1: Concept Comparison -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="glass-card p-8 rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mb-6 text-slate-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-4 text-slate-900">동기 (Synchronous)</h3>
+                <p class="text-slate-600 mb-6 leading-relaxed">
+                    음식이 나올 때까지 카운터 앞에서 기다리는 방식입니다. 앞사람의 작업이 끝날 때까지 전체 흐름이 멈춥니다.
+                </p>
+                <div class="bg-slate-100 rounded-xl p-4 text-sm font-medium text-slate-500 italic">
+                    "매우 비효율적이며 사용자 경험을 저해합니다."
+                </div>
+            </div>
+
+            <div class="glass-card p-8 rounded-3xl border-2 border-accent/20 bg-white shadow-xl hover:shadow-2xl transition-all">
+                <div class="w-12 h-12 bg-accent/10 rounded-2xl flex items-center justify-center mb-6 text-accent">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold mb-4 text-slate-900">비동기 (Asynchronous)</h3>
+                <p class="text-slate-600 mb-6 leading-relaxed">
+                    주문 후 진동벨을 받고 다른 일을 하며 기다리는 방식입니다. 데이터 로딩 중에도 스크롤이나 버튼 클릭이 가능합니다.
+                </p>
+                <div class="bg-accent/5 rounded-xl p-4 text-sm font-semibold text-accent italic">
+                    "현대 웹 애플리케이션의 필수 요소입니다."
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Flowchart (Visualization) -->
+        <section class="glass-card p-8 md:p-12 rounded-3xl">
+            <h2 class="font-display text-3xl font-bold text-slate-900 mb-10 text-center">비동기 작업의 상태 변화 (Promise)</h2>
+            
+            <div class="flex flex-col md:flex-row items-center justify-between space-y-8 md:space-y-0 relative">
+                <!-- Pending -->
+                <div class="flex flex-col items-center step-node">
+                    <div class="w-20 h-20 rounded-full bg-slate-200 flex items-center justify-center border-4 border-white shadow-lg mb-4">
+                        <span class="text-2xl">⏳</span>
+                    </div>
+                    <span class="font-bold text-slate-700">Pending</span>
+                    <span class="text-xs text-slate-500">대기 (주문 완료)</span>
+                </div>
+
+                <div class="hidden md:block step-line-horizontal"></div>
+
+                <!-- Middle Decision -->
+                <div class="flex flex-col items-center">
+                    <div class="w-12 h-12 rotate-45 border-2 border-slate-300 flex items-center justify-center bg-white mb-4">
+                        <span class="rotate-[-45deg] text-xs font-bold text-slate-400">?</span>
+                    </div>
+                </div>
+
+                <div class="hidden md:block step-line-horizontal"></div>
+
+                <!-- Success / Fail -->
+                <div class="flex flex-col space-y-8 md:space-y-12">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 rounded-2xl bg-success/10 flex items-center justify-center border-2 border-success/30 shadow-sm">
+                            <span class="text-xl">✅</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-success">Fulfilled</p>
+                            <p class="text-xs text-slate-500">성공 (음식 나옴 → resolve)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 rounded-2xl bg-danger/10 flex items-center justify-center border-2 border-danger/30 shadow-sm">
+                            <span class="text-xl">❌</span>
+                        </div>
+                        <div>
+                            <p class="font-bold text-danger">Rejected</p>
+                            <p class="text-xs text-slate-500">실패 (재료 소진 → reject)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Code Example -->
+        <section class="space-y-6">
+            <div class="flex items-center space-x-3 mb-2">
+                <div class="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center">
+                    <code class="text-white text-xs font-bold">JS</code>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-900">실전 예제 (async/await)</h2>
+            </div>
+            
+            <div class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-accent to-blue-600 rounded-xl blur opacity-20 group-hover:opacity-30 transition duration-1000"></div>
+                <pre class="code-block relative font-mono">
+// 1. 데이터를 가져오는 "약속" 함수 (2초 대기 시뮬레이션)
+function 주문하기() {
+  return new Promise((resolve, reject) => {
+    console.log("1. 주문을 받았습니다. (요리 시작)");
+    
+    setTimeout(() => {
+      const 성공 = true; // 요리 성공 여부
+      if (성공) {
+        resolve("🍕 피자"); // 성공 시 결과값 전달
+      } else {
+        reject("재료가 다 떨어졌어요."); // 실패 시 이유 전달
+      }
+    }, 2000); // 2초 뒤 실행
+  });
+}
+
+// 2. 비동기 작업을 처리하는 함수
+async function 점심식사() {
+  console.log("--- 점심 시간 시작 ---");
+  
+  try {
+    // await은 "결과가 나올 때까지 이 함수 안에서만 기다려라"라는 뜻입니다.
+    const 음식 = await 주문하기(); 
+    console.log(`3. 드디어 ${음식}가 나왔습니다! 맛있게 먹습니다.`);
+  } catch (에러) {
+    console.log(`X. 문제가 발생했어요: ${에러}`);
+  }
+
+  console.log("--- 점심 시간 종료 ---");
+}
+
+점심식사();
+console.log("2. 요리가 준비되는 동안 다른 일을 합니다. (뉴스 보기)");
+                </pre>
+            </div>
+        </section>
+
+        <!-- Section 4: Execution Order & Summary -->
+        <section class="bento-grid flex flex-col md:grid md:grid-cols-12 gap-6">
+            <div class="md:col-span-7 glass-card p-8 rounded-3xl">
+                <h3 class="text-xl font-bold mb-6 text-slate-900 flex items-center">
+                    <span class="mr-2">📝</span> 실행 순서 분석
+                </h3>
+                <ol class="space-y-4">
+                    <li class="flex items-start">
+                        <span class="w-6 h-6 rounded-full bg-slate-800 text-white text-xs flex items-center justify-center shrink-0 mt-0.5 mr-3">1</span>
+                        <p class="text-slate-600"><strong>점심 시간 시작</strong> 및 <strong>요리 시작</strong> 로그 출력</p>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="w-6 h-6 rounded-full bg-accent text-white text-xs flex items-center justify-center shrink-0 mt-0.5 mr-3">2</span>
+                        <p class="text-slate-600 font-semibold text-slate-900">"뉴스 보기" 작업이 즉시 실행 (전체 프로그램이 멈추지 않음!)</p>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="w-6 h-6 rounded-full bg-slate-800 text-white text-xs flex items-center justify-center shrink-0 mt-0.5 mr-3">3</span>
+                        <p class="text-slate-600">2초 후, 요리가 완성되면 <strong>피자 먹기</strong>와 <strong>점심 시간 종료</strong> 출력</p>
+                    </li>
+                </ol>
+            </div>
+            
+            <div class="md:col-span-5 bg-slate-900 text-white p-8 rounded-3xl shadow-xl flex flex-col justify-center">
+                <h3 class="text-xl font-bold mb-4 text-accent">핵심 요약</h3>
+                <ul class="space-y-3 text-slate-300">
+                    <li class="flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span><strong>Promise</strong>: 미래의 결과를 약속</span>
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span><strong>Await</strong>: 작업 완료를 비동기적으로 대기</span>
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span><strong>UX</strong>: 끊김 없는 사용자 경험 제공</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Interactive Elements for demonstration (optional enhancement)
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("비동기 프로그래밍 가이드가 로드되었습니다.");
+        });
+    </script>
+</body>
+</html>

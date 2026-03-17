@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern JS: Destructuring Assignment Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        secondary: '#6366f1'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+        .card-shadow {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-shadow:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+        }
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            text-align: left;
+        }
+        .step-node {
+            position: relative;
+        }
+        .step-node:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            right: -1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #cbd5e1;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .step-node:not(:last-child)::after {
+                content: '↓';
+                right: auto;
+                left: 50%;
+                bottom: -1.5rem;
+                top: auto;
+                transform: translateX(-50%);
+            }
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white leading-relaxed">
+
+    <!-- Hero Section -->
+    <header class="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center animate-fade-in-up">
+        <div class="inline-block px-4 py-1.5 mb-6 text-sm font-semibold tracking-wide text-accent uppercase bg-blue-50 rounded-full border border-blue-100">
+            ES6+ Modern JavaScript
+        </div>
+        <h1 class="text-5xl md:text-6xl font-display font-bold text-slate-900 mb-6 tracking-tight">
+            구조분해할당 <br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-secondary">Destructuring Assignment</span>
+        </h1>
+        <p class="text-xl text-slate-600 max-w-2xl mx-auto font-light">
+            복잡한 데이터 구조에서 필요한 값만 쏙쏙 뽑아내어 독립된 변수에 담는 <br class="hidden md:block"/>아주 강력하고 편리한 문법을 소개합니다.
+        </p>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-24">
+        
+        <!-- Why Section -->
+        <section class="mb-20">
+            <h2 class="text-3xl font-display font-bold mb-10 text-center">왜 필요할까요? <span class="text-slate-400 font-light">(The Pain Points)</span></h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass-card p-8 rounded-2xl card-shadow">
+                    <div class="w-12 h-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">반복의 귀찮음</h3>
+                    <p class="text-slate-500">데이터를 꺼낼 때마다 <code>user.name</code>, <code>user.age</code>처럼 객체 이름을 반복해서 써야 하는 번거로움이 사라집니다.</p>
+                </div>
+                <div class="glass-card p-8 rounded-2xl card-shadow">
+                    <div class="w-12 h-12 bg-amber-50 text-amber-500 rounded-xl flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">가독성 저하</h3>
+                    <p class="text-slate-500">코드가 길어지면 한눈에 어떤 데이터를 사용하는지 파악하기 힘듭니다. 구조분해는 선언부에서 데이터 구조를 명시합니다.</p>
+                </div>
+                <div class="glass-card p-8 rounded-2xl card-shadow">
+                    <div class="w-12 h-12 bg-green-50 text-green-500 rounded-xl flex items-center justify-center mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">유연성 부족</h3>
+                    <p class="text-slate-500">데이터가 비어있을 때 기본값을 설정하거나, 특정 순서를 건너뛰고 값을 가져오는 과정이 매우 간소화됩니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visualization Section -->
+        <section class="mb-20 glass-card rounded-3xl p-10">
+            <h2 class="text-3xl font-display font-bold mb-12 text-center text-slate-900">핵심 개념 도식화</h2>
+            
+            <div class="flex flex-col md:flex-row items-center justify-center gap-12 mb-16">
+                <div class="flex flex-col items-center text-center max-w-[280px] step-node">
+                    <div class="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center mb-4 border-2 border-dashed border-slate-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">1. 데이터 박스</h4>
+                    <p class="text-sm text-slate-500">포장된 객체{ } 또는 배열[ ] 데이터 뭉치</p>
+                </div>
+                <div class="flex flex-col items-center text-center max-w-[280px] step-node">
+                    <div class="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+                        </svg>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">2. 내용물 추출</h4>
+                    <p class="text-sm text-slate-500">이름(Key)이나 순서(Index)를 기준으로 분해</p>
+                </div>
+                <div class="flex flex-col items-center text-center max-w-[280px]">
+                    <div class="w-20 h-20 bg-green-100 rounded-2xl flex items-center justify-center mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                        </svg>
+                    </div>
+                    <h4 class="font-bold text-lg mb-2">3. 이름표 할당</h4>
+                    <p class="text-sm text-slate-500">꺼낸 값들에 각각 독립적인 변수 이름을 부여</p>
+                </div>
+            </div>
+
+            <div class="overflow-hidden rounded-xl border border-slate-200">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-100 border-b border-slate-200">
+                        <tr>
+                            <th class="px-6 py-4 font-display font-bold text-slate-700">구분</th>
+                            <th class="px-6 py-4 font-display font-bold text-slate-700">대상</th>
+                            <th class="px-6 py-4 font-display font-bold text-slate-700">방식</th>
+                            <th class="px-6 py-4 font-display font-bold text-slate-700">비유</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 font-bold text-slate-900">객체 <span class="text-accent">{ }</span></td>
+                            <td class="px-6 py-4 text-slate-600">이름(Key) 기준</td>
+                            <td class="px-6 py-4 text-slate-600">이름이 같은 변수에 할당</td>
+                            <td class="px-6 py-4 text-slate-500 italic">"사과 상자에서 '사과'라고 적힌 것을 꺼냄"</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-4 font-bold text-slate-900">배열 <span class="text-secondary">[ ]</span></td>
+                            <td class="px-6 py-4 text-slate-600">순서(Index) 기준</td>
+                            <td class="px-6 py-4 text-slate-600">위치에 맞는 변수에 할당</td>
+                            <td class="px-6 py-4 text-slate-500 italic">"줄 서 있는 사람 중 첫 번째 사람을 꺼냄"</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Code Examples -->
+        <section class="mb-20">
+            <div class="bento-grid">
+                <!-- Object Destructuring -->
+                <div class="col-span-12 lg:col-span-6 space-y-4">
+                    <div class="flex items-center space-x-3 mb-2">
+                        <div class="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-white font-bold">1</div>
+                        <h3 class="text-2xl font-display font-bold">객체(Object) 구조분해</h3>
+                    </div>
+                    <p class="text-slate-600 mb-4">데이터의 이름(key)을 보고 값을 찾아옵니다.</p>
+                    <div class="code-block group">
+                        <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
+                            <span class="text-xs text-slate-400 font-mono">example_obj.js</span>
+                            <span class="w-3 h-3 rounded-full bg-red-500/20 group-hover:bg-red-500 transition-colors"></span>
+                        </div>
+<pre>
+// 기존 방식
+const person = { name: "명식이", age: 60, job: "SW Engineer" };
+const name = person.name;
+const age = person.age;
+
+// 구조분해할당 방식 (훨씬 간결!)
+const { name, age } = person;
+
+console.log(name); // "명식이"
+console.log(age);  // 60
+</pre>
+                    </div>
+                </div>
+
+                <!-- Array Destructuring -->
+                <div class="col-span-12 lg:col-span-6 space-y-4">
+                    <div class="flex items-center space-x-3 mb-2">
+                        <div class="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-white font-bold">2</div>
+                        <h3 class="text-2xl font-display font-bold">배열(Array) 구조분해</h3>
+                    </div>
+                    <p class="text-slate-600 mb-4">데이터가 들어있는 순서대로 값을 가져옵니다.</p>
+                    <div class="code-block group">
+                        <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
+                            <span class="text-xs text-slate-400 font-mono">example_arr.js</span>
+                            <span class="w-3 h-3 rounded-full bg-blue-500/20 group-hover:bg-blue-500 transition-colors"></span>
+                        </div>
+<pre>
+const numbers = [10, 20, 30, 40];
+
+// 첫 번째, 두 번째 값을 가져오고 세 번째는 건너뛰기
+const [first, second, , fourth] = numbers;
+
+console.log(first);  // 10
+console.log(second); // 20
+console.log(fourth); // 40
+</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Advantages Bento Grid -->
+        <section>
+            <h2 class="text-3xl font-display font-bold mb-10 text-center">주요 장점 및 활용 <span class="text-slate-400 font-light">(Advantages)</span></h2>
+            <div class="bento-grid">
+                <div class="col-span-12 md:col-span-7 glass-card p-8 rounded-3xl card-shadow bg-gradient-to-br from-white to-blue-50/30">
+                    <div class="flex items-start gap-4">
+                        <div class="p-3 bg-blue-100 rounded-xl text-accent">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2">가독성 및 유지보수 향상</h4>
+                            <p class="text-slate-600"><code>person.name</code> 대신 직관적인 <code>name</code>을 바로 사용할 수 있어 코드가 명확해집니다. 어떤 속성을 사용하는지 선언부에서 즉시 확인 가능합니다.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12 md:col-span-5 glass-card p-8 rounded-3xl card-shadow">
+                    <div class="flex items-start gap-4">
+                        <div class="p-3 bg-amber-100 rounded-xl text-amber-600">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold mb-2">기본값 설정 (Default)</h4>
+                            <p class="text-slate-600">값이 없을 때를 대비해 기본값을 즉시 정의하여 에러를 방지합니다.</p>
+                            <code class="block mt-3 p-2 bg-slate-100 rounded text-sm text-slate-700">const { theme = "light" } = settings;</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-span-12 glass-card p-8 rounded-3xl card-shadow border-l-4 border-l-accent">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div class="md:w-1/2">
+                            <h4 class="text-xl font-bold mb-2">함수 파라미터 활용의 극대화</h4>
+                            <p class="text-slate-600">함수로 데이터를 넘길 때 객체 통째로 넘기지 않고 필요한 것만 명시해서 받으면, 데이터의 순서가 바뀌어도 이름으로 매칭하기 때문에 훨씬 안전하고 확장성이 좋아집니다.</p>
+                        </div>
+                        <div class="md:w-5/12 code-block py-4">
+<pre>
+function printUser({ name, age }) {
+  console.log(`${name}님은 ${age}세입니다.`);
+}
+</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion -->
+        <footer class="mt-20 text-center animate-fade-in-up" style="animation-delay: 0.4s;">
+            <div class="max-w-3xl mx-auto p-10 bg-slate-900 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-accent opacity-20 blur-3xl -mr-10 -mt-10"></div>
+                <div class="absolute bottom-0 left-0 w-32 h-32 bg-secondary opacity-20 blur-3xl -ml-10 -mb-10"></div>
+                
+                <h3 class="text-2xl font-display font-bold mb-4 relative z-10">Takeaway</h3>
+                <p class="text-slate-300 text-lg mb-0 relative z-10">
+                    구조분해할당은 코드를 <span class="text-white font-bold underline decoration-accent decoration-2 underline-offset-4">더 짧고, 읽기 쉽고, 안전하게</span> 만들기 위해 반드시 필요한 <br class="hidden md:block"/>현대 자바스크립트의 필수 기술입니다.
+                </p>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Schema.org Implementation -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "JavaScript 구조분해할당(Destructuring Assignment) 완벽 가이드",
+      "description": "ES6+ 자바스크립트의 핵심 문법인 구조분해할당의 개념, 필요성, 예제 및 장점을 초보자 눈높이에서 설명합니다.",
+      "author": {
+        "@type": "Person",
+        "name": "AI Web Developer"
+      },
+      "proficiencyLevel": "Beginner",
+      "articleSection": "Modern JavaScript Syntax"
+    }
+    </script>
+</body>
+</html>

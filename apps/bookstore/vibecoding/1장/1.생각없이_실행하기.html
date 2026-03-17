@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>바이브 코딩 실전 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        googleBlue: '#4285F4',
+                        googleRed: '#EA4335',
+                        googleYellow: '#FBBC05',
+                        googleGreen: '#34A853'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        }
+        .card-shadow {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .step-node::after {
+            content: '';
+            position: absolute;
+            bottom: -1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 1.5rem;
+            background: #cbd5e1;
+        }
+        .step-node:last-child::after {
+            display: none;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        pre {
+            scrollbar-width: thin;
+            scrollbar-color: #475569 #1e293b;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white leading-relaxed">
+
+    <!-- Hero Section -->
+    <header class="relative overflow-hidden pt-16 pb-12 md:pt-24 md:pb-20">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-10">
+            <div class="absolute top-10 left-10 w-64 h-64 bg-googleBlue rounded-full blur-3xl animate-float"></div>
+            <div class="absolute bottom-10 right-10 w-64 h-64 bg-googleRed rounded-full blur-3xl animate-float" style="animation-delay: 2s;"></div>
+        </div>
+        
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <div class="inline-block px-4 py-1.5 mb-6 text-sm font-semibold tracking-wide text-accent uppercase bg-blue-50 rounded-full animate-fade-in-up">
+                AI Search x Quick Implementation
+            </div>
+            <h1 class="font-display text-4xl md:text-6xl font-bold text-slate-900 mb-6 tracking-tight animate-fade-in-up" style="animation-delay: 0.1s;">
+                바이브 코딩 <span class="text-transparent bg-clip-text bg-gradient-to-r from-googleBlue to-googleGreen">실전 가이드</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto animate-fade-in-up" style="animation-delay: 0.2s;">
+                복잡한 문법보다 '무엇을 만들 것인가'에 집중하세요. <br class="hidden md:block"> 구글 AI 검색으로 즉시 구현하는 현대적인 개발 방식을 제안합니다.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 pb-24 space-y-20">
+        
+        <!-- Section 1: Why Needed -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.3s;">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-xl bg-googleBlue flex items-center justify-center text-white font-bold">1</div>
+                <h2 class="text-2xl md:text-3xl font-bold font-display">필요한 이유</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-8 rounded-3xl card-shadow border-l-4 border-l-googleBlue">
+                    <div class="text-googleBlue mb-4 text-3xl font-bold">01</div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900">압도적 속도</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">아이디어 구상에서 실행까지 단 1분 내외. 복잡한 로컬 환경 설정 없이 즉각적으로 시각화합니다.</p>
+                </div>
+                <div class="glass-card p-8 rounded-3xl card-shadow border-l-4 border-l-googleRed">
+                    <div class="text-googleRed mb-4 text-3xl font-bold">02</div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900">극강의 간편함</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">크롬 브라우저와 인터넷만 있으면 충분합니다. 별도의 에디터 설치 과정이 생략됩니다.</p>
+                </div>
+                <div class="glass-card p-8 rounded-3xl card-shadow border-l-4 border-l-googleYellow">
+                    <div class="text-googleYellow mb-4 text-3xl font-bold">03</div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900">높은 정확성</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">자연어 명령(Prompt)만으로 최신 트렌드가 반영된 구조화된 HTML/JS 코드를 얻을 수 있습니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Flowchart Process -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.4s;">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-xl bg-googleGreen flex items-center justify-center text-white font-bold">2</div>
+                <h2 class="text-2xl md:text-3xl font-bold font-display">핵심 프로세스</h2>
+            </div>
+
+            <div class="glass-card p-8 md:p-12 rounded-[2rem] overflow-hidden">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-8 relative">
+                    <!-- Flow Item 1 -->
+                    <div class="flex flex-col items-center text-center z-10 w-full md:w-1/4">
+                        <div class="w-16 h-16 bg-slate-800 text-white rounded-full flex items-center justify-center mb-4 shadow-lg ring-4 ring-slate-100">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                        </div>
+                        <h4 class="font-bold text-slate-900 mb-1">지시서 작성</h4>
+                        <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-2">Step 01</p>
+                        <p class="text-sm text-slate-600">바이브 코딩 수칙에 따라 프롬프트 작성</p>
+                    </div>
+
+                    <div class="hidden md:block absolute left-[20%] top-1/2 -translate-y-8 w-[10%] border-t-2 border-dashed border-slate-300"></div>
+
+                    <!-- Flow Item 2 -->
+                    <div class="flex flex-col items-center text-center z-10 w-full md:w-1/4">
+                        <div class="w-16 h-16 bg-googleBlue text-white rounded-full flex items-center justify-center mb-4 shadow-lg ring-4 ring-blue-50">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                        <h4 class="font-bold text-slate-900 mb-1">AI 검색 실행</h4>
+                        <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-2">Step 02</p>
+                        <p class="text-sm text-slate-600">구글 검색창에 붙여넣어 코드 생성</p>
+                    </div>
+
+                    <div class="hidden md:block absolute left-[45%] top-1/2 -translate-y-8 w-[10%] border-t-2 border-dashed border-slate-300"></div>
+
+                    <!-- Flow Item 3 -->
+                    <div class="flex flex-col items-center text-center z-10 w-full md:w-1/4">
+                        <div class="w-16 h-16 bg-googleGreen text-white rounded-full flex items-center justify-center mb-4 shadow-lg ring-4 ring-green-50">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h4 class="font-bold text-slate-900 mb-1">결과 확인</h4>
+                        <p class="text-xs text-slate-500 uppercase tracking-widest font-semibold mb-2">Step 03</p>
+                        <p class="text-sm text-slate-600">온라인 에디터에서 코드 즉시 실행</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Practical Example -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.5s;">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-xl bg-googleYellow flex items-center justify-center text-white font-bold">3</div>
+                <h2 class="text-2xl md:text-3xl font-bold font-display">실전 예제</h2>
+            </div>
+
+            <div class="space-y-8">
+                <!-- Step 1 Prompt -->
+                <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div class="bg-slate-800 px-6 py-4 flex items-center justify-between">
+                        <span class="text-slate-300 text-sm font-semibold tracking-wider">PROMPT COPY</span>
+                        <button onclick="copyPrompt()" class="text-white hover:text-accent transition-colors text-xs bg-slate-700 px-3 py-1 rounded-full">Copy Text</button>
+                    </div>
+                    <div class="p-6 md:p-8 bg-slate-900">
+                        <pre id="promptText" class="text-slate-300 font-mono text-sm leading-relaxed whitespace-pre-wrap">너는 빠르게 작동하는 프로토타입을 만드는 코딩 파트너다.
+
+[목적]
+HTML과 JavaScript만 사용해 버튼을 누를 때마다 
+화면 배경색이 무작위로 바뀌는 단일 HTML 웹앱을 만든다.
+
+[제약]
+- 1개의 HTML 파일로 구성한다.
+- 디자인은 중앙에 큰 버튼 하나만 있게 한다.
+- 배경색이 바뀔 때 색상 코드(HEX)를 화면에 표시한다.
+
+[출력]
+- 설명 없이 전체 HTML 코드만 코드블록으로 출력한다.</pre>
+                    </div>
+                </div>
+
+                <!-- Step 2 Generated Code -->
+                <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div class="bg-googleBlue px-6 py-4 flex items-center justify-between">
+                        <span class="text-white text-sm font-semibold tracking-wider">GENERATED HTML</span>
+                        <span class="bg-white/20 text-white text-[10px] px-2 py-0.5 rounded uppercase">Response Example</span>
+                    </div>
+                    <div class="p-6 md:p-8">
+                        <pre class="text-slate-700 font-mono text-xs md:text-sm leading-relaxed overflow-x-auto">
+&lt;!DOCTYPE html&gt;
+&lt;html lang="ko"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;style&gt;
+        body { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; font-family: sans-serif; transition: background 0.3s; }
+        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; border-radius: 10px; border: none; background: #333; color: white; }
+        #colorCode { margin-top: 20px; font-size: 1.5rem; font-weight: bold; background: rgba(255,255,255,0.7); padding: 5px 10px; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;button onclick="changeColor()"&gt;배경색 바꾸기&lt;/button&gt;
+    &lt;div id="colorCode"&gt;#FFFFFF&lt;/div&gt;
+
+    &lt;script&gt;
+        function changeColor() {
+            const hex = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0').toUpperCase();
+            document.body.style.backgroundColor = hex;
+            document.getElementById('colorCode').innerText = hex;
+        }
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Implementation Checklist -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.6s;">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-xl bg-googleRed flex items-center justify-center text-white font-bold">4</div>
+                <h2 class="text-2xl md:text-3xl font-bold font-display">최종 확인 가이드</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="glass-card p-8 rounded-3xl">
+                    <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-googleGreen" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                        작동 확인 순서
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3">
+                            <span class="bg-slate-200 text-slate-700 w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold">1</span>
+                            <span class="text-slate-600">AI가 생성한 코드의 <strong>'복사'</strong> 버튼을 클릭</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="bg-slate-200 text-slate-700 w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold">2</span>
+                            <span class="text-slate-600"><strong>CodePen</strong> 또는 <strong>HTML Viewer</strong> 사이트에 접속</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="bg-slate-200 text-slate-700 w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold">3</span>
+                            <span class="text-slate-600">편집창에 복사한 코드를 <strong>붙여넣기(Ctrl+V)</strong></span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="bg-slate-200 text-slate-700 w-6 h-6 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold">4</span>
+                            <span class="text-slate-600 text-googleBlue font-semibold underline underline-offset-4 decoration-googleBlue/30">브라우저에서 즉시 작동 확인!</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="glass-card p-8 rounded-3xl bg-slate-900 text-white">
+                    <h3 class="text-xl font-bold mb-6 text-white flex items-center gap-2">
+                        <svg class="w-6 h-6 text-googleYellow" fill="currentColor" viewBox="0 0 20 20"><path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1a1 1 0 112 0v1a1 1 0 11-2 0zM13.536 14.95a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM14.95 5.05a1 1 0 00-1.414 1.414l.707.707a1 1 0 001.414-1.414l-.707-.707z"></path></svg>
+                        핵심 수칙 분석
+                    </h3>
+                    <div class="space-y-6">
+                        <div>
+                            <span class="text-googleYellow text-xs font-bold uppercase tracking-widest">Single File</span>
+                            <p class="text-slate-400 text-sm mt-1">HTML, CSS, JS가 단일 파일에 포함되어 관리가 쉽습니다.</p>
+                        </div>
+                        <div>
+                            <span class="text-googleBlue text-xs font-bold uppercase tracking-widest">Clear Action</span>
+                            <p class="text-slate-400 text-sm mt-1">질문 대신 "무작위 배경색 변경"이라는 명확한 작업을 지시했습니다.</p>
+                        </div>
+                        <div>
+                            <span class="text-googleGreen text-xs font-bold uppercase tracking-widest">Debugging</span>
+                            <p class="text-slate-400 text-sm mt-1">콘솔 로그를 포함해 크롬 개발자 도구(F12)에서 추적이 가능합니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer-like CTA (Not a legal footer) -->
+    <div class="max-w-4xl mx-auto px-6 pb-20">
+        <div class="bg-gradient-to-br from-slate-800 to-slate-950 p-1 rounded-[2.5rem] shadow-2xl">
+            <div class="bg-slate-900/50 backdrop-blur-sm px-8 py-12 rounded-[2.3rem] text-center border border-white/10">
+                <h3 class="text-2xl md:text-3xl font-bold text-white mb-4">지금 바로 아이디어를 검색해보세요.</h3>
+                <p class="text-slate-400 mb-8 max-w-lg mx-auto">더 이상 코딩을 '공부'하지 마세요. 구글 AI와 함께 당신의 비전을 '실현'하는 것이 바이브 코딩의 본질입니다.</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="https://www.google.com" target="_blank" class="px-8 py-3 bg-googleBlue hover:bg-blue-600 text-white font-bold rounded-full transition-all hover:scale-105 shadow-lg shadow-blue-500/20">구글 AI 검색 바로가기</a>
+                    <a href="https://codepen.io/pen/" target="_blank" class="px-8 py-3 bg-white hover:bg-slate-100 text-slate-900 font-bold rounded-full transition-all hover:scale-105 shadow-lg shadow-white/10">CodePen 에디터 열기</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copyPrompt() {
+            const promptText = document.getElementById('promptText').innerText;
+            navigator.clipboard.writeText(promptText).then(() => {
+                const btn = event.target;
+                const originalText = btn.innerText;
+                btn.innerText = 'Copied!';
+                btn.classList.replace('bg-slate-700', 'bg-googleGreen');
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.replace('bg-googleGreen', 'bg-slate-700');
+                }, 2000);
+            });
+        }
+
+        // Add Intersection Observer for fade-in animations
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-fade-in-up').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.8s ease-out';
+            observer.observe(el);
+        });
+    </script>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "HowTo",
+      "name": "바이브 코딩 실전 가이드",
+      "description": "구글 AI 검색을 활용하여 코드를 즉시 생성하고 실행하는 방법",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "name": "지시서 작성",
+          "text": "바이브 코딩 수칙에 따라 프롬프트를 작성합니다."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "AI 검색 실행",
+          "text": "구글 검색창에 프롬프트를 입력하여 코드를 생성합니다."
+        },
+        {
+          "@type": "HowToStep",
+          "name": "결과 확인",
+          "text": "온라인 에디터에서 생성된 코드를 실행합니다."
+        }
+      ]
+    }
+    </script>
+</body>
+</html>

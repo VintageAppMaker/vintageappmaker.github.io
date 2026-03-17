@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Module System: ES5 vs ES6 Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        codebg: '#1e293b'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        pulseSoft: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.8' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+        }
+        .code-block {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            border-left: 4px solid #3b82f6;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+        .card-shadow {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .step-line::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #cbd5e1;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white antialiased">
+
+    <!-- Header Section -->
+    <header class="relative pt-20 pb-16 px-6 overflow-hidden">
+        <div class="max-w-5xl mx-auto text-center relative z-10 animate-fade-in-up">
+            <span class="inline-block py-1 px-3 rounded-full bg-blue-100 text-blue-600 text-sm font-bold mb-4 tracking-wider uppercase">Mastering JavaScript</span>
+            <h1 class="text-5xl md:text-7xl font-display font-extrabold text-slate-900 mb-6 tracking-tight">
+                Javascript <span class="text-accent">Module</span> System
+            </h1>
+            <p class="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto font-light leading-relaxed">
+                현직 개발자와 함께 배우는 ES5와 ES6의 핵심 차이점 및 모듈 활용 가이드
+            </p>
+        </div>
+        <!-- Decorative elements -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-0 opacity-20 pointer-events-none">
+            <div class="absolute top-10 left-10 w-64 h-64 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl animate-float"></div>
+            <div class="absolute bottom-10 right-10 w-64 h-64 bg-slate-300 rounded-full mix-blend-multiply filter blur-3xl animate-float" style="animation-delay: 2s"></div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-24">
+        
+        <!-- 1. What is Module? Section -->
+        <section class="mb-20">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-1 h-10 rounded-xl bg-accent flex items-center justify-center text-white font-bold">1</div>
+                <h2 class="text-3xl font-display font-bold text-slate-900">모듈(Module)이란 무엇인가?</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 items-stretch">
+                <div class="glass-card p-8 rounded-3xl card-shadow">
+                    <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.628.288a2 2 0 00-1.108 1.58l-.126 1.272a2 2 0 001.253 2.027l2.63.925a2 2 0 002.484-1.3l.005-.02a2 2 0 00-.507-1.448l-1.712-2.054a2 2 0 01-.117-2.341l.142-.214a1 1 0 00-.496-1.394 1 1 0 00-1.109.15l-1.126 1.127a2 2 0 01-1.569.569l-1.902-.19a2 2 0 01-1.586-.949l-.066-.105a2 2 0 00-2.534-.567l-2.639 1.522a2 2 0 00-1.055 1.54l-.12 1.176a2 2 0 00.835 1.686l1.507 1.093a2 2 0 002.413-.208l.564-.564a2 2 0 011.585-.566l1.902.19a2 2 0 011.586.949l.51.814a2 2 0 001.632.894h.021a2 2 0 001.632-.894l.51-.814a2 2 0 011.586-.949l1.902-.19a2 2 0 011.585.566l.564.564a2 2 0 002.413.208l1.507-1.093a2 2 0 00.835-1.686l-.12-1.176a2 2 0 00-1.055-1.54l-2.639-1.522z"></path></svg>
+                        개념 설명
+                    </h3>
+                    <p class="text-slate-600 leading-relaxed">
+                        모듈은 커다란 레고 성을 만들기 위한 <strong class="text-slate-900 font-bold">'개별 레고 블록'</strong>과 같습니다. 하나의 거대한 자바스크립트 파일에 모든 코드를 작성하면 관리가 불가능해집니다. 이를 기능별로 쪼개어 독립된 파일로 만든 것이 바로 <strong>모듈</strong>입니다.
+                    </p>
+                </div>
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 card-shadow">
+                    <h3 class="text-xl font-bold mb-6 flex items-center gap-2 text-slate-900">
+                        <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        왜 필요한가?
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex gap-4">
+                            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-bold">1</span>
+                            <div>
+                                <span class="font-bold block text-slate-800">코드의 재사용성</span>
+                                <span class="text-sm text-slate-500">한 번 만든 기능을 다른 프로젝트에서도 쉽게 가져다 쓸 수 있습니다.</span>
+                            </div>
+                        </li>
+                        <li class="flex gap-4">
+                            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-bold">2</span>
+                            <div>
+                                <span class="font-bold block text-slate-800">유지보수 용이</span>
+                                <span class="text-sm text-slate-500">특정 기능에 문제가 생기면 해당 모듈 파일만 수정하면 됩니다.</span>
+                            </div>
+                        </li>
+                        <li class="flex gap-4">
+                            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-bold">3</span>
+                            <div>
+                                <span class="font-bold block text-slate-800">네임스페이스 충돌 방지</span>
+                                <span class="text-sm text-slate-500">서로 다른 파일에서 같은 이름의 변수를 사용해도 충돌하지 않습니다.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. ES5 vs ES6 Comparison Section -->
+        <section class="mb-20">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white font-bold">2</div>
+                <h2 class="text-3xl font-display font-bold text-slate-900">ES5 vs ES6 모듈 방식 비교</h2>
+            </div>
+
+            <div class="overflow-hidden rounded-3xl border border-slate-200 glass-card">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-900 text-white">
+                            <th class="py-5 px-6 font-display font-semibold uppercase tracking-wider text-sm">구분</th>
+                            <th class="py-5 px-6 font-display font-semibold uppercase tracking-wider text-sm">ES5 (CommonJS 방식)</th>
+                            <th class="py-5 px-6 font-display font-semibold uppercase tracking-wider text-sm">ES6 (ESM 방식)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="py-5 px-6 font-bold text-slate-900 bg-slate-100/30">도입 시기</td>
+                            <td class="py-5 px-6 text-slate-600">2009년 표준 (Node.js 기본 방식)</td>
+                            <td class="py-5 px-6 text-slate-600 font-semibold text-accent">2015년 표준 (현대 프론트엔드 표준)</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="py-5 px-6 font-bold text-slate-900 bg-slate-100/30">내보내기 키워드</td>
+                            <td class="py-5 px-6 font-mono text-sm bg-slate-50">module.exports / exports</td>
+                            <td class="py-5 px-6 font-mono text-sm bg-blue-50/30 text-accent font-semibold">export / export default</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="py-5 px-6 font-bold text-slate-900 bg-slate-100/30">가져오기 키워드</td>
+                            <td class="py-5 px-6 font-mono text-sm bg-slate-50">require()</td>
+                            <td class="py-5 px-6 font-mono text-sm bg-blue-50/30 text-accent font-semibold">import</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50/50 transition-colors">
+                            <td class="py-5 px-6 font-bold text-slate-900 bg-slate-100/30">특징</td>
+                            <td class="py-5 px-6 text-slate-600">실행 시점에 불러옴 (동적)</td>
+                            <td class="py-5 px-6 text-slate-600">컴파일 시점에 불러옴 (정적, 성능 우수)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 3. Syntax Examples Section -->
+        <section class="mb-20">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-xl bg-accent flex items-center justify-center text-white font-bold">3</div>
+                <h2 class="text-3xl font-display font-bold text-slate-900">쉬운 예제로 보는 문법 비교</h2>
+            </div>
+
+            <!-- Example 1: ES5 -->
+            <div class="mb-12">
+                <div class="inline-flex items-center px-4 py-1.5 rounded-t-2xl bg-slate-800 text-white text-sm font-semibold">
+                    [예제 1] ES5 방식 (과거 방식)
+                </div>
+                <div class="glass-card p-8 rounded-tr-3xl rounded-b-3xl border-t-0">
+                    <p class="text-slate-600 mb-6 font-medium">더하기 기능을 가진 수학 도구함을 만든다고 가정해 봅시다.</p>
+                    <div class="grid lg:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">math.js (내보내는 파일)</span>
+<pre class="code-block">
+// math.js
+function add(a, b) {
+  return a + b;
+}
+
+module.exports = add; // 도구함에서 add 함수를 밖으로 꺼내줌
+</pre>
+                        </div>
+                        <div class="space-y-2">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">app.js (가져오는 파일)</span>
+<pre class="code-block">
+// app.js
+const add = require('./math.js'); // 꺼내준 add 함수를 불러옴
+
+console.log(add(5, 3)); // 출력: 8
+</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Example 2: ES6 -->
+            <div class="space-y-8">
+                <div class="inline-flex items-center px-4 py-1.5 rounded-t-2xl bg-accent text-white text-sm font-semibold">
+                    [예제 2] ES6 방식 (현대 표준 - import/export)
+                </div>
+                
+                <div class="bento-grid">
+                    <!-- Named Export -->
+                    <div class="col-span-12 lg:col-span-7 glass-card p-8 rounded-3xl border-accent/20">
+                        <div class="flex items-start justify-between mb-6">
+                            <div>
+                                <h4 class="text-lg font-bold text-slate-900 mb-1">1) Named Export</h4>
+                                <p class="text-sm text-slate-500 italic">여러 개의 기능을 각각의 이름으로 내보낼 때 사용합니다.</p>
+                            </div>
+                            <span class="bg-blue-100 text-accent text-[10px] font-bold px-2 py-1 rounded uppercase tracking-tighter">Multiple</span>
+                        </div>
+                        <div class="space-y-6">
+                            <div>
+                                <span class="text-xs font-bold text-slate-400 uppercase mb-2 block">math.js</span>
+<pre class="code-block">
+// math.js
+export const add = (a, b) => a + b;
+export const subtract = (a, b) => a - b;
+</pre>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-slate-400 uppercase mb-2 block">app.js</span>
+<pre class="code-block">
+// app.js
+import { add, subtract } from './math.js';
+
+console.log(add(5, 3));      // 8
+console.log(subtract(5, 3)); // 2
+</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Default Export -->
+                    <div class="col-span-12 lg:col-span-5 glass-card p-8 rounded-3xl bg-slate-900/5">
+                        <div class="flex items-start justify-between mb-6">
+                            <div>
+                                <h4 class="text-lg font-bold text-slate-900 mb-1">2) Default Export</h4>
+                                <p class="text-sm text-slate-500 italic">핵심 기능 하나만 내보낼 때 사용합니다.</p>
+                            </div>
+                            <span class="bg-slate-200 text-slate-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-tighter">Single</span>
+                        </div>
+                        <div class="space-y-6">
+                            <div>
+                                <span class="text-xs font-bold text-slate-400 uppercase mb-2 block">message.js</span>
+<pre class="code-block">
+// message.js
+export default function greet(name) {
+  return `안녕하세요, ${name}님!`;
+}
+</pre>
+                            </div>
+                            <div>
+                                <span class="text-xs font-bold text-slate-400 uppercase mb-2 block">app.js</span>
+<pre class="code-block">
+// app.js
+// 이름을 자유롭게 지정 가능
+import myGreet from './message.js'; 
+
+console.log(myGreet('철수')); // 안녕하세요, 철수님!
+</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Conclusion Section -->
+        <section class="mb-20">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center text-white font-bold">4</div>
+                <h2 class="text-3xl font-display font-bold text-slate-900">왜 ES6 방식을 써야 할까요?</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 hover:border-accent transition-all group">
+                    <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-accent group-hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">가독성</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">import, export라는 단어가 직관적이어서 코드가 무엇을 하는지 한눈에 알 수 있습니다.</p>
+                </div>
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 hover:border-accent transition-all group">
+                    <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-accent group-hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">성능 최적화</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">사용하지 않는 코드를 자동으로 제거(Tree Shaking)하여 파일 용량을 줄이고 속도를 높입니다.</p>
+                </div>
+                <div class="bg-white p-8 rounded-3xl border border-slate-200 hover:border-accent transition-all group">
+                    <div class="w-12 h-12 bg-slate-100 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-accent group-hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-3">브라우저 지원</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">최신 브라우저들은 별도의 설정 없이도 ES6 모듈을 직접 이해하고 처리할 수 있습니다.</p>
+                </div>
+            </div>
+
+            <!-- Flowchart-like visual for module process -->
+            <div class="bg-slate-900 rounded-[2.5rem] p-10 text-white relative overflow-hidden">
+                <div class="relative z-10">
+                    <h3 class="text-2xl font-display font-bold mb-8 text-center text-blue-400">모듈화 시스템 요약 도식</h3>
+                    <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12">
+                        <div class="text-center group">
+                            <div class="w-24 h-24 bg-slate-800 rounded-3xl border-2 border-slate-700 flex items-center justify-center mb-3 group-hover:border-accent transition-colors">
+                                <span class="text-3xl">🧩</span>
+                            </div>
+                            <p class="text-sm font-bold">기능 단위 모듈화</p>
+                            <p class="text-[10px] text-slate-500 mt-1">파일별 독립성 확보</p>
+                        </div>
+                        <div class="hidden md:block">
+                            <svg class="w-8 h-8 text-slate-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </div>
+                        <div class="text-center group">
+                            <div class="w-24 h-24 bg-slate-800 rounded-3xl border-2 border-slate-700 flex items-center justify-center mb-3 group-hover:border-accent transition-colors">
+                                <span class="text-3xl">📤</span>
+                            </div>
+                            <p class="text-sm font-bold">Export</p>
+                            <p class="text-[10px] text-slate-500 mt-1">필요한 기능 외부 노출</p>
+                        </div>
+                        <div class="hidden md:block">
+                            <svg class="w-8 h-8 text-slate-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </div>
+                        <div class="text-center group">
+                            <div class="w-24 h-24 bg-slate-800 rounded-3xl border-2 border-slate-700 flex items-center justify-center mb-3 group-hover:border-accent transition-colors">
+                                <span class="text-3xl">📥</span>
+                            </div>
+                            <p class="text-sm font-bold">Import</p>
+                            <p class="text-[10px] text-slate-500 mt-1">원하는 모듈 불러오기</p>
+                        </div>
+                        <div class="hidden md:block">
+                            <svg class="w-8 h-8 text-slate-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </div>
+                        <div class="text-center group">
+                            <div class="w-24 h-24 bg-accent/20 rounded-3xl border-2 border-accent flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                                <span class="text-3xl">🚀</span>
+                            </div>
+                            <p class="text-sm font-bold text-accent">애플리케이션 완성</p>
+                            <p class="text-[10px] text-slate-500 mt-1">안정적이고 빠른 조립</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="absolute -bottom-24 -right-24 w-64 h-64 bg-accent/10 rounded-full blur-3xl"></div>
+            </div>
+        </section>
+
+        <!-- Instructor's Note -->
+        <section class="max-w-4xl mx-auto">
+            <div class="bg-blue-50 border border-blue-100 rounded-3xl p-8 md:p-12 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <svg class="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C19.5693 16 20.017 15.5523 20.017 15V9C20.017 8.44772 19.5693 8 19.017 8H16.017C14.9124 8 14.017 7.10457 14.017 6V5C14.017 3.89543 14.9124 3 16.017 3H19.017C21.2261 3 23.017 4.79086 23.017 7V17C23.017 19.2091 21.2261 21 19.017 21H14.017ZM1 21L1 18C1 16.8954 1.89543 16 3 16H6C6.55228 16 7 15.5523 7 15V9C7 8.44772 6.55228 8 6 8H3C1.89543 8 1 7.10457 1 6V5C1 3.89543 1.89543 3 3 3H6C8.20914 3 10 4.79086 10 7V17C10 19.2091 8.20914 21 6 21H1Z"></path></svg>
+                </div>
+                <div class="relative z-10">
+                    <h3 class="text-blue-600 font-bold mb-4 flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm">💡</span>
+                        강사의 한마디
+                    </h3>
+                    <p class="text-xl md:text-2xl text-slate-800 font-medium leading-relaxed mb-6 italic">
+                        "프로그래밍은 작은 부품(모듈)을 조립하는 과정입니다. ES6의 <span class="text-blue-600 border-b-2 border-blue-200">import/export</span>를 마스터하는 것은 현대적인 웹앱 개발을 위한 가장 기본적이고 강력한 도구를 손에 넣는 것과 같습니다."
+                    </p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-slate-300"></div>
+                        <div>
+                            <p class="text-sm font-bold text-slate-900 leading-none">Senior Web Developer</p>
+                            <p class="text-xs text-slate-500 mt-1">현직 개발자 겸 프로그래밍 강사</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JSON-LD Structured Data for Article -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "자바스크립트 모듈 시스템: ES5 vs ES6 완벽 가이드",
+      "description": "현직 개발자가 설명하는 자바스크립트 모듈의 개념과 ES5(CommonJS)와 ES6(ESM)의 문법 및 특징 비교.",
+      "author": {
+        "@type": "Person",
+        "name": "Programming Instructor"
+      },
+      "proficiencyLevel": "Beginner"
+    }
+    </script>
+</body>
+</html>

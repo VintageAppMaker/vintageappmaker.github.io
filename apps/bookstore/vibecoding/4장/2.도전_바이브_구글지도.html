@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Map Search - No API Tool</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+            display: ['Outfit', 'sans-serif'],
+          },
+          colors: {
+            slate: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              900: '#0f172a',
+            },
+            accent: '#3b82f6'
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            pulseSoft: {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0.7' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .glass-card {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .map-frame {
+      filter: grayscale(0.1) contrast(1.1);
+      transition: all 0.5s ease;
+    }
+    .map-frame:hover {
+      filter: grayscale(0);
+    }
+    .step-node {
+      position: relative;
+    }
+    .step-node:not(:last-child)::after {
+      content: '→';
+      position: absolute;
+      right: -1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #94a3b8;
+      font-weight: bold;
+    }
+    @media (max-width: 768px) {
+      .step-node:not(:last-child)::after {
+        content: '↓';
+        right: auto;
+        left: 50%;
+        bottom: -1.25rem;
+        top: auto;
+        transform: translateX(-50%);
+      }
+    }
+    pre {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      overflow-x: auto;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+    code {
+      font-family: 'Fira Code', 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white min-h-screen">
+
+  <main class="max-w-5xl mx-auto px-4 py-12 md:py-20 animate-fade-in-up">
+    <!-- Header -->
+    <header class="text-center mb-16">
+      <div class="inline-block px-4 py-1.5 mb-4 text-xs font-bold tracking-widest text-accent uppercase bg-blue-50 rounded-full border border-blue-100">
+        No-API Solution
+      </div>
+      <h1 class="text-4xl md:text-6xl font-bold font-display text-slate-900 mb-6">
+        📍 Smart Map <span class="text-accent">Viewer</span>
+      </h1>
+      <p class="text-lg text-slate-500 max-w-2xl mx-auto">
+        API 키 발급 과정 없이 주소만으로 즉시 구글 지도를 렌더링합니다. 
+        빠른 프로토타이핑과 실무 적용을 위한 최적의 도구입니다.
+      </p>
+    </header>
+
+    <!-- Search Section -->
+    <div class="glass-card p-2 md:p-3 rounded-2xl shadow-xl mb-12 flex flex-col md:flex-row gap-2 transition-all duration-300 focus-within:ring-2 focus-within:ring-accent/20">
+      <input 
+        type="text" 
+        id="addressInput" 
+        placeholder="검색할 주소를 입력하세요 (예: 서울특별시 중구 세종대로 110)" 
+        class="flex-grow px-6 py-4 bg-transparent outline-none text-lg text-slate-700 placeholder:text-slate-400 font-medium"
+      >
+      <button 
+        onclick="updateMap()" 
+        class="bg-accent hover:bg-blue-600 text-white font-bold px-8 py-4 rounded-xl transition-all active:scale-95 shadow-lg shadow-blue-500/20 whitespace-nowrap"
+      >
+        지도 검색하기
+      </button>
+    </div>
+
+    <!-- Map Preview -->
+    <div class="relative mb-20 group">
+      <div id="map-placeholder" class="aspect-video w-full rounded-3xl bg-slate-200 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 transition-all group-hover:bg-slate-100">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-slate-400 mb-4 animate-float" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <p class="text-slate-500 font-medium">상단에 주소를 입력하면 이곳에 지도가 표시됩니다.</p>
+      </div>
+      <div id="map-container" class="hidden aspect-video w-full rounded-3xl overflow-hidden shadow-2xl border border-white">
+        <!-- iframe will be injected here -->
+      </div>
+      
+      <div id="externalLinkContainer" class="hidden mt-4 text-right animate-fade-in-up">
+        <a id="externalLink" href="#" target="_blank" class="inline-flex items-center text-sm font-semibold text-accent hover:underline">
+          원하는 위치가 아닌가요? 구글에서 직접 확인하기
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- Logic Section -->
+    <section class="space-y-12">
+      <div class="border-t border-slate-200 pt-12">
+        <h2 class="text-3xl font-bold font-display text-slate-900 mb-8 flex items-center">
+          <span class="w-8 h-8 bg-accent text-white rounded-lg flex items-center justify-center text-sm mr-3">1</span>
+          System Architecture
+        </h2>
+        
+        <!-- Logic Flow Diagram -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-center mb-12">
+          <div class="step-node p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
+            <div class="text-xs font-bold text-slate-400 uppercase mb-2">Input</div>
+            <div class="text-slate-800 font-bold">주소 텍스트</div>
+          </div>
+          <div class="step-node p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
+            <div class="text-xs font-bold text-slate-400 uppercase mb-2">Process</div>
+            <div class="text-slate-800 font-bold">URL 인코딩</div>
+          </div>
+          <div class="step-node p-6 bg-white rounded-2xl shadow-sm border border-slate-100">
+            <div class="text-xs font-bold text-slate-400 uppercase mb-2">Integration</div>
+            <div class="text-slate-800 font-bold">Iframe 결합</div>
+          </div>
+          <div class="p-6 bg-blue-50 rounded-2xl shadow-sm border border-blue-100">
+            <div class="text-xs font-bold text-accent uppercase mb-2">Output</div>
+            <div class="text-accent font-bold">지도 시각화</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="text-3xl font-bold font-display text-slate-900 mb-8 flex items-center">
+          <span class="w-8 h-8 bg-accent text-white rounded-lg flex items-center justify-center text-sm mr-3">2</span>
+          Core Implementation
+        </h2>
+        <div class="rounded-2xl overflow-hidden shadow-lg">
+          <pre><code>
+// 핵심 로직: 주소 값을 기반으로 구글 임베드 URL 동적 생성
+function updateMap() {
+  const address = document.getElementById('addressInput').value;
+  
+  if (!address) {
+    alert('주소를 입력해주세요.');
+    return;
+  }
+
+  // API Key 없이 사용하는 URL 패턴
+  const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+  
+  // UI 렌더링 업데이트
+  const placeholder = document.getElementById('map-placeholder');
+  const container = document.getElementById('map-container');
+  
+  placeholder.classList.add('hidden');
+  container.classList.remove('hidden');
+  container.innerHTML = `&lt;iframe 
+    src="${mapUrl}" 
+    class="w-full h-full border-none map-frame" 
+    allowfullscreen&gt;&lt;/iframe&gt;`;
+}
+          </code></pre>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 rounded-3xl p-8 md:p-12 text-white">
+        <h3 class="text-2xl font-bold mb-4">💡 바이브 코딩(Vibe Coding) 포인트</h3>
+        <p class="text-slate-400 leading-relaxed">
+          이 어플리케이션은 복잡한 API 연동 없이도 <strong>'공유 패턴의 추상화'</strong>를 통해 문제를 해결합니다. 
+          구글 맵의 URL 구조를 파악하고, 필요한 데이터(주소)를 인코딩하여 주입하는 간단한 논리만으로 강력한 기능을 구현할 수 있습니다. 
+          이것이 바로 기술의 본질을 이해하고 효율적으로 도구를 사용하는 개발자의 사고방식입니다.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function updateMap() {
+      const address = document.getElementById('addressInput').value;
+      
+      if (!address) {
+        const inputField = document.getElementById('addressInput');
+        inputField.classList.add('ring-2', 'ring-red-400');
+        setTimeout(() => inputField.classList.remove('ring-2', 'ring-red-400'), 2000);
+        return;
+      }
+
+      // API Key 없이 사용하는 Google Maps Embed URL
+      const mapUrl = `https://maps.google.com/maps?q=${encodeURIComponent(address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+      const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(address + " 주소")}`;
+
+      // View Update
+      const placeholder = document.getElementById('map-placeholder');
+      const container = document.getElementById('map-container');
+      const linkContainer = document.getElementById('externalLinkContainer');
+      const externalLink = document.getElementById('externalLink');
+
+      placeholder.classList.add('hidden');
+      container.classList.remove('hidden');
+      container.innerHTML = `<iframe src="${mapUrl}" class="w-full h-full border-none map-frame" allowfullscreen></iframe>`;
+      
+      linkContainer.classList.remove('hidden');
+      externalLink.href = searchUrl;
+
+      // Scroll to map
+      container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // Support Enter Key
+    document.getElementById('addressInput').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') updateMap();
+    });
+  </script>
+</body>
+</html>

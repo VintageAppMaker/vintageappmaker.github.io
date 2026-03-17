@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>바이브 코딩(Vibe Coding)의 정석: 프로그래밍 지식의 중요성</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: {
+                            light: '#60a5fa',
+                            DEFAULT: '#3b82f6',
+                            dark: '#2563eb'
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+        .card-shadow {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-shadow:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .flow-line {
+            position: relative;
+        }
+        .flow-line::after {
+            content: '';
+            position: absolute;
+            bottom: -1.5rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 1.5rem;
+            background: #cbd5e1;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white leading-relaxed">
+
+    <!-- Hero Section -->
+    <header class="relative pt-20 pb-16 px-6 overflow-hidden">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-20">
+            <div class="absolute top-10 left-10 w-64 h-64 bg-accent-light rounded-full blur-3xl animate-float"></div>
+            <div class="absolute bottom-10 right-10 w-96 h-96 bg-slate-300 rounded-full blur-3xl animate-float" style="animation-delay: -2s;"></div>
+        </div>
+        
+        <div class="max-w-4xl mx-auto text-center animate-fade-in-up">
+            <span class="inline-block px-4 py-1.5 mb-6 text-sm font-semibold tracking-wide text-accent bg-blue-50 border border-blue-100 rounded-full uppercase">
+                Revolution of Development
+            </span>
+            <h1 class="font-display text-4xl md:text-6xl font-bold mb-6 gradient-text">
+                바이브 코딩 시대,<br>왜 다시 '기초'인가?
+            </h1>
+            <p class="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+                인공지능이라는 강력한 엔진을 제어하는 조종법, <br class="hidden md:block">
+                프로그래밍 기초 지식은 목적지까지 안전하게 도달하게 하는 지도입니다.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-24">
+        
+        <!-- Section 1: 명세의 힘 -->
+        <section class="mb-20">
+            <div class="flex items-center gap-4 mb-10">
+                <div class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-bold text-xl shadow-lg">1</div>
+                <h2 class="text-3xl font-display font-bold text-slate-900">프로그래밍 학습이 필요한 진짜 이유</h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="glass-card p-8 rounded-3xl card-shadow border-t-4 border-t-accent">
+                    <div class="mb-4 text-accent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04m14.562 0c.307.31.513.712.513 1.156a1.125 1.125 0 01-1.125 1.126 1.125 1.125 0 01-1.125-1.126c0-.444.206-.846.513-1.156m0 0a1.5 1.5 0 10-2.25-1.5M12 18a.75.75 0 110-1.5.75.75 0 010 1.5z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900">지시의 정밀도</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        "대충 맛있게 해줘"가 아닌 "소금 2g, 설탕 10g 넣어줘"라고 명확히 지시할 수 있는 능력이 결과를 결정합니다.
+                    </p>
+                </div>
+
+                <div class="glass-card p-8 rounded-3xl card-shadow border-t-4 border-t-slate-400">
+                    <div class="mb-4 text-slate-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900">디버깅 능력</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        AI가 생성한 코드에 버그가 생겼을 때, 기초 지식이 없으면 에러 메시지조차 해석하지 못해 무의미한 대화만 반복하게 됩니다.
+                    </p>
+                </div>
+
+                <div class="glass-card p-8 rounded-3xl card-shadow border-t-4 border-t-accent">
+                    <div class="mb-4 text-accent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900">구조적 사고</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        복잡한 문제를 작은 단위로 쪼개어 AI에게 순차적으로 일을 시키는 '컴퓨팅 사고력'의 정수입니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: 핵심 요약 도식화 -->
+        <section class="mb-20">
+            <div class="flex items-center gap-4 mb-10">
+                <div class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-bold text-xl shadow-lg">2</div>
+                <h2 class="text-3xl font-display font-bold text-slate-900">비교: 지식의 유무가 만드는 차이</h2>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-separate border-spacing-y-4">
+                    <thead>
+                        <tr class="text-slate-400 text-sm uppercase tracking-wider">
+                            <th class="px-6 py-4 font-semibold">구분</th>
+                            <th class="px-6 py-4 font-semibold text-red-400">기초 지식 없는 바이브 코딩</th>
+                            <th class="px-6 py-4 font-semibold text-accent">기초 지식 있는 바이브 코딩</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-slate-700">
+                        <tr class="glass-card shadow-sm">
+                            <td class="px-6 py-6 font-bold rounded-l-3xl border-y border-l bg-slate-100/50">명령 방식</td>
+                            <td class="px-6 py-6 border-y">"로그인 화면 만들어줘" <br><span class="text-xs text-slate-400">(막연함)</span></td>
+                            <td class="px-6 py-6 border-y rounded-r-3xl font-medium text-slate-900">"ID/PW 입력창과 localStorage 저장 기능이 있는 로그인 폼을 만들어줘"</td>
+                        </tr>
+                        <tr class="glass-card shadow-sm">
+                            <td class="px-6 py-6 font-bold rounded-l-3xl border-y border-l bg-slate-100/50">사고 구조</td>
+                            <td class="px-6 py-6 border-y text-red-500 font-medium">결과 중심 <span class="text-xs text-slate-400">(운에 맡김)</span></td>
+                            <td class="px-6 py-6 border-y rounded-r-3xl text-accent font-medium">논리 중심 <span class="text-xs text-slate-400">(변수 → 조건 → 결과)</span></td>
+                        </tr>
+                        <tr class="glass-card shadow-sm">
+                            <td class="px-6 py-6 font-bold rounded-l-3xl border-y border-l bg-slate-100/50">결과물</td>
+                            <td class="px-6 py-6 border-y">에러 발생 시 대처 불가</td>
+                            <td class="px-6 py-6 border-y rounded-r-3xl">에러 원인 파악 및 부분 수정 지시</td>
+                        </tr>
+                        <tr class="glass-card shadow-sm">
+                            <td class="px-6 py-6 font-bold rounded-l-3xl border-y border-l bg-slate-100/50">AI의 역할</td>
+                            <td class="px-6 py-6 border-y">내 의도를 추측하는 비서</td>
+                            <td class="px-6 py-6 border-y rounded-r-3xl font-semibold">정밀한 엔지니어링 도구</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Flow Diagram -->
+            <div class="mt-16 p-10 bg-slate-900 rounded-[3rem] text-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-10">
+                    <svg class="w-32 h-32 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.45l8.15 14.1H3.85L12 5.45z"/></svg>
+                </div>
+                <h4 class="text-slate-400 text-sm font-bold uppercase tracking-[0.2em] mb-12">지식의 필터링 과정</h4>
+                <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-4">
+                    <div class="px-6 py-4 bg-slate-800 border border-slate-700 rounded-2xl text-slate-300 font-medium w-full md:w-auto">나의 생각</div>
+                    <div class="hidden md:block text-slate-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </div>
+                    <div class="px-8 py-5 bg-accent text-white rounded-2xl font-bold shadow-[0_0_20px_rgba(59,130,246,0.5)] animate-pulse-slow w-full md:w-auto">프로그래밍 지식 (필터)</div>
+                    <div class="hidden md:block text-slate-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </div>
+                    <div class="px-6 py-4 bg-slate-800 border border-slate-700 rounded-2xl text-slate-300 font-medium w-full md:w-auto">정밀한 프롬프트</div>
+                    <div class="hidden md:block text-slate-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </div>
+                    <div class="px-8 py-5 bg-emerald-500 text-white rounded-2xl font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] w-full md:w-auto">완벽한 결과물</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: 구체적 사례 -->
+        <section class="mb-20">
+            <div class="flex items-center gap-4 mb-10">
+                <div class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-bold text-xl shadow-lg">3</div>
+                <h2 class="text-3xl font-display font-bold text-slate-900">구체적 사례 연구</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Case 1 -->
+                <div class="flex flex-col h-full">
+                    <div class="mb-4 flex items-center gap-2">
+                        <span class="px-3 py-1 bg-slate-200 text-slate-700 text-xs font-bold rounded-full">CASE 01</span>
+                        <h3 class="text-xl font-bold text-slate-800">사용자 등급 확인 기능</h3>
+                    </div>
+                    <div class="glass-card p-6 rounded-3xl border-l-4 border-l-orange-400 flex-grow">
+                        <div class="space-y-6">
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase mb-2">초보자의 명령</p>
+                                <p class="text-slate-700 bg-white/50 p-3 rounded-xl border">"사용자 등급이 1이면 혜택을 줘."</p>
+                                <p class="mt-2 text-xs text-red-500">→ 버그 위험: <code class="bg-red-50 px-1">userRole == 1</code> (타입 체크 미비)</p>
+                            </div>
+                            <div class="pt-4 border-t border-slate-200">
+                                <p class="text-xs font-bold text-accent uppercase mb-2">학습자의 명령</p>
+                                <p class="text-slate-900 bg-blue-50 p-3 rounded-xl border border-blue-100 font-medium">
+                                    "데이터 타입까지 엄격하게 비교하는 <strong>=== 연산자</strong>를 써서 숫자 1일 때만 동작하게 해줘."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Case 2 -->
+                <div class="flex flex-col h-full">
+                    <div class="mb-4 flex items-center gap-2">
+                        <span class="px-3 py-1 bg-slate-200 text-slate-700 text-xs font-bold rounded-full">CASE 02</span>
+                        <h3 class="text-xl font-bold text-slate-800">서버 데이터 가져오기</h3>
+                    </div>
+                    <div class="glass-card p-6 rounded-3xl border-l-4 border-l-accent flex-grow">
+                        <div class="space-y-6">
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase mb-2">초보자의 명령</p>
+                                <p class="text-slate-700 bg-white/50 p-3 rounded-xl border">"서버 데이터에서 이름을 출력해줘."</p>
+                                <p class="mt-2 text-xs text-red-500">→ 런타임 에러: <code class="bg-red-50 px-1">data.user.name</code> (Null 참조 에러)</p>
+                            </div>
+                            <div class="pt-4 border-t border-slate-200">
+                                <p class="text-xs font-bold text-accent uppercase mb-2">학습자의 명령</p>
+                                <p class="text-slate-900 bg-blue-50 p-3 rounded-xl border border-blue-100 font-medium">
+                                    "<strong>옵셔널 체이닝(?.)</strong>을 사용해서 데이터가 null이 아닐 때만 안전하게 가져오게 짜줘."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: 예제 설명 -->
+        <section class="mb-10">
+            <div class="flex items-center gap-4 mb-10">
+                <div class="w-12 h-12 bg-slate-900 text-white rounded-2xl flex items-center justify-center font-bold text-xl shadow-lg">4</div>
+                <h2 class="text-3xl font-display font-bold text-slate-900">왜 '이것'을 알아야 하는가?</h2>
+            </div>
+
+            <div class="bg-slate-900 rounded-[2.5rem] p-8 md:p-12 text-slate-300 shadow-2xl overflow-hidden relative">
+                <div class="flex flex-col md:flex-row gap-12 items-center">
+                    <div class="w-full md:w-1/2">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                        </div>
+                        <div class="bg-slate-800 p-6 rounded-2xl font-mono text-sm leading-relaxed border border-slate-700">
+                            <span class="text-slate-500">// AI가 생성한 코드</span><br>
+                            <span class="text-blue-400">let</span> result = value <span class="text-accent-light font-bold">??</span> <span class="text-orange-300">"기본값"</span>;
+                        </div>
+                        <p class="mt-6 text-slate-400 text-sm italic">
+                            * 매뉴얼 3.1장: Nullish Coalescing Operator
+                        </p>
+                    </div>
+
+                    <div class="w-full md:w-1/2 space-y-8">
+                        <div class="relative pl-8 border-l-2 border-slate-700">
+                            <span class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-slate-700"></span>
+                            <h4 class="text-slate-500 font-bold text-xs uppercase tracking-widest mb-2">모르는 사람</h4>
+                            <p class="text-slate-400">"저 물음표 두 개는 뭐지? 그냥 되나 보다." <br><span class="text-xs">(결과 예측 불가능)</span></p>
+                        </div>
+                        <div class="relative pl-8 border-l-2 border-accent">
+                            <span class="absolute left-[-9px] top-0 w-4 h-4 rounded-full bg-accent animate-pulse"></span>
+                            <h4 class="text-accent font-bold text-xs uppercase tracking-widest mb-2">공부한 사람</h4>
+                            <p class="text-slate-100 font-medium">
+                                "아, 이건 <strong>Nullish 연산자</strong>구나! null/undefined일 때만 작동하니까 0이나 빈 문자열은 그대로 유지되는 안전장치네!"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion -->
+        <section class="mt-24 text-center max-w-3xl mx-auto">
+            <div class="inline-block p-4 rounded-full bg-blue-50 mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+            </div>
+            <h2 class="text-3xl font-display font-bold text-slate-900 mb-6">지능형 바이브 코딩의 시작</h2>
+            <p class="text-slate-600 text-lg leading-relaxed mb-10">
+                문법을 모두 외울 필요는 없습니다. 하지만 어떤 도구가 있는지(변수, 타입, 비동기, DOM 제어 등)를 알고 있어야 AI를 제대로 부려먹을 수 있습니다. 이것이 바로 AI 시대의 진정한 경쟁력입니다.
+            </p>
+            <div class="flex justify-center gap-4">
+                <div class="px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition-colors cursor-pointer shadow-xl">
+                    학습 시작하기
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating Background Elements -->
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-20 overflow-hidden">
+        <svg class="absolute top-[20%] left-[-5%] w-64 h-64 text-slate-200 opacity-30 rotate-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        <svg class="absolute bottom-[10%] right-[-5%] w-96 h-96 text-slate-200 opacity-20 -rotate-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.45l8.15 14.1H3.85L12 5.45z"/></svg>
+    </div>
+
+    <script>
+        // Smooth reveal for glass cards
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.glass-card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }, index * 100);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            cards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.6s ease-out';
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>

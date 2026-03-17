@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Functions Guide - The LEGO Blocks of Code</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        javascript: '#f7df1e'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-subtle': 'pulseSubtle 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        pulseSubtle: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.8' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .code-block {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            border-left: 4px solid #3b82f6;
+        }
+        .step-node {
+            position: relative;
+            z-index: 10;
+        }
+        .connector {
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            width: 2rem;
+            height: 2px;
+            background: #cbd5e1;
+            transform: translateY(-50%);
+        }
+        @media (max-width: 768px) {
+            .connector { display: none; }
+        }
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white leading-relaxed">
+
+    <!-- Header Section -->
+    <header class="relative pt-16 pb-12 overflow-hidden">
+        <div class="max-w-5xl mx-auto px-6 relative z-10">
+            <div class="inline-block px-4 py-1.5 mb-6 text-sm font-semibold tracking-wide text-accent bg-blue-50 rounded-full animate-fade-in-up">
+                JavaScript Essentials
+            </div>
+            <h1 class="text-5xl md:text-6xl font-bold font-display text-slate-900 mb-6 tracking-tight animate-fade-in-up" style="animation-delay: 0.1s;">
+                자바스크립트 <span class="text-transparent bg-clip-text bg-gradient-to-r from-accent to-blue-600">함수(Function)</span>
+            </h1>
+            <p class="text-xl text-slate-600 max-w-2xl animate-fade-in-up" style="animation-delay: 0.2s;">
+                함수는 특정 작업을 수행하기 위해 독립적으로 설계된 코드 묶음입니다. <br class="hidden md:block">
+                마치 <span class="font-bold text-slate-800 underline decoration-accent/30 decoration-4">레고 블록</span>처럼 조립하여 더 큰 프로그램을 만듭니다.
+            </p>
+        </div>
+        <!-- Decorative background element -->
+        <div class="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
+    </header>
+
+    <main class="max-w-5xl mx-auto px-6 pb-24 space-y-20">
+        
+        <!-- Logic Flowchart Section -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.3s;">
+            <h2 class="text-2xl font-bold font-display text-slate-900 mb-10 flex items-center">
+                <span class="w-8 h-8 bg-slate-900 text-white rounded-lg flex items-center justify-center mr-3 text-sm">01</span>
+                함수의 실행 메커니즘
+            </h2>
+            <div class="flex flex-col md:flex-row items-center justify-between gap-8 bg-white p-10 rounded-3xl border border-slate-200 shadow-sm overflow-hidden relative">
+                <div class="step-node flex flex-col items-center text-center space-y-3 w-full md:w-1/4">
+                    <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-600 shadow-inner">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                    </div>
+                    <h3 class="font-bold text-slate-800">1. 입력 (Parameter)</h3>
+                    <p class="text-sm text-slate-500">함수로 전달되는 값</p>
+                    <div class="connector"></div>
+                </div>
+                <div class="step-node flex flex-col items-center text-center space-y-3 w-full md:w-1/4">
+                    <div class="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg animate-pulse-subtle">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    </div>
+                    <h3 class="font-bold text-slate-800 text-blue-600">2. 처리 (Logic)</h3>
+                    <p class="text-sm text-slate-500">데이터 가공 및 연산</p>
+                    <div class="connector"></div>
+                </div>
+                <div class="step-node flex flex-col items-center text-center space-y-3 w-full md:w-1/4">
+                    <div class="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-600 shadow-inner">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                    </div>
+                    <h3 class="font-bold text-slate-800">3. 출력 (Return)</h3>
+                    <p class="text-sm text-slate-500">최종 결과값 반환</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content: Three Types -->
+        <section class="space-y-12">
+            <h2 class="text-2xl font-bold font-display text-slate-900 flex items-center">
+                <span class="w-8 h-8 bg-slate-900 text-white rounded-lg flex items-center justify-center mr-3 text-sm">02</span>
+                함수 정의의 세 가지 핵심 방식
+            </h2>
+
+            <div class="grid grid-cols-1 gap-12">
+                <!-- 1. 함수 선언문 -->
+                <article class="glass-card rounded-3xl p-8 card-hover">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <div class="flex-1 space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-tighter">Traditional</span>
+                                <h3 class="text-2xl font-bold text-slate-900">1. 함수 선언문 (Declaration)</h3>
+                            </div>
+                            <p class="text-slate-600">
+                                가장 전통적이고 대중적인 방식입니다. <span class="text-slate-900 font-semibold">"미리 등록해둔 레시피"</span>와 같아서 이름만 부르면 어디서든 실행됩니다.
+                            </p>
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                                <ul class="space-y-2 text-sm text-slate-700">
+                                    <li class="flex items-start">
+                                        <span class="text-blue-500 mr-2">✦</span>
+                                        <span><strong>호이스팅(Hoisting) 지원:</strong> 함수 선언 전 윗부분에서 호출해도 에러 없이 작동합니다.</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="code-block">
+<pre><code>// 선언하기 전에도 호출 가능!
+console.log(sayHi()); 
+
+function sayHi() {
+  return "안녕하세요! 일반 함수입니다.";
+}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- 2. 함수 표현식 -->
+                <article class="glass-card rounded-3xl p-8 card-hover">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <div class="flex-1 space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <span class="bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-tighter">Logical</span>
+                                <h3 class="text-2xl font-bold text-slate-900">2. 함수 표현식 (Expression)</h3>
+                            </div>
+                            <p class="text-slate-600">
+                                함수를 익명 상태로 만들어 <span class="text-slate-900 font-semibold">변수에 담는 방식</span>입니다. 데이터처럼 취급할 수 있어 유연성이 높습니다.
+                            </p>
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                                <ul class="space-y-2 text-sm text-slate-700">
+                                    <li class="flex items-start">
+                                        <span class="text-amber-500 mr-2">✦</span>
+                                        <span><strong>순차적 실행:</strong> 호이스팅이 발생하지 않아 반드시 선언 후 사용해야 합니다. (코드의 안정성)</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="code-block">
+<pre><code>// 변수에 함수를 대입
+const subtract = function(a, b) {
+  return a - b;
+};
+
+// 선언 이후에만 사용 가능
+console.log(subtract(10, 3)); // 출력: 7</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- 3. 화살표 함수 -->
+                <article class="glass-card rounded-3xl p-8 border-accent/20 card-hover bg-slate-900/5">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <div class="flex-1 space-y-4">
+                            <div class="flex items-center space-x-3">
+                                <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-tighter">Modern</span>
+                                <h3 class="text-2xl font-bold text-slate-900">3. 화살표 함수 (Arrow)</h3>
+                            </div>
+                            <p class="text-slate-600">
+                                ES6에서 도입된 <span class="text-slate-900 font-semibold">"속성 요약 레시피"</span>입니다. 간결한 문법 덕분에 현대 프론트엔드 개발(React 등)에서 가장 많이 쓰입니다.
+                            </p>
+                            <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                                <ul class="space-y-2 text-sm text-slate-700">
+                                    <li class="flex items-start">
+                                        <span class="text-emerald-500 mr-2">✦</span>
+                                        <span><strong>극강의 간결함:</strong> 한 줄일 경우 <code class="bg-slate-200 px-1 rounded">return</code>과 <code class="bg-slate-200 px-1 rounded">{}</code> 생략이 가능합니다.</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="code-block">
+<pre><code>// 한 줄 요약 버전
+const multiply = (a, b) => a * b;
+console.log(multiply(2, 4)); // 8
+
+// 여러 줄 로직 버전
+const getMessage = (name) => {
+  let greeting = "반가워요, " + name + "님!";
+  return greeting;
+};</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Summary Table Section -->
+        <section class="animate-fade-in-up" style="animation-delay: 0.4s;">
+             <h2 class="text-2xl font-bold font-display text-slate-900 mb-8 flex items-center">
+                <span class="w-8 h-8 bg-slate-900 text-white rounded-lg flex items-center justify-center mr-3 text-sm">03</span>
+                💡 한눈에 비교하기
+            </h2>
+            <div class="overflow-x-auto rounded-3xl border border-slate-200 shadow-sm">
+                <table class="w-full text-left border-collapse bg-white">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                            <th class="px-6 py-4 font-bold">구분</th>
+                            <th class="px-6 py-4 font-bold">문법 예시</th>
+                            <th class="px-6 py-4 font-bold text-center">호이스팅</th>
+                            <th class="px-6 py-4 font-bold">주요 특징</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-5 font-bold text-slate-900">함수 선언문</td>
+                            <td class="px-6 py-5 font-mono text-sm text-blue-600">function name() {}</td>
+                            <td class="px-6 py-5 text-center">
+                                <span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">가능</span>
+                            </td>
+                            <td class="px-6 py-5 text-sm text-slate-600">가장 기본, 전역 어디서나 호출 가능</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-5 font-bold text-slate-900">함수 표현식</td>
+                            <td class="px-6 py-5 font-mono text-sm text-amber-600">const name = function() {}</td>
+                            <td class="px-6 py-5 text-center">
+                                <span class="bg-slate-100 text-slate-400 px-2 py-1 rounded text-xs font-bold">불가능</span>
+                            </td>
+                            <td class="px-6 py-5 text-sm text-slate-600">변수처럼 사용, 논리적 흐름 중시</td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="px-6 py-5 font-bold text-slate-900">화살표 함수</td>
+                            <td class="px-6 py-5 font-mono text-sm text-emerald-600">const name = () => {}</td>
+                            <td class="px-6 py-5 text-center">
+                                <span class="bg-slate-100 text-slate-400 px-2 py-1 rounded text-xs font-bold">불가능</span>
+                            </td>
+                            <td class="px-6 py-5 text-sm text-slate-600">간결한 문법, 현대 개발 표준 선호</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Final Summary Advice -->
+        <section class="bg-slate-900 text-white rounded-[2rem] p-10 md:p-14 relative overflow-hidden shadow-2xl">
+            <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
+                <div class="md:w-2/3">
+                    <h2 class="text-3xl font-bold font-display mb-6">현명한 개발자를 위한 제언</h2>
+                    <p class="text-slate-400 text-lg leading-relaxed">
+                        현대 자바스크립트 개발에서는 <span class="text-white font-bold underline decoration-accent">화살표 함수</span>를 가장 많이 사용합니다. 
+                        특히 콜백 함수나 짧은 연산에서 압도적인 가독성을 자랑합니다. 다만, 코드의 실행 흐름을 예측 가능하게 유지하기 위해 함수를 먼저 정의하고 사용하는 
+                        <span class="text-white font-bold">표현식 방식</span>의 습관을 들이는 것이 좋습니다.
+                    </p>
+                </div>
+                <div class="md:w-1/3 flex justify-center">
+                    <div class="w-32 h-32 bg-accent/20 rounded-full flex items-center justify-center animate-float">
+                        <svg class="w-16 h-16 text-accent" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M13 14h-2a1 1 0 01-1-1V9a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1zm5-9H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zM9 16H7v-2h2v2zm0-4H7V8h2v4zm4 4h-2v-2h2v2zm4 0h-2v-2h2v2zm0-4h-2V8h2v4z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <!-- Background Decoration -->
+            <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-accent to-transparent opacity-50"></div>
+        </section>
+    </main>
+
+    <script>
+        // Interactive element: console log for code snippets simulation (Optional)
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("%cJS Guide Loaded! Ready to build with LEGO blocks.", "color: #3b82f6; font-weight: bold; font-size: 14px;");
+        });
+    </script>
+</body>
+</html>

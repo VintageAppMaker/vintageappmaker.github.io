@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML 제어와 크롬 개발자 도구 완벽 가이드</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Outfit:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        slate: {
+                            50: '#f8fafc',
+                            100: '#f1f5f9',
+                            200: '#e2e8f0',
+                            300: '#cbd5e1',
+                            400: '#94a3b8',
+                            500: '#64748b',
+                            600: '#475569',
+                            700: '#334155',
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        accent: '#3b82f6',
+                        highlight: '#6366f1'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-subtle': 'pulseSubtle 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        pulseSubtle: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.8' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.03);
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+        .card-shadow {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-shadow:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+        }
+        .flow-line {
+            position: relative;
+        }
+        .flow-line::after {
+            content: '';
+            position: absolute;
+            right: -1rem;
+            top: 50%;
+            width: 1rem;
+            height: 2px;
+            background: #cbd5e1;
+            transform: translateY(-50%);
+        }
+        @media (max-width: 768px) {
+            .flow-line::after { display: none; }
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f8fafc; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans selection:bg-accent selection:text-white leading-relaxed">
+
+    <!-- Hero Section -->
+    <header class="relative overflow-hidden pt-20 pb-16 px-6">
+        <div class="max-w-6xl mx-auto text-center animate-fade-in-up">
+            <span class="inline-block px-4 py-1.5 mb-6 text-xs font-bold tracking-widest text-accent uppercase bg-blue-50 rounded-full border border-blue-100">
+                Programming Course: Chapter 5
+            </span>
+            <h1 class="text-4xl md:text-6xl font-display font-bold text-slate-900 mb-6 tracking-tight">
+                HTML 제어와 <span class="text-accent italic">브라우저의 이해</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto font-light">
+                웹페이지를 살아 움직이게 만드는 마법, 자바스크립트를 활용한 HTML 수정 기법과 개발자 도구 활용법을 알아봅니다.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-6 pb-24">
+        
+        <!-- 1. Intro & DOM Visualization -->
+        <section class="mb-20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-12">
+                <div>
+                    <h2 class="text-3xl font-display font-bold mb-6 text-slate-800">1. 왜 HTML을 제어해야 할까요?</h2>
+                    <p class="text-slate-600 mb-4">
+                        정적인 HTML 문서는 한 번 로드되면 변하지 않습니다. 하지만 사용자의 클릭, 데이터 업데이트 등에 맞춰 화면을 바꾸기 위해서는 **자바스크립트가 실시간으로 HTML을 수정**해야 합니다.
+                    </p>
+                    <div class="flex items-start gap-4 p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                        <div class="p-2 bg-accent/10 rounded-lg text-accent">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                        </div>
+                        <p class="text-sm text-slate-500 leading-snug">
+                            <strong>핵심 개념 (DOM):</strong> 브라우저는 HTML 문서를 읽어 '나무(Tree)' 형태의 지도인 <b>DOM(Document Object Model)</b>을 만듭니다.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-8 rounded-3xl">
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-8 text-center">HTML 제어 흐름 도식</h3>
+                    <div class="flex flex-col space-y-4">
+                        <!-- Step 1 -->
+                        <div class="flex items-center group">
+                            <div class="w-12 h-12 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center font-bold text-slate-400 group-hover:border-accent transition-colors">1</div>
+                            <div class="ml-4 p-4 bg-white rounded-xl border border-slate-200 flex-1 card-shadow">
+                                <span class="block text-xs font-bold text-slate-400 mb-1">Step 1</span>
+                                <span class="font-semibold text-slate-700">HTML 문서 작성</span>
+                            </div>
+                        </div>
+                        <!-- Arrow -->
+                        <div class="flex justify-center py-1 text-slate-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                        </div>
+                        <!-- Step 2 -->
+                        <div class="flex items-center group">
+                            <div class="w-12 h-12 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center font-bold text-slate-400 group-hover:border-accent transition-colors">2</div>
+                            <div class="ml-4 p-4 bg-white rounded-xl border border-slate-200 flex-1 card-shadow">
+                                <span class="block text-xs font-bold text-slate-400 mb-1">Step 2</span>
+                                <span class="font-semibold text-slate-700">DOM 생성 (브라우저가 지도를 만듦)</span>
+                            </div>
+                        </div>
+                        <!-- Arrow -->
+                        <div class="flex justify-center py-1 text-slate-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+                        </div>
+                        <!-- Step 3 -->
+                        <div class="flex items-center group">
+                            <div class="w-12 h-12 rounded-full bg-accent/20 border-2 border-accent flex items-center justify-center font-bold text-accent">3</div>
+                            <div class="ml-4 p-4 bg-accent text-white rounded-xl shadow-lg shadow-accent/20 flex-1">
+                                <span class="block text-xs font-bold opacity-80 mb-1">Step 3</span>
+                                <span class="font-semibold">JavaScript가 DOM을 통해 제어</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Interactive Demo -->
+        <section class="mb-20">
+            <div class="mb-8">
+                <h2 class="text-3xl font-display font-bold text-slate-800">2. 실시간 수정 예제 체험</h2>
+                <p class="text-slate-500 mt-2">자바스크립트가 어떻게 HTML의 내용을 바꾸는지 직접 확인해 보세요.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Code Panel -->
+                <div class="lg:col-span-7 bg-slate-900 rounded-3xl p-6 overflow-hidden shadow-2xl">
+                    <div class="flex items-center gap-2 mb-4 border-b border-slate-800 pb-4">
+                        <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-amber-500"></div>
+                        <div class="w-3 h-3 rounded-full bg-emerald-500"></div>
+                        <span class="text-xs text-slate-500 font-mono ml-2">script.js</span>
+                    </div>
+                    <pre class="font-mono text-sm leading-relaxed text-slate-300">
+<span class="text-slate-500">// 1. 수정할 대상을 ID로 찾습니다.</span>
+<span class="text-highlight">const</span> el = document.<span class="text-accent">getElementById</span>(<span class="text-emerald-400">"demo"</span>);
+
+<span class="text-slate-500">// 2. 글자 내용을 바꿉니다.</span>
+el.<span class="text-accent">textContent</span> = <span class="text-emerald-400">"내용이 성공적으로 변경되었습니다!"</span>;
+
+<span class="text-slate-500">// 3. 스타일도 함께 바꿀 수 있습니다.</span>
+el.style.<span class="text-accent">color</span> = <span class="text-emerald-400">"#3b82f6"</span>;
+el.style.<span class="text-accent">fontWeight</span> = <span class="text-emerald-400">"bold"</span>;
+                    </pre>
+                </div>
+
+                <!-- Preview Panel -->
+                <div class="lg:col-span-5 glass-card rounded-3xl p-8 flex flex-col justify-center items-center text-center">
+                    <div class="mb-6">
+                        <span class="text-xs font-bold text-slate-400 mb-2 block tracking-widest uppercase">실행 결과</span>
+                        <p id="demo" class="text-2xl font-semibold text-slate-400 transition-all duration-500 py-4 px-6 rounded-2xl border-2 border-dashed border-slate-200">
+                            Original Text
+                        </p>
+                    </div>
+                    <button onclick="changeContent()" class="px-8 py-3 bg-slate-900 text-white rounded-full font-bold hover:bg-slate-800 transition-all hover:scale-105 active:scale-95 shadow-xl">
+                        자바스크립트 실행하기
+                    </button>
+                    <script>
+                        function changeContent() {
+                            const el = document.getElementById("demo");
+                            el.textContent = "내용이 성공적으로 변경되었습니다!";
+                            el.style.color = "#3b82f6";
+                            el.style.borderColor = "#3b82f6";
+                            el.style.backgroundColor = "rgba(59, 130, 246, 0.05)";
+                            el.style.borderStyle = "solid";
+                        }
+                    </script>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Key Concepts Bento Grid -->
+        <section class="mb-20">
+            <h2 class="text-3xl font-display font-bold text-slate-800 mb-10">3. 핵심 요약: 선택하고 바꾸기</h2>
+            
+            <div class="bento-grid">
+                <!-- Selectors -->
+                <div class="col-span-12 md:col-span-6 glass-card p-8 rounded-3xl card-shadow">
+                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-accent mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">① 요소 선택하기 (찾기)</h3>
+                    <ul class="space-y-4 text-slate-600">
+                        <li class="flex items-start gap-3">
+                            <span class="text-accent mt-1">●</span>
+                            <div>
+                                <code class="bg-slate-100 px-2 py-0.5 rounded text-pink-600 text-sm">getElementById("ID")</code>
+                                <p class="text-sm mt-1">가장 빠르고 정확하게 특정 요소 하나를 찾을 때 사용</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-accent mt-1">●</span>
+                            <div>
+                                <code class="bg-slate-100 px-2 py-0.5 rounded text-pink-600 text-sm">querySelector(".클래스")</code>
+                                <p class="text-sm mt-1">CSS 선택자 문법을 사용하여 유연하게 찾을 때 사용</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Modification -->
+                <div class="col-span-12 md:col-span-6 glass-card p-8 rounded-3xl card-shadow">
+                    <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center text-emerald-600 mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4">② 내용 수정하기 (바꾸기)</h3>
+                    <ul class="space-y-4 text-slate-600">
+                        <li class="flex items-start gap-3">
+                            <span class="text-emerald-500 mt-1">●</span>
+                            <div>
+                                <code class="bg-slate-100 px-2 py-0.5 rounded text-emerald-700 text-sm">.textContent</code>
+                                <p class="text-sm mt-1">태그 안의 순수한 글자 내용만 변경</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-emerald-500 mt-1">●</span>
+                            <div>
+                                <code class="bg-slate-100 px-2 py-0.5 rounded text-emerald-700 text-sm">.innerHTML</code>
+                                <p class="text-sm mt-1">새로운 HTML 태그를 포함하여 구조 자체를 변경</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <span class="text-emerald-500 mt-1">●</span>
+                            <div>
+                                <code class="bg-slate-100 px-2 py-0.5 rounded text-emerald-700 text-sm">.setAttribute()</code>
+                                <p class="text-sm mt-1">이미지 경로(src)나 링크(href) 같은 속성을 변경</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Chrome DevTools Guide -->
+        <section class="mb-10">
+            <div class="bg-slate-800 rounded-[2rem] p-8 md:p-12 text-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-10 animate-float">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
+                </div>
+                
+                <div class="relative z-10">
+                    <h2 class="text-3xl font-display font-bold mb-8">4. 크롬 개발자 도구 (실시간 연습장)</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div>
+                            <div class="text-accent font-display text-4xl font-bold mb-4 italic">01.</div>
+                            <h4 class="font-bold mb-2">도구 열기</h4>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                웹브라우저에서 <span class="bg-slate-700 px-2 py-0.5 rounded text-white italic">F12</span> 또는 <span class="bg-slate-700 px-2 py-0.5 rounded text-white italic">Ctrl+Shift+I</span>를 눌러 개발자 도구를 엽니다.
+                            </p>
+                        </div>
+                        <div>
+                            <div class="text-accent font-display text-4xl font-bold mb-4 italic">02.</div>
+                            <h4 class="font-bold mb-2">요소 선택</h4>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                상단 <span class="text-emerald-400 font-semibold">Elements(요소)</span> 패널을 누른 뒤, 수정하고 싶은 코드 줄을 찾습니다.
+                            </p>
+                        </div>
+                        <div>
+                            <div class="text-accent font-display text-4xl font-bold mb-4 italic">03.</div>
+                            <h4 class="font-bold mb-2">즉시 수정</h4>
+                            <p class="text-slate-400 text-sm leading-relaxed">
+                                글자를 <span class="text-emerald-400 font-semibold">더블 클릭</span>하여 내용을 바꾸면 화면에 즉시 반영됩니다. (새로고침하면 원래대로 돌아갑니다!)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final Tip -->
+        <div class="flex items-center justify-center">
+            <div class="inline-flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 rounded-full shadow-sm animate-pulse-subtle">
+                <span class="w-2 h-2 rounded-full bg-accent"></span>
+                <span class="text-sm font-medium text-slate-500 italic">"실제 웹페이지 반영을 위해서는 꼭 소스 코드를 수정하고 저장해야 함을 기억하세요!"</span>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EducationalOccupationalCredential",
+      "name": "HTML 제어 및 DOM 활용 교육",
+      "description": "초보자를 위한 자바스크립트 기반 HTML 요소 제어와 브라우저 개발자 도구 활용 방법 가이드",
+      "author": {
+        "@type": "Person",
+        "name": "강사"
+      }
+    }
+    </script>
+</body>
+</html>
