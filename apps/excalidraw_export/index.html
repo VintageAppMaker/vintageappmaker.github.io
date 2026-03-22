@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Excalidraw Viewer</title>
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --panel: rgba(255, 251, 243, 0.9);
+      --ink: #172033;
+      --muted: #6b7280;
+      --accent: #b45309;
+      --accent-2: #0f766e;
+      --line: rgba(23, 32, 51, 0.14);
+      --shadow: 0 24px 70px rgba(23, 32, 51, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      font-family: "Segoe UI", "Apple SD Gothic Neo", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(180, 83, 9, 0.16), transparent 28%),
+        radial-gradient(circle at 100% 0%, rgba(15, 118, 110, 0.14), transparent 24%),
+        linear-gradient(180deg, #fbf7ef 0%, var(--bg) 100%);
+    }
+
+    body {
+      padding: 24px;
+    }
+
+    .app {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 16px;
+      height: 100%;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .toolbar,
+    .viewer-shell {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 20px;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: clamp(1.2rem, 1.05rem + 1vw, 1.85rem);
+    }
+
+    .title p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      max-width: 360px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fffdf8;
+      background: linear-gradient(135deg, var(--accent), #92400e);
+      box-shadow: 0 12px 24px rgba(180, 83, 9, 0.24);
+    }
+
+    button.secondary {
+      background: linear-gradient(135deg, var(--accent-2), #155e75);
+      box-shadow: 0 12px 24px rgba(15, 118, 110, 0.22);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .viewer-shell {
+      position: relative;
+      overflow: hidden;
+      min-height: 520px;
+    }
+
+    .status {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 2;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.84);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      max-width: min(640px, calc(100% - 32px));
+      pointer-events: none;
+    }
+
+    .status.error {
+      color: #b91c1c;
+      font-weight: 600;
+    }
+
+    .canvas-wrap {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(23, 32, 51, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23, 32, 51, 0.04) 1px, transparent 1px),
+        linear-gradient(180deg, #fcfaf5 0%, #f7f1e6 100%);
+      background-size: 24px 24px, 24px 24px, 100% 100%;
+      background-position: 0 0, 0 0, 0 0;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .canvas-wrap.dragging {
+      cursor: grabbing;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+    }
+
+    .zoom-indicator {
+      min-width: 84px;
+      text-align: center;
+    }
+
+    @media (max-width: 780px) {
+      body {
+        padding: 14px;
+      }
+
+      .toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .actions {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .pill {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section class="toolbar">
+      <div class="title">
+        <h1>Excalidraw File Viewer</h1>
+        <p>React 없이 브라우저만으로 `.excalidraw` 파일을 읽어와 하단 canvas에 표시합니다.</p>
+      </div>
+      <div class="actions">
+        <span class="pill" id="fileName">선택된 파일 없음</span>
+        <button type="button" id="loadButton">읽어오기</button>
+        <button type="button" id="exportButton">내보내기</button>
+        <button type="button" id="fitButton" class="secondary">다시 맞추기</button>
+        <div class="zoom-controls">
+          <button type="button" id="zoomOutButton" class="secondary">축소</button>
+          <span class="pill zoom-indicator" id="zoomLabel">100%</span>
+          <button type="button" id="zoomInButton" class="secondary">확대</button>
+        </div>
+        <input type="file" id="fileInput" accept=".excalidraw,application/json">
+      </div>
+    </section>
+
+    <section class="viewer-shell">
+      <div class="status" id="status">`.excalidraw` 파일을 읽어오면 여기에 표시합니다.</div>
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="viewerCanvas"></canvas>
+      </div>
+    </section>
+  </div>
+
+  <script id="embeddedSceneData" type="application/json"></script>
+  <script id="embeddedViewStateData" type="application/json"></script>
+  <script id="embeddedMetaData" type="application/json"></script>
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const loadButton = document.getElementById("loadButton");
+    const exportButton = document.getElementById("exportButton");
+    const fitButton = document.getElementById("fitButton");
+    const zoomInButton = document.getElementById("zoomInButton");
+    const zoomOutButton = document.getElementById("zoomOutButton");
+    const zoomLabel = document.getElementById("zoomLabel");
+    const fileName = document.getElementById("fileName");
+    const statusBox = document.getElementById("status");
+    const canvasWrap = document.getElementById("canvasWrap");
+    const canvas = document.getElementById("viewerCanvas");
+    const ctx = canvas.getContext("2d");
+
+    let currentScene = null;
+    let currentFiles = {};
+    let currentElements = [];
+    let currentBounds = null;
+    const imageCache = new Map();
+    const viewState = {
+      scale: 1,
+      minScale: 0.1,
+      maxScale: 8,
+      offsetX: 0,
+      offsetY: 0,
+    };
+    const dragState = {
+      active: false,
+      startX: 0,
+      startY: 0,
+      originX: 0,
+      originY: 0,
+    };
+    const activePointers = new Map();
+    const pinchState = {
+      active: false,
+      startDistance: 0,
+      startScale: 1,
+      sceneX: 0,
+      sceneY: 0,
+    };
+
+    if (loadButton && fileInput) {
+      loadButton.addEventListener("click", () => fileInput.click());
+    }
+
+    if (exportButton) {
+      exportButton.addEventListener("click", () => {
+        if (!currentScene) {
+          setStatus("내보낼 Excalidraw scene이 없습니다. 먼저 파일을 읽어오세요.", true);
+          return;
+        }
+
+        downloadExportHtml();
+      });
+    }
+
+    if (fitButton) {
+      fitButton.addEventListener("click", () => {
+        fitSceneToViewport();
+        renderCurrentScene();
+      });
+    }
+
+    if (zoomInButton) {
+      zoomInButton.addEventListener("click", () => zoomAtCenter(1.2));
+    }
+
+    if (zoomOutButton) {
+      zoomOutButton.addEventListener("click", () => zoomAtCenter(1 / 1.2));
+    }
+
+    if (fileInput) {
+      fileInput.addEventListener("change", async (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        try {
+          const raw = await file.text();
+          const parsed = JSON.parse(raw);
+          if (!parsed || !Array.isArray(parsed.elements)) {
+            throw new Error("유효한 Excalidraw 파일 형식이 아닙니다.");
+          }
+
+          applyScene(parsed);
+          if (fileName) {
+            fileName.textContent = file.name;
+          }
+          setStatus("파일을 읽었습니다. 하단 canvas에 렌더링합니다.", false);
+          fitSceneToViewport();
+          renderCurrentScene();
+        } catch (error) {
+          currentScene = null;
+          currentFiles = {};
+          currentElements = [];
+          currentBounds = null;
+          clearCanvas();
+          if (fileName) {
+            fileName.textContent = file.name;
+          }
+          setStatus(error && error.message ? error.message : "파일을 읽는 중 오류가 발생했습니다.", true);
+        } finally {
+          event.target.value = "";
+        }
+      });
+    }
+
+    bootstrapEmbeddedScene();
+
+    function setStatus(message, isError) {
+      if (!statusBox) return;
+      statusBox.textContent = message;
+      statusBox.classList.toggle("error", Boolean(isError));
+    }
+
+    function applyScene(scene) {
+      currentScene = scene;
+      currentFiles = scene.files || {};
+      currentElements = (scene.elements || [])
+        .filter((element) => !element.isDeleted)
+        .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+      currentBounds = currentElements.length ? getSceneBounds(currentElements) : null;
+      imageCache.clear();
+    }
+
+    function clearCanvas() {
+      resizeCanvas();
+      ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+      updateZoomLabel();
+    }
+
+    function resizeCanvas() {
+      const width = Math.max(1, canvasWrap.clientWidth);
+      const height = Math.max(1, canvasWrap.clientHeight);
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, Math.floor(width * dpr));
+      canvas.height = Math.max(1, Math.floor(height * dpr));
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function renderCurrentScene() {
+      resizeCanvas();
+
+      if (!currentElements.length) {
+        clearCanvas();
+        setStatus("표시할 요소가 없습니다.", false);
+        return;
+      }
+
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      ctx.clearRect(0, 0, width, height);
+      ctx.save();
+      ctx.translate(viewState.offsetX, viewState.offsetY);
+      ctx.scale(viewState.scale, viewState.scale);
+
+      for (const element of currentElements) {
+        drawElement(ctx, element, currentFiles);
+      }
+
+      ctx.restore();
+      updateZoomLabel();
+      setStatus("렌더링 완료. 휠 또는 핀치로 확대/축소하고, 드래그로 이동할 수 있습니다.", false);
+    }
+
+    function fitSceneToViewport() {
+      if (!currentBounds) {
+        viewState.scale = 1;
+        viewState.offsetX = 0;
+        viewState.offsetY = 0;
+        updateZoomLabel();
+        return;
+      }
+
+      const pad = 80;
+      const viewWidth = Math.max(canvasWrap.clientWidth, 640);
+      const viewHeight = Math.max(canvasWrap.clientHeight, 480);
+      const sceneWidth = Math.max(1, currentBounds.maxX - currentBounds.minX);
+      const sceneHeight = Math.max(1, currentBounds.maxY - currentBounds.minY);
+      const scale = Math.min(2, Math.max(viewState.minScale, Math.min((viewWidth - pad * 2) / sceneWidth, (viewHeight - pad * 2) / sceneHeight)));
+
+      viewState.scale = scale;
+      viewState.offsetX = (viewWidth - sceneWidth * scale) / 2 - currentBounds.minX * scale;
+      viewState.offsetY = (viewHeight - sceneHeight * scale) / 2 - currentBounds.minY * scale;
+      updateZoomLabel();
+    }
+
+    function centerSceneInViewport() {
+      if (!currentBounds) {
+        return;
+      }
+
+      const viewWidth = Math.max(canvasWrap.clientWidth, 1);
+      const viewHeight = Math.max(canvasWrap.clientHeight, 1);
+      const sceneWidth = Math.max(1, currentBounds.maxX - currentBounds.minX);
+      const sceneHeight = Math.max(1, currentBounds.maxY - currentBounds.minY);
+
+      viewState.offsetX = (viewWidth - sceneWidth * viewState.scale) / 2 - currentBounds.minX * viewState.scale;
+      viewState.offsetY = (viewHeight - sceneHeight * viewState.scale) / 2 - currentBounds.minY * viewState.scale;
+      updateZoomLabel();
+    }
+
+    function updateZoomLabel() {
+      if (!zoomLabel) return;
+      zoomLabel.textContent = Math.round(viewState.scale * 100) + "%";
+    }
+
+    function zoomAtCenter(factor) {
+      const rect = canvas.getBoundingClientRect();
+      zoomAtPoint(rect.width / 2, rect.height / 2, factor);
+    }
+
+    function zoomAtPoint(screenX, screenY, factor) {
+      const nextScale = clamp(viewState.scale * factor, viewState.minScale, viewState.maxScale);
+      const effectiveFactor = nextScale / viewState.scale;
+      if (effectiveFactor === 1) return;
+
+      viewState.offsetX = screenX - (screenX - viewState.offsetX) * effectiveFactor;
+      viewState.offsetY = screenY - (screenY - viewState.offsetY) * effectiveFactor;
+      viewState.scale = nextScale;
+      renderCurrentScene();
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function getExportPayload() {
+      return {
+        scene: currentScene,
+        viewState: {
+          scale: viewState.scale,
+          offsetX: viewState.offsetX,
+          offsetY: viewState.offsetY,
+        },
+        meta: {
+          fileName: fileName.textContent || "embedded scene",
+          exportedAt: new Date().toISOString(),
+        },
+      };
+    }
+
+    function downloadExportHtml() {
+      const payload = getExportPayload();
+      const sceneTag = `<script id="embeddedSceneData" type="application/json">${escapeScriptJson(JSON.stringify(payload.scene))}<\/script>`;
+      const viewStateTag = `<script id="embeddedViewStateData" type="application/json">${escapeScriptJson(JSON.stringify(payload.viewState))}<\/script>`;
+      const metaTag = `<script id="embeddedMetaData" type="application/json">${escapeScriptJson(JSON.stringify(payload.meta))}<\/script>`;
+      const runtimeScript = Array.from(document.scripts)
+        .find((script) => !script.type && !script.id)
+        ?.textContent || "";
+
+      const html = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHtml(payload.meta.fileName || "Excalidraw Viewer")}</title>
+  <style>
+    :root {
+      --ink: #172033;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background:
+        linear-gradient(rgba(23, 32, 51, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23, 32, 51, 0.04) 1px, transparent 1px),
+        linear-gradient(180deg, #fcfaf5 0%, #f7f1e6 100%);
+      background-size: 24px 24px, 24px 24px, 100% 100%;
+      background-position: 0 0, 0 0, 0 0;
+      color: var(--ink);
+      font-family: "Segoe UI", "Apple SD Gothic Neo", sans-serif;
+    }
+
+    .canvas-wrap {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      cursor: grab;
+      touch-action: none;
+    }
+
+    .canvas-wrap.dragging {
+      cursor: grabbing;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="viewerCanvas"></canvas>
+  </div>
+  ${sceneTag}
+  ${viewStateTag}
+  ${metaTag}
+  <script>
+${runtimeScript}
+  <\/script>
+</body>
+</html>`;
+
+      const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = "export.html";
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      setStatus("현재 scene을 포함한 standalone export.html을 다운로드했습니다.", false);
+    }
+
+    function escapeScriptJson(json) {
+      return json.replace(/</g, "\\u003c");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function parseEmbeddedJson(id) {
+      const node = document.getElementById(id);
+      if (!node) return null;
+      const raw = (node.textContent || "").trim();
+      if (!raw) return null;
+
+      try {
+        return JSON.parse(raw);
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function bootstrapEmbeddedScene() {
+      const embeddedScene = parseEmbeddedJson("embeddedSceneData");
+      if (!embeddedScene || !Array.isArray(embeddedScene.elements)) {
+        return;
+      }
+
+      const embeddedView = parseEmbeddedJson("embeddedViewStateData");
+      const embeddedMeta = parseEmbeddedJson("embeddedMetaData");
+
+      applyScene(embeddedScene);
+      if (fileName) {
+        fileName.textContent = embeddedMeta && embeddedMeta.fileName ? embeddedMeta.fileName : "embedded scene";
+      }
+
+      if (embeddedView && typeof embeddedView.scale === "number") {
+        viewState.scale = clamp(embeddedView.scale, viewState.minScale, viewState.maxScale);
+        centerSceneInViewport();
+      } else {
+        fitSceneToViewport();
+      }
+
+      setStatus("내장된 Excalidraw scene을 불러왔습니다.", false);
+      renderCurrentScene();
+    }
+
+    function getSceneBounds(elements) {
+      let minX = Infinity;
+      let minY = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+
+      for (const element of elements) {
+        const box = getElementBounds(element);
+        minX = Math.min(minX, box.minX);
+        minY = Math.min(minY, box.minY);
+        maxX = Math.max(maxX, box.maxX);
+        maxY = Math.max(maxY, box.maxY);
+      }
+
+      if (!Number.isFinite(minX)) {
+        return { minX: 0, minY: 0, maxX: 1200, maxY: 800 };
+      }
+
+      return { minX, minY, maxX, maxY };
+    }
+
+    function getElementBounds(element) {
+      const x = element.x || 0;
+      const y = element.y || 0;
+      const w = element.width || 0;
+      const h = element.height || 0;
+
+      if (Array.isArray(element.points) && element.points.length) {
+        let minX = x;
+        let minY = y;
+        let maxX = x;
+        let maxY = y;
+        for (const point of element.points) {
+          minX = Math.min(minX, x + point[0]);
+          minY = Math.min(minY, y + point[1]);
+          maxX = Math.max(maxX, x + point[0]);
+          maxY = Math.max(maxY, y + point[1]);
+        }
+        return expandBounds({ minX, minY, maxX, maxY }, element.strokeWidth || 1);
+      }
+
+      return expandBounds({
+        minX: Math.min(x, x + w),
+        minY: Math.min(y, y + h),
+        maxX: Math.max(x, x + w),
+        maxY: Math.max(y, y + h),
+      }, element.strokeWidth || 1);
+    }
+
+    function expandBounds(bounds, amount) {
+      return {
+        minX: bounds.minX - amount * 2,
+        minY: bounds.minY - amount * 2,
+        maxX: bounds.maxX + amount * 2,
+        maxY: bounds.maxY + amount * 2,
+      };
+    }
+
+    function drawElement(context, element, files) {
+      context.save();
+      context.translate(element.x || 0, element.y || 0);
+
+      if (element.angle) {
+        const cx = (element.width || 0) / 2;
+        const cy = (element.height || 0) / 2;
+        context.translate(cx, cy);
+        context.rotate(element.angle);
+        context.translate(-cx, -cy);
+      }
+
+      applyStyles(context, element);
+
+      switch (element.type) {
+        case "rectangle":
+          drawRectangle(context, element);
+          break;
+        case "ellipse":
+          drawEllipse(context, element);
+          break;
+        case "diamond":
+          drawDiamond(context, element);
+          break;
+        case "line":
+          drawLinear(context, element, false);
+          break;
+        case "arrow":
+          drawLinear(context, element, true);
+          break;
+        case "freedraw":
+          drawFreeDraw(context, element);
+          break;
+        case "text":
+          drawText(context, element);
+          break;
+        case "image":
+          drawImageElement(context, element, files);
+          break;
+        default:
+          drawFallbackBox(context, element);
+          break;
+      }
+
+      context.restore();
+    }
+
+    function applyStyles(context, element) {
+      context.lineWidth = element.strokeWidth || 1.5;
+      context.strokeStyle = element.strokeColor || "#1f2937";
+      context.fillStyle = getFillStyle(element.backgroundColor);
+      context.globalAlpha = typeof element.opacity === "number" ? element.opacity / 100 : 1;
+      context.lineJoin = "round";
+      context.lineCap = "round";
+
+      if (Array.isArray(element.strokeStyle) || element.strokeStyle === "dashed") {
+        context.setLineDash([10, 8]);
+      } else if (element.strokeStyle === "dotted") {
+        context.setLineDash([2, 6]);
+      } else {
+        context.setLineDash([]);
+      }
+    }
+
+    function getFillStyle(color) {
+      if (!color || color === "transparent") return "rgba(0,0,0,0)";
+      return color;
+    }
+
+    function drawRectangle(context, element) {
+      const x = 0;
+      const y = 0;
+      const w = element.width || 0;
+      const h = element.height || 0;
+      const r = Math.min(12, Math.abs(w) / 6, Math.abs(h) / 6);
+      roundedRect(context, x, y, w, h, r);
+      fillAndStroke(context, element);
+    }
+
+    function roundedRect(context, x, y, w, h, r) {
+      const rx = Math.max(0, Math.min(r, Math.abs(w) / 2));
+      const ry = Math.max(0, Math.min(r, Math.abs(h) / 2));
+      context.beginPath();
+      context.moveTo(x + rx, y);
+      context.lineTo(x + w - rx, y);
+      context.quadraticCurveTo(x + w, y, x + w, y + ry);
+      context.lineTo(x + w, y + h - ry);
+      context.quadraticCurveTo(x + w, y + h, x + w - rx, y + h);
+      context.lineTo(x + rx, y + h);
+      context.quadraticCurveTo(x, y + h, x, y + h - ry);
+      context.lineTo(x, y + ry);
+      context.quadraticCurveTo(x, y, x + rx, y);
+      context.closePath();
+    }
+
+    function drawEllipse(context, element) {
+      context.beginPath();
+      context.ellipse(
+        (element.width || 0) / 2,
+        (element.height || 0) / 2,
+        Math.abs(element.width || 0) / 2,
+        Math.abs(element.height || 0) / 2,
+        0,
+        0,
+        Math.PI * 2
+      );
+      fillAndStroke(context, element);
+    }
+
+    function drawDiamond(context, element) {
+      const w = element.width || 0;
+      const h = element.height || 0;
+      context.beginPath();
+      context.moveTo(w / 2, 0);
+      context.lineTo(w, h / 2);
+      context.lineTo(w / 2, h);
+      context.lineTo(0, h / 2);
+      context.closePath();
+      fillAndStroke(context, element);
+    }
+
+    function drawLinear(context, element, withArrowHeads) {
+      const points = Array.isArray(element.points) ? element.points : [[0, 0], [element.width || 0, element.height || 0]];
+      if (!points.length) return;
+
+      context.beginPath();
+      context.moveTo(points[0][0], points[0][1]);
+      for (let i = 1; i < points.length; i += 1) {
+        context.lineTo(points[i][0], points[i][1]);
+      }
+      context.stroke();
+
+      if (withArrowHeads && points.length >= 2) {
+        const start = points[points.length - 2];
+        const end = points[points.length - 1];
+        drawArrowHead(context, start, end, element.strokeColor || "#1f2937", element.strokeWidth || 1.5);
+      }
+    }
+
+    function drawArrowHead(context, start, end, color, width) {
+      const angle = Math.atan2(end[1] - start[1], end[0] - start[0]);
+      const size = Math.max(10, width * 4);
+      context.save();
+      context.fillStyle = color;
+      context.beginPath();
+      context.moveTo(end[0], end[1]);
+      context.lineTo(
+        end[0] - size * Math.cos(angle - Math.PI / 6),
+        end[1] - size * Math.sin(angle - Math.PI / 6)
+      );
+      context.lineTo(
+        end[0] - size * Math.cos(angle + Math.PI / 6),
+        end[1] - size * Math.sin(angle + Math.PI / 6)
+      );
+      context.closePath();
+      context.fill();
+      context.restore();
+    }
+
+    function drawFreeDraw(context, element) {
+      const points = Array.isArray(element.points) ? element.points : [];
+      if (!points.length) return;
+
+      context.beginPath();
+      context.moveTo(points[0][0], points[0][1]);
+      for (let i = 1; i < points.length; i += 1) {
+        const prev = points[i - 1];
+        const curr = points[i];
+        const midX = (prev[0] + curr[0]) / 2;
+        const midY = (prev[1] + curr[1]) / 2;
+        context.quadraticCurveTo(prev[0], prev[1], midX, midY);
+      }
+      const last = points[points.length - 1];
+      context.lineTo(last[0], last[1]);
+      context.stroke();
+    }
+
+    function drawText(context, element) {
+      const size = element.fontSize || 20;
+      const family = mapFontFamily(element.fontFamily);
+      const align = element.textAlign || "left";
+      const baseline = "top";
+      const lines = String(element.text || "").split("\n");
+      const lineHeight = (element.lineHeight || 1.25) * size;
+
+      context.fillStyle = element.strokeColor || "#1f2937";
+      context.font = `${size}px ${family}`;
+      context.textAlign = align;
+      context.textBaseline = baseline;
+
+      let x = 0;
+      if (align === "center") x = (element.width || 0) / 2;
+      if (align === "right") x = element.width || 0;
+
+      for (let i = 0; i < lines.length; i += 1) {
+        context.fillText(lines[i], x, i * lineHeight);
+      }
+    }
+
+    function mapFontFamily(fontFamily) {
+      if (fontFamily === 2) return '"Comic Sans MS", "Trebuchet MS", sans-serif';
+      if (fontFamily === 3) return '"Courier New", monospace';
+      return '"Segoe UI", "Apple SD Gothic Neo", sans-serif';
+    }
+
+    function drawImageElement(context, element, files) {
+      const file = files[element.fileId];
+      if (!file || !file.dataURL) {
+        drawFallbackBox(context, element, "Image");
+        return;
+      }
+
+      let img = imageCache.get(element.fileId);
+      if (!img) {
+        img = new Image();
+        img.onload = () => {
+          if (currentScene) renderCurrentScene();
+        };
+        img.src = file.dataURL;
+        imageCache.set(element.fileId, img);
+      }
+
+      if (img.complete) {
+        context.drawImage(img, 0, 0, element.width || img.width, element.height || img.height);
+      } else {
+        drawFallbackBox(context, element, "Loading image");
+      }
+    }
+
+    function drawFallbackBox(context, element, label) {
+      const w = element.width || 120;
+      const h = element.height || 60;
+      context.save();
+      context.strokeStyle = "#9ca3af";
+      context.fillStyle = "rgba(156, 163, 175, 0.08)";
+      context.setLineDash([8, 8]);
+      context.strokeRect(0, 0, w, h);
+      context.fillRect(0, 0, w, h);
+      context.setLineDash([]);
+      context.fillStyle = "#6b7280";
+      context.font = '12px "Segoe UI", sans-serif';
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.fillText(label || element.type || "Unsupported", w / 2, h / 2);
+      context.restore();
+    }
+
+    function fillAndStroke(context, element) {
+      if (element.backgroundColor && element.backgroundColor !== "transparent") {
+        context.fill();
+      }
+      context.stroke();
+    }
+
+    window.addEventListener("resize", () => {
+      if (currentScene) {
+        fitSceneToViewport();
+        renderCurrentScene();
+      } else {
+        clearCanvas();
+      }
+    });
+
+    canvasWrap.addEventListener("wheel", (event) => {
+      if (!currentScene) return;
+      event.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+      const factor = event.deltaY < 0 ? 1.1 : 1 / 1.1;
+      zoomAtPoint(x, y, factor);
+    }, { passive: false });
+
+    canvasWrap.addEventListener("pointerdown", (event) => {
+      if (!currentScene) return;
+      activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      canvasWrap.setPointerCapture(event.pointerId);
+
+      if (activePointers.size >= 2) {
+        stopDragging();
+        startPinchGesture();
+        return;
+      }
+
+      startDragging(event.clientX, event.clientY);
+    });
+
+    canvasWrap.addEventListener("pointermove", (event) => {
+      if (!currentScene) return;
+      if (activePointers.has(event.pointerId)) {
+        activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+      }
+
+      if (pinchState.active && activePointers.size >= 2) {
+        updatePinchGesture();
+        return;
+      }
+
+      if (!dragState.active) return;
+      viewState.offsetX = dragState.originX + (event.clientX - dragState.startX);
+      viewState.offsetY = dragState.originY + (event.clientY - dragState.startY);
+      renderCurrentScene();
+    });
+
+    function startDragging(clientX, clientY) {
+      dragState.active = true;
+      dragState.startX = clientX;
+      dragState.startY = clientY;
+      dragState.originX = viewState.offsetX;
+      dragState.originY = viewState.offsetY;
+      canvasWrap.classList.add("dragging");
+    }
+
+    function stopDragging(event) {
+      dragState.active = false;
+      canvasWrap.classList.remove("dragging");
+      if (event) {
+        try {
+          canvasWrap.releasePointerCapture(event.pointerId);
+        } catch (error) {
+        }
+      }
+    }
+
+    function startPinchGesture() {
+      const pointers = getTrackedPointers();
+      if (pointers.length < 2) {
+        pinchState.active = false;
+        return;
+      }
+
+      const center = getPointerCenter(pointers[0], pointers[1]);
+      pinchState.active = true;
+      pinchState.startDistance = getPointerDistance(pointers[0], pointers[1]);
+      pinchState.startScale = viewState.scale;
+      pinchState.sceneX = (center.x - viewState.offsetX) / viewState.scale;
+      pinchState.sceneY = (center.y - viewState.offsetY) / viewState.scale;
+    }
+
+    function updatePinchGesture() {
+      const pointers = getTrackedPointers();
+      if (pointers.length < 2 || !pinchState.startDistance) {
+        return;
+      }
+
+      const center = getPointerCenter(pointers[0], pointers[1]);
+      const distance = getPointerDistance(pointers[0], pointers[1]);
+      const nextScale = clamp(
+        pinchState.startScale * (distance / pinchState.startDistance),
+        viewState.minScale,
+        viewState.maxScale
+      );
+
+      viewState.scale = nextScale;
+      viewState.offsetX = center.x - pinchState.sceneX * nextScale;
+      viewState.offsetY = center.y - pinchState.sceneY * nextScale;
+      renderCurrentScene();
+    }
+
+    function stopPinchGesture() {
+      pinchState.active = false;
+      pinchState.startDistance = 0;
+    }
+
+    function getTrackedPointers() {
+      return Array.from(activePointers.values()).slice(0, 2);
+    }
+
+    function getPointerCenter(a, b) {
+      return {
+        x: (a.x + b.x) / 2,
+        y: (a.y + b.y) / 2,
+      };
+    }
+
+    function getPointerDistance(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    function releasePointer(event) {
+      activePointers.delete(event.pointerId);
+      stopDragging(event);
+
+      if (pinchState.active && activePointers.size < 2) {
+        stopPinchGesture();
+      }
+
+      if (activePointers.size === 1) {
+        const remainingPointer = getTrackedPointers()[0];
+        if (remainingPointer) {
+          startDragging(remainingPointer.x, remainingPointer.y);
+        }
+      }
+    }
+
+    canvasWrap.addEventListener("pointerup", releasePointer);
+    canvasWrap.addEventListener("pointercancel", releasePointer);
+    canvasWrap.addEventListener("pointerleave", releasePointer);
+
+    if (currentScene) {
+      renderCurrentScene();
+    } else {
+      clearCanvas();
+    }
+  </script>
+</body>
+</html>
