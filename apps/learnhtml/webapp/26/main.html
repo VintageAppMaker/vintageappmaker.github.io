@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Pro - Add & Manage Rows/Cols</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9;
+            user-select: none;
+        }
+
+        .excel-table th, .excel-table .row-num {
+            position: sticky;
+            background: #f8fafc;
+            z-index: 20;
+            border: 1px solid #e2e8f0;
+        }
+        .excel-table th { top: 0; height: 32px; min-width: 100px; }
+        .excel-table .row-num { left: 0; width: 45px; text-align: center; font-size: 11px; color: #94a3b8; }
+
+        .cell-container {
+            position: relative;
+            border: 1px solid #e2e8f0;
+            background: white;
+            min-width: 100px;
+            height: 32px;
+            font-size: 13px;
+            color: #334155;
+            padding: 0 8px;
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .cell-container.active {
+            outline: 2px solid #2563eb;
+            z-index: 30;
+        }
+
+        .cell-container.in-selection {
+            background-color: rgba(37, 99, 235, 0.1);
+        }
+
+        .fill-handle {
+            position: absolute;
+            right: -4px;
+            bottom: -4px;
+            width: 8px;
+            height: 8px;
+            background-color: #2563eb;
+            border: 1px solid white;
+            cursor: crosshair;
+            z-index: 40;
+            display: none;
+        }
+        .cell-container.active .fill-handle {
+            display: block;
+        }
+
+        /* 추가 버튼 스타일 개선 */
+        .insert-trigger {
+            opacity: 0;
+            transition: opacity 0.2s;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #2563eb;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 50;
+            width: 18px;
+            height: 18px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        th:hover .insert-trigger, .row-num:hover .insert-trigger {
+            opacity: 1;
+        }
+
+        .insert-trigger:hover {
+            background: #1d4ed8;
+            transform: scale(1.1);
+        }
+
+        .tab-btn.active {
+            border-bottom: 3px solid #2563eb;
+            color: #2563eb;
+            background: white;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; height: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- Top Toolbar -->
+    <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shrink-0 shadow-sm z-50">
+        <div class="flex items-center gap-4">
+            <div class="bg-blue-600 p-2 rounded-lg text-white">
+                <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold text-slate-800">Smart Excel Editor</h1>
+                <p class="text-[10px] text-blue-500 font-bold tracking-tight uppercase">Row/Col Management Active</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="undoBtn" class="flex items-center gap-2 px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-all text-sm font-medium">
+                <i data-lucide="undo-2" class="w-4 h-4"></i>
+                되돌리기
+            </button>
+            <label class="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg cursor-pointer transition-all text-sm font-medium">
+                <i data-lucide="upload" class="w-4 h-4"></i>
+                파일 업로드
+                <input type="file" id="fileInput" class="hidden" accept=".xlsx, .xls, .csv">
+            </label>
+            <button id="downloadBtn" class="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all text-sm font-medium shadow-sm">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                엑셀 다운로드
+            </button>
+        </div>
+    </header>
+
+    <!-- Formula Bar -->
+    <div class="bg-slate-50 border-b border-slate-200 px-4 py-1.5 flex items-center gap-2 shrink-0">
+        <div id="activeCellLabel" class="bg-white border border-slate-300 px-3 py-1 rounded font-mono text-slate-600 min-w-[70px] text-center font-bold text-sm shadow-sm">A1</div>
+        <div class="h-6 w-[1px] bg-slate-300"></div>
+        <div class="flex-grow flex items-center bg-white border border-slate-300 rounded px-3 focus-within:ring-2 focus-within:ring-blue-100 focus-within:border-blue-400 transition-all shadow-sm">
+            <span class="text-slate-400 font-serif font-bold italic mr-3 select-none">fx</span>
+            <input type="text" id="formulaInput" class="w-full bg-transparent outline-none py-1 text-sm font-mono text-slate-800" placeholder="수식 입력 (예: =A1+B1)">
+        </div>
+    </div>
+
+    <main class="flex-grow flex overflow-hidden">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white border-r border-slate-200 flex flex-col shrink-0">
+            <div class="p-4 border-b border-slate-100 font-bold text-xs uppercase tracking-widest text-slate-400">속성 및 도구</div>
+            <div class="p-4 space-y-6">
+                <div class="space-y-3">
+                    <label class="text-xs font-bold text-slate-600 flex items-center gap-2">
+                        <i data-lucide="type" class="w-3.5 h-3.5"></i> 열 표시 형식
+                    </label>
+                    <select id="formatSelect" class="w-full border border-slate-200 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                        <option value="text">일반/텍스트</option>
+                        <option value="number">숫자 (정수)</option>
+                        <option value="currency">금액 (천 단위 ,)</option>
+                        <option value="date">날짜 (YYYY-MM-DD)</option>
+                    </select>
+                </div>
+
+                <!-- Currency Options -->
+                <div id="currencyOptions" class="hidden space-y-3 pt-2">
+                    <label class="text-xs font-bold text-slate-600 flex justify-between">
+                        <span>소수점 자리수</span>
+                        <span id="decimalLabel" class="text-blue-600">0</span>
+                    </label>
+                    <input type="range" id="decimalSlider" min="0" max="2" value="0" step="1" class="w-full accent-blue-600 cursor-pointer">
+                </div>
+
+                <div class="pt-4 border-t border-slate-100 flex flex-col gap-2">
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="addRowAtSelection()" class="flex items-center justify-center gap-2 py-2 bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-[10px] font-bold hover:bg-slate-100 transition-colors">
+                            <i data-lucide="rows-3" class="w-3.5 h-3.5"></i> 행 삽입
+                        </button>
+                        <button onclick="addColumnAtSelection()" class="flex items-center justify-center gap-2 py-2 bg-slate-50 text-slate-700 border border-slate-200 rounded-lg text-[10px] font-bold hover:bg-slate-100 transition-colors">
+                            <i data-lucide="columns-3" class="w-3.5 h-3.5"></i> 열 삽입
+                        </button>
+                    </div>
+                    <button id="deleteRangeBtn" class="flex items-center justify-center gap-2 py-2.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors">
+                        <i data-lucide="eraser" class="w-4 h-4"></i> 선택 영역 삭제
+                    </button>
+                    <button onclick="deleteRow()" class="flex items-center justify-center gap-2 py-2.5 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors">
+                        <i data-lucide="minus-square" class="w-4 h-4"></i> 행 삭제
+                    </button>
+                    <button onclick="deleteColumn()" class="flex items-center justify-center gap-2 py-2.5 bg-red-50 text-red-600 rounded-lg text-xs font-bold hover:bg-red-100 transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i> 열 삭제
+                    </button>
+                </div>
+                
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 mt-auto">
+                    <p class="text-[10px] text-slate-400 font-medium leading-relaxed">
+                        <span class="font-bold text-slate-600 underline">Tip:</span> 행 번호나 열 머리글의 <span class="text-blue-600 font-bold">+</span> 버튼을 클릭하여 원하는 위치에 행/열을 즉시 추가할 수 있습니다.
+                    </p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Editor View -->
+        <div class="flex-grow flex flex-col overflow-hidden relative bg-white">
+            <div id="tabContainer" class="flex overflow-x-auto bg-slate-50 border-b border-slate-200 px-4 shrink-0"></div>
+            
+            <div id="tableWrapper" class="flex-grow overflow-auto custom-scrollbar relative">
+                <table id="excelTable" class="excel-table border-collapse min-w-full table-fixed">
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+
+            <!-- Welcome UI -->
+            <div id="welcomeScreen" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50/90 z-40">
+                <div class="bg-white p-10 rounded-3xl shadow-2xl flex flex-col items-center max-w-sm text-center border border-slate-100">
+                    <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-inner">
+                        <i data-lucide="file-spreadsheet" class="w-8 h-8"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-slate-800 mb-2">데이터를 불러오세요</h2>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-6">
+                        머리글의 + 버튼을 클릭하여 행과 열을 자유롭게 추가하고 편집해보세요.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 px-6 py-2 flex items-center justify-between text-[11px] font-medium text-slate-400 shrink-0">
+        <div id="statusText" class="flex items-center gap-2 text-blue-600">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span> 준비 완료
+        </div>
+        <div id="fileInfo">파일 정보 없음</div>
+    </footer>
+
+    <script>
+        let workbook = null;
+        let currentSheet = "";
+        let sheetData = {}; 
+        let evaluatedData = {}; 
+        let colFormats = {}; 
+        
+        let selectedCol = null;
+        let selectedRow = null;
+        let activeCell = { r: 0, c: 0 };
+        let selectionStart = { r: 0, c: 0 };
+        let selectionEnd = null; 
+
+        let undoStack = [];
+        const MAX_UNDO_STEPS = 50;
+
+        let isDragging = false;
+        let dragStart = null;
+        let dragEnd = null;
+
+        const formulaInput = document.getElementById('formulaInput');
+        const activeCellLabel = document.getElementById('activeCellLabel');
+        const formatSelect = document.getElementById('formatSelect');
+        const currencyOptions = document.getElementById('currencyOptions');
+        const decimalSlider = document.getElementById('decimalSlider');
+        const decimalLabel = document.getElementById('decimalLabel');
+        const deleteRangeBtn = document.getElementById('deleteRangeBtn');
+
+        lucide.createIcons();
+
+        const getColLetter = (n) => {
+            let s = "";
+            while (n >= 0) { s = String.fromCharCode((n % 26) + 65) + s; n = Math.floor(n / 26) - 1; }
+            return s;
+        };
+
+        const letterToIdx = (s) => {
+            return s.split('').reduce((acc, char) => acc * 26 + (char.charCodeAt(0) - 64), 0) - 1;
+        };
+
+        function applyDisplayFormat(val, config) {
+            const type = typeof config === 'object' ? config.type : config;
+            const decimals = typeof config === 'object' ? (config.decimals || 0) : 0;
+
+            if (val === undefined || val === null || val === "" || isNaN(val)) {
+                if (typeof val === 'string' && val.startsWith('#')) return val;
+                return val;
+            }
+
+            const num = parseFloat(val);
+            if (isNaN(num)) return val;
+
+            switch(type) {
+                case 'currency':
+                    return new Intl.NumberFormat('ko-KR', {
+                        minimumFractionDigits: decimals,
+                        maximumFractionDigits: decimals
+                    }).format(num);
+                case 'number':
+                    return Math.floor(num).toString();
+                case 'date':
+                    const date = new Date((num - 25569) * 86400 * 1000);
+                    if (isNaN(date.getTime())) return val;
+                    return date.toISOString().split('T')[0];
+                default:
+                    return val;
+            }
+        }
+
+        function saveStateToUndo() {
+            const snapshot = {
+                sheetData: JSON.parse(JSON.stringify(sheetData)),
+                colFormats: JSON.parse(JSON.stringify(colFormats))
+            };
+            undoStack.push(snapshot);
+            if (undoStack.length > MAX_UNDO_STEPS) undoStack.shift();
+        }
+
+        function performUndo() {
+            if (undoStack.length === 0) return;
+            const lastState = undoStack.pop();
+            sheetData = lastState.sheetData;
+            colFormats = lastState.colFormats;
+            refreshAll();
+            statusNotify("실행 취소됨");
+        }
+
+        function statusNotify(msg) {
+            const status = document.getElementById('statusText');
+            status.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> ${msg}`;
+            setTimeout(() => status.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span> 준비 완료`, 2000);
+        }
+
+        // --- FIXED: Enhanced Add Row/Col Logic ---
+        function addRow(idx) {
+            if (!currentSheet || !sheetData[currentSheet]) return;
+            saveStateToUndo();
+            const maxCols = Math.max(15, ...sheetData[currentSheet].map(r => r.length));
+            const newRow = Array(maxCols).fill("");
+            sheetData[currentSheet].splice(idx, 0, newRow);
+            refreshAll();
+            statusNotify(`${idx + 1}행에 새로운 행이 삽입되었습니다.`);
+        }
+
+        function addColumn(idx) {
+            if (!currentSheet || !sheetData[currentSheet]) return;
+            saveStateToUndo();
+            sheetData[currentSheet].forEach(row => {
+                row.splice(idx, 0, "");
+            });
+            
+            const formats = colFormats[currentSheet] || {};
+            const newFormats = {};
+            Object.keys(formats).forEach(k => {
+                const colIdx = parseInt(k);
+                if (colIdx < idx) newFormats[colIdx] = formats[colIdx];
+                else newFormats[colIdx + 1] = formats[colIdx];
+            });
+            colFormats[currentSheet] = newFormats;
+            
+            refreshAll();
+            statusNotify(`${getColLetter(idx)}열에 새로운 열이 삽입되었습니다.`);
+        }
+
+        function addRowAtSelection() {
+            addRow(selectedRow !== null ? selectedRow : activeCell.r);
+        }
+
+        function addColumnAtSelection() {
+            addColumn(selectedCol !== null ? selectedCol : activeCell.c);
+        }
+
+        function deleteSelectedRange() {
+            if (!currentSheet || !sheetData[currentSheet]) return;
+            saveStateToUndo();
+            const start = selectionStart;
+            const end = selectionEnd || selectionStart;
+            const minR = Math.min(start.r, end.r);
+            const maxR = Math.max(start.r, end.r);
+            const minC = Math.min(start.c, end.c);
+            const maxC = Math.max(start.c, end.c);
+            let count = 0;
+            for (let r = minR; r <= maxR; r++) {
+                if (!sheetData[currentSheet][r]) continue;
+                for (let c = minC; c <= maxC; c++) {
+                    if (sheetData[currentSheet][r][c] !== "") {
+                        sheetData[currentSheet][r][c] = "";
+                        count++;
+                    }
+                }
+            }
+            refreshAll();
+            statusNotify(`${count}개 셀 내용 삭제됨`);
+        }
+
+        deleteRangeBtn.onclick = deleteSelectedRange;
+
+        window.addEventListener('keydown', (e) => {
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.contentEditable === 'true') {
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+                e.preventDefault();
+                performUndo();
+            }
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                deleteSelectedRange();
+            }
+        });
+
+        document.getElementById('undoBtn').onclick = performUndo;
+
+        formatSelect.onchange = () => {
+            if (selectedCol === null) return;
+            saveStateToUndo();
+            if (!colFormats[currentSheet]) colFormats[currentSheet] = {};
+            const existing = colFormats[currentSheet][selectedCol] || { decimals: 0 };
+            colFormats[currentSheet][selectedCol] = {
+                type: formatSelect.value,
+                decimals: existing.decimals || 0
+            };
+            updateOptionsUI();
+            refreshAll();
+            statusNotify(`${getColLetter(selectedCol)}열 형식 변경됨`);
+        };
+
+        decimalSlider.oninput = () => {
+            if (selectedCol === null) return;
+            const val = parseInt(decimalSlider.value);
+            decimalLabel.textContent = val;
+            if (!colFormats[currentSheet][selectedCol]) return;
+            saveStateToUndo();
+            colFormats[currentSheet][selectedCol].decimals = val;
+            refreshAll();
+        };
+
+        function updateOptionsUI() {
+            if (selectedCol === null || !colFormats[currentSheet] || !colFormats[currentSheet][selectedCol]) {
+                currencyOptions.classList.add('hidden');
+                return;
+            }
+            const config = colFormats[currentSheet][selectedCol];
+            if (config.type === 'currency') {
+                currencyOptions.classList.remove('hidden');
+                decimalSlider.value = config.decimals || 0;
+                decimalLabel.textContent = config.decimals || 0;
+            } else {
+                currencyOptions.classList.add('hidden');
+            }
+        }
+
+        function evaluateFormula(val, sheetName, seen = new Set()) {
+            if (!val || !val.toString().startsWith('=')) return val;
+            const expr = val.substring(1).toUpperCase();
+            const refRegex = /([A-Z]+)([0-9]+)/g;
+            const replaced = expr.replace(refRegex, (match, colStr, rowStr) => {
+                const c = letterToIdx(colStr);
+                const r = parseInt(rowStr) - 1;
+                const targetVal = (sheetData[sheetName] && sheetData[sheetName][r] && sheetData[sheetName][r][c] !== undefined)
+                    ? sheetData[sheetName][r][c] : 0;
+                const key = `${sheetName}!${colStr}${rowStr}`;
+                if (seen.has(key)) return "0";
+                seen.add(key);
+                const res = evaluateFormula(targetVal, sheetName, seen);
+                return isNaN(parseFloat(res)) ? 0 : parseFloat(res);
+            });
+            try {
+                const calc = Function(`'use strict'; return (${replaced})`)();
+                return typeof calc === 'number' ? Number(calc.toFixed(4)) : calc;
+            } catch { return "#ERROR!"; }
+        }
+
+        function refreshAll() {
+            if (!currentSheet || !sheetData[currentSheet]) return;
+            evaluatedData[currentSheet] = sheetData[currentSheet].map((row, r) => 
+                row.map((val, c) => evaluateFormula(val, currentSheet))
+            );
+            renderTable();
+        }
+
+        document.getElementById('fileInput').onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const data = new Uint8Array(ev.target.result);
+                workbook = XLSX.read(data, { type: 'array' });
+                sheetData = {};
+                evaluatedData = {};
+                colFormats = {};
+                workbook.SheetNames.forEach(name => {
+                    sheetData[name] = XLSX.utils.sheet_to_json(workbook.Sheets[name], { header: 1, defval: "" });
+                    colFormats[name] = {};
+                });
+                undoStack = [];
+                document.getElementById('welcomeScreen').style.display = 'none';
+                document.getElementById('fileInfo').textContent = file.name;
+                initTabs();
+                switchSheet(workbook.SheetNames[0]);
+            };
+            reader.readAsArrayBuffer(file);
+        };
+
+        function initTabs() {
+            const container = document.getElementById('tabContainer');
+            container.innerHTML = '';
+            workbook.SheetNames.forEach(name => {
+                const btn = document.createElement('button');
+                btn.className = `tab-btn px-6 py-2.5 text-xs font-bold transition-all whitespace-nowrap border-b-2 border-transparent text-slate-500 hover:text-slate-800 ${name === currentSheet ? 'active' : ''}`;
+                btn.textContent = name;
+                btn.onclick = () => switchSheet(name);
+                container.appendChild(btn);
+            });
+        }
+
+        function switchSheet(name) {
+            currentSheet = name;
+            initTabs();
+            refreshAll();
+        }
+
+        function renderTable() {
+            const data = sheetData[currentSheet];
+            const evalData = evaluatedData[currentSheet];
+            const formats = colFormats[currentSheet] || {};
+            const head = document.getElementById('tableHead');
+            const body = document.getElementById('tableBody');
+            head.innerHTML = '';
+            body.innerHTML = '';
+            if (!data) return;
+            
+            const maxCols = Math.max(15, ...data.map(r => r.length));
+            const hTr = document.createElement('tr');
+            hTr.innerHTML = `<th class="row-num"></th>`;
+            for (let i = 0; i < maxCols; i++) {
+                const th = document.createElement('th');
+                th.className = `relative text-[11px] font-bold text-slate-400 hover:bg-slate-200 cursor-pointer transition-colors ${selectedCol === i ? 'bg-blue-100 text-blue-600' : ''}`;
+                
+                // FIXED: Changed to onmousedown to prevent event interference
+                const addColBtn = document.createElement('div');
+                addColBtn.className = 'insert-trigger flex items-center justify-center';
+                addColBtn.style.right = '2px';
+                addColBtn.style.top = '7px';
+                addColBtn.innerHTML = '<i data-lucide="plus" class="w-3 h-3"></i>';
+                addColBtn.onmousedown = (e) => { 
+                    e.stopPropagation(); 
+                    e.preventDefault();
+                    addColumn(i + 1); 
+                };
+                
+                th.appendChild(document.createTextNode(getColLetter(i)));
+                th.appendChild(addColBtn);
+                
+                th.onmousedown = (e) => { 
+                    e.stopPropagation();
+                    selectedCol = i; 
+                    selectedRow = null; 
+                    const config = formats[i] || { type: 'text', decimals: 0 };
+                    formatSelect.value = config.type || 'text';
+                    updateOptionsUI();
+                    renderTable(); 
+                };
+                hTr.appendChild(th);
+            }
+            head.appendChild(hTr);
+
+            const start = selectionStart;
+            const end = selectionEnd || selectionStart;
+            const minR = Math.min(start.r, end.r);
+            const maxR = Math.max(start.r, end.r);
+            const minC = Math.min(start.c, end.c);
+            const maxC = Math.max(start.c, end.c);
+
+            data.forEach((row, r) => {
+                const tr = document.createElement('tr');
+                const rowNumTd = document.createElement('td');
+                rowNumTd.className = `relative row-num hover:bg-slate-200 cursor-pointer transition-colors ${selectedRow === r ? 'bg-blue-100 text-blue-600 font-bold' : ''}`;
+                
+                // FIXED: Changed to onmousedown to prevent event interference
+                const addRowBtn = document.createElement('div');
+                addRowBtn.className = 'insert-trigger flex items-center justify-center';
+                addRowBtn.style.bottom = '2px';
+                addRowBtn.style.left = '14px';
+                addRowBtn.innerHTML = '<i data-lucide="plus" class="w-3 h-3"></i>';
+                addRowBtn.onmousedown = (e) => { 
+                    e.stopPropagation(); 
+                    e.preventDefault();
+                    addRow(r + 1); 
+                };
+                
+                rowNumTd.appendChild(document.createTextNode(r + 1));
+                rowNumTd.appendChild(addRowBtn);
+
+                rowNumTd.onmousedown = (e) => { 
+                    e.stopPropagation();
+                    selectedRow = r; 
+                    selectedCol = null; 
+                    updateOptionsUI();
+                    renderTable(); 
+                };
+                tr.appendChild(rowNumTd);
+
+                for (let c = 0; c < maxCols; c++) {
+                    const td = document.createElement('td');
+                    td.className = 'p-0';
+                    const cellDiv = document.createElement('div');
+                    const isCellInSelection = r >= minR && r <= maxR && c >= minC && c <= maxC;
+                    const isActive = activeCell.r === r && activeCell.c === c;
+                    cellDiv.className = `cell-container ${isActive ? 'active' : ''} ${isCellInSelection ? 'in-selection' : ''} ${selectedCol === c ? 'bg-blue-50/40' : ''}`;
+                    cellDiv.dataset.r = r;
+                    cellDiv.dataset.c = c;
+                    const rawVal = evalData[r] && evalData[r][c] !== undefined ? evalData[r][c] : "";
+                    cellDiv.textContent = applyDisplayFormat(rawVal, formats[c] || 'text');
+                    const handle = document.createElement('div');
+                    handle.className = 'fill-handle';
+                    handle.onmousedown = (e) => startDrag(e, r, c);
+                    cellDiv.appendChild(handle);
+                    cellDiv.onmousedown = (e) => {
+                        e.stopPropagation();
+                        selectCell(r, c, e.shiftKey);
+                    };
+                    cellDiv.ondblclick = () => enterEditMode(cellDiv, r, c);
+                    tr.appendChild(td);
+                    td.appendChild(cellDiv);
+                }
+                body.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        function selectCell(r, c, shiftKey) {
+            if (shiftKey && selectionStart) {
+                selectionEnd = { r, c };
+            } else {
+                selectionStart = { r, c };
+                selectionEnd = null;
+            }
+            activeCell = { r, c };
+            activeCellLabel.textContent = `${getColLetter(c)}${r + 1}`;
+            formulaInput.value = (sheetData[currentSheet] && sheetData[currentSheet][r]) ? (sheetData[currentSheet][r][c] || "") : "";
+            renderTable();
+        }
+
+        function enterEditMode(div, r, c) {
+            const currentVal = (sheetData[currentSheet] && sheetData[currentSheet][r]) ? (sheetData[currentSheet][r][c] || "") : "";
+            div.contentEditable = true;
+            div.textContent = currentVal; 
+            div.focus();
+            const range = document.createRange();
+            const sel = window.getSelection();
+            range.selectNodeContents(div);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+            div.onblur = () => {
+                const newVal = div.textContent;
+                div.contentEditable = false;
+                if (newVal !== currentVal) {
+                    saveStateToUndo();
+                    updateCell(r, c, newVal);
+                } else {
+                    refreshAll();
+                }
+            };
+            div.onkeydown = (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); div.blur(); }
+                if (e.key === 'Escape') { e.textContent = currentVal; div.blur(); }
+            };
+        }
+
+        function updateCell(r, c, val) {
+            if (!sheetData[currentSheet][r]) sheetData[currentSheet][r] = [];
+            sheetData[currentSheet][r][c] = val;
+            refreshAll();
+        }
+
+        formulaInput.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                const oldVal = (sheetData[currentSheet] && sheetData[currentSheet][activeCell.r]) ? sheetData[currentSheet][activeCell.r][activeCell.c] : "";
+                if (formulaInput.value !== oldVal) {
+                    saveStateToUndo();
+                    updateCell(activeCell.r, activeCell.c, formulaInput.value);
+                }
+                formulaInput.blur();
+            }
+        };
+
+        function startDrag(e, r, c) {
+            e.preventDefault();
+            e.stopPropagation();
+            isDragging = true;
+            dragStart = { r, c };
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('mouseup', endDrag);
+        }
+
+        function onDrag(e) {
+            if (!isDragging) return;
+            const target = document.elementFromPoint(e.clientX, e.clientY);
+            const cell = target ? target.closest('.cell-container') : null;
+            if (cell) {
+                const r = parseInt(cell.dataset.r);
+                const c = parseInt(cell.dataset.c);
+                dragEnd = { r, c };
+                const minR = Math.min(dragStart.r, dragEnd.r);
+                const maxR = Math.max(dragStart.r, dragEnd.r);
+                const minC = Math.min(dragStart.c, dragEnd.c);
+                const maxC = Math.max(dragStart.c, dragEnd.c);
+                document.querySelectorAll('.cell-container').forEach(div => {
+                    const dr = parseInt(div.dataset.r);
+                    const dc = parseInt(div.dataset.c);
+                    const inRange = dr >= minR && dr <= maxR && dc >= minC && dc <= maxC;
+                    div.classList.toggle('drag-target', inRange);
+                });
+            }
+        }
+
+        function endDrag() {
+            if (!isDragging) return;
+            isDragging = false;
+            document.removeEventListener('mousemove', onDrag);
+            document.removeEventListener('mouseup', endDrag);
+            if (dragStart && dragEnd && (dragStart.r !== dragEnd.r || dragStart.c !== dragEnd.c)) {
+                saveStateToUndo();
+                const sourceVal = (sheetData[currentSheet][dragStart.r] && sheetData[currentSheet][dragStart.r][dragStart.c]) || "";
+                const minR = Math.min(dragStart.r, dragEnd.r);
+                const maxR = Math.max(dragStart.r, dragEnd.r);
+                const minC = Math.min(dragStart.c, dragEnd.c);
+                const maxC = Math.max(dragStart.c, dragEnd.c);
+                for (let r = minR; r <= maxR; r++) {
+                    for (let c = minC; c <= maxC; c++) {
+                        if (r === dragStart.r && c === dragStart.c) continue;
+                        let finalVal = sourceVal;
+                        if (sourceVal.toString().startsWith('=')) {
+                            const dr = r - dragStart.r;
+                            const dc = c - dragStart.c;
+                            finalVal = sourceVal.replace(/([A-Z]+)([0-9]+)/g, (match, colStr, rowStr) => {
+                                const newR = parseInt(rowStr) + dr;
+                                const newCIdx = letterToIdx(colStr) + dc;
+                                return `${getColLetter(newCIdx < 0 ? 0 : newCIdx)}${newR < 1 ? 1 : newR}`;
+                            });
+                        }
+                        if (!sheetData[currentSheet][r]) sheetData[currentSheet][r] = [];
+                        sheetData[currentSheet][r][c] = finalVal;
+                    }
+                }
+                refreshAll();
+                statusNotify("자동 채우기 완료");
+            } else {
+                renderTable();
+            }
+            dragStart = null; dragEnd = null;
+        }
+
+        function deleteRow() {
+            if (selectedRow === null) return;
+            saveStateToUndo();
+            sheetData[currentSheet].splice(selectedRow, 1);
+            selectedRow = null;
+            refreshAll();
+            statusNotify("행 삭제됨");
+        }
+
+        function deleteColumn() {
+            if (selectedCol === null) return;
+            saveStateToUndo();
+            sheetData[currentSheet].forEach(row => { if (row && row.length > selectedCol) row.splice(selectedCol, 1); });
+            const formats = colFormats[currentSheet] || {};
+            const newFormats = {};
+            Object.keys(formats).forEach(k => {
+                const idx = parseInt(k);
+                if (idx < selectedCol) newFormats[idx] = formats[idx];
+                if (idx > selectedCol) newFormats[idx - 1] = formats[idx];
+            });
+            colFormats[currentSheet] = newFormats;
+            selectedCol = null;
+            updateOptionsUI();
+            refreshAll();
+            statusNotify("열 삭제됨");
+        }
+
+        document.getElementById('downloadBtn').onclick = () => {
+            const newWb = XLSX.utils.book_new();
+            workbook.SheetNames.forEach(n => {
+                const formats = colFormats[n] || {};
+                const exportData = evaluatedData[n].map((row, r) => 
+                    row.map((val, c) => applyDisplayFormat(val, formats[c] || 'text'))
+                );
+                const ws = XLSX.utils.aoa_to_sheet(exportData);
+                XLSX.utils.book_append_sheet(newWb, ws, n);
+            });
+            XLSX.writeFile(newWb, "excel_editor_export.xlsx");
+        };
+
+        document.getElementById('tableWrapper').onmousedown = (e) => {
+            if (e.target.tagName === 'TD' || e.target.tagName === 'TABLE' || e.target.id === 'tableWrapper') {
+                selectedCol = null;
+                selectedRow = null;
+                selectionStart = activeCell;
+                selectionEnd = null;
+                updateOptionsUI();
+                renderTable();
+            }
+        };
+    </script>
+</body>
+</html>

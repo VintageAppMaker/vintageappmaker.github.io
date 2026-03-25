@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Excel Animated Chart Demo</title>
+    <style>
+        :root {
+            --bg-1: #07111f;
+            --bg-2: #12243c;
+            --panel: rgba(7, 17, 31, 0.78);
+            --line: rgba(255, 255, 255, 0.1);
+            --text: #eef4ff;
+            --muted: #97aac8;
+            --accent: #5fd1ff;
+            --accent-2: #ffd166;
+            --accent-3: #a0ffcf;
+            --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+            --radius: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", "Noto Sans KR", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(95, 209, 255, 0.18), transparent 30%),
+                radial-gradient(circle at bottom right, rgba(255, 209, 102, 0.18), transparent 25%),
+                linear-gradient(145deg, var(--bg-1), var(--bg-2));
+        }
+
+        .shell {
+            width: min(1240px, calc(100% - 32px));
+            margin: 32px auto;
+            display: grid;
+            grid-template-columns: 360px minmax(0, 1fr);
+            gap: 24px;
+        }
+
+        .panel {
+            background: var(--panel);
+            backdrop-filter: blur(18px);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .controls {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin: 0;
+        }
+
+        h1 {
+            font-size: 30px;
+            line-height: 1.15;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .label {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        textarea,
+        input,
+        button {
+            font: inherit;
+        }
+
+        textarea,
+        input[type="number"] {
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text);
+            padding: 14px 16px;
+            outline: none;
+        }
+
+        textarea {
+            min-height: 220px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .button-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            border: 0;
+            border-radius: 999px;
+            padding: 12px 14px;
+            cursor: pointer;
+            color: #04111f;
+            background: linear-gradient(90deg, var(--accent), #86f7d5);
+            font-weight: 700;
+        }
+
+        button.secondary {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .hint {
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(255, 209, 102, 0.1);
+            color: #ffeab3;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .stage {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            min-height: 760px;
+        }
+
+        .stage-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .kicker {
+            color: var(--accent);
+            font-size: 13px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+        }
+
+        .year-badge {
+            min-width: 120px;
+            text-align: right;
+            font-size: clamp(48px, 7vw, 88px);
+            font-weight: 800;
+            line-height: 0.9;
+            color: rgba(255, 255, 255, 0.14);
+        }
+
+        .status {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 10px 16px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--muted);
+        }
+
+        .tab-button.active {
+            color: #08121f;
+            background: linear-gradient(90deg, var(--accent), #c2ffe7);
+            border-color: transparent;
+        }
+
+        .tab-panels {
+            position: relative;
+            min-height: 460px;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .chart {
+            display: grid;
+            grid-template-columns: 90px minmax(0, 1fr) 90px;
+            gap: 16px;
+            align-items: center;
+            padding: 18px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .chart:last-child {
+            border-bottom: 0;
+        }
+
+        .name {
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bar-track {
+            position: relative;
+            height: 42px;
+            border-radius: 999px;
+            overflow: hidden;
+            background:
+                linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 0;
+            border-radius: 999px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-2));
+            transition: width 0.8s ease;
+            box-shadow: inset 0 0 24px rgba(255, 255, 255, 0.18);
+        }
+
+        .value {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            color: #f7fbff;
+            font-weight: 700;
+        }
+
+        .line-wrap {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 220px;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .line-card,
+        .pie-card {
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 18px;
+        }
+
+        .line-svg {
+            width: 100%;
+            height: 360px;
+            display: block;
+        }
+
+        .axis-line,
+        .grid-line {
+            stroke: rgba(255, 255, 255, 0.12);
+            stroke-width: 1;
+        }
+
+        .line-scan-band {
+            fill: rgba(95, 209, 255, 0.1);
+        }
+
+        .line-scan-line {
+            stroke: rgba(160, 255, 207, 0.95);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 10px rgba(160, 255, 207, 0.6));
+        }
+
+        .line-scan-pulse {
+            fill: rgba(160, 255, 207, 0.18);
+        }
+
+        .line-path {
+            fill: none;
+            stroke: var(--accent);
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 12px rgba(95, 209, 255, 0.35));
+        }
+
+        .point {
+            fill: var(--accent-2);
+            stroke: #08121f;
+            stroke-width: 2;
+            transition: r 0.2s ease;
+        }
+
+        .point.active {
+            r: 8;
+            fill: var(--accent-3);
+        }
+
+        .line-legend {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .legend-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--muted);
+        }
+
+        .legend-row strong {
+            color: var(--text);
+        }
+
+        .pie-wrap {
+            display: grid;
+            grid-template-columns: 340px minmax(0, 1fr);
+            gap: 18px;
+            align-items: center;
+        }
+
+        .pie-svg {
+            width: 100%;
+            height: 340px;
+            display: block;
+        }
+
+        .slice {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform-origin: 170px 170px;
+        }
+
+        .slice:hover {
+            opacity: 0.92;
+            transform: scale(1.02);
+        }
+
+        .pie-center {
+            fill: rgba(7, 17, 31, 0.92);
+        }
+
+        .pie-total {
+            font-size: 28px;
+            font-weight: 800;
+            fill: var(--text);
+            text-anchor: middle;
+        }
+
+        .pie-sub {
+            font-size: 13px;
+            fill: var(--muted);
+            text-anchor: middle;
+        }
+
+        .pie-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .pie-item {
+            display: grid;
+            grid-template-columns: 14px minmax(0, 1fr) auto auto;
+            gap: 12px;
+            align-items: center;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+        }
+
+        .percent {
+            color: var(--accent-2);
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timeline {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .tick {
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--muted);
+            font-size: 13px;
+            transition: 0.3s ease;
+        }
+
+        .tick.active {
+            color: #08121f;
+            background: linear-gradient(90deg, var(--accent), #c2ffe7);
+            border-color: transparent;
+            font-weight: 700;
+        }
+
+        @media (max-width: 980px) {
+            .shell {
+                grid-template-columns: 1fr;
+            }
+
+            .stage {
+                min-height: auto;
+            }
+
+            .line-wrap,
+            .pie-wrap {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+
+            .button-row,
+            .meta,
+            .chart {
+                grid-template-columns: 1fr;
+            }
+
+            .value {
+                text-align: left;
+            }
+
+            .pie-item {
+                grid-template-columns: 14px minmax(0, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <section class="panel controls">
+            <div>
+                <p class="kicker">Excel To Motion Chart</p>
+                <h1>Animated Charts Demo</h1>
+            </div>
+            <p class="subtitle">
+                엑셀에서 복사한 표를 붙여넣으면 연도별 수치를 1초 간격으로 재생합니다.
+                첫 번째 열은 항목명, 이후 열은 시점별 숫자입니다.
+            </p>
+
+            <div class="field">
+                <label class="label" for="excelInput">엑셀 데이터 붙여넣기</label>
+                <textarea id="excelInput" spellcheck="false">Category	2021	2022	2023	2024	2025
+Netflix	120	150	190	220	260
+Disney+	90	130	150	180	210
+YouTube	140	170	210	250	310
+TikTok	60	95	140	205	280
+Prime Video	100	115	138	160	175</textarea>
+            </div>
+
+            <div class="meta">
+                <div class="field">
+                    <label class="label" for="intervalInput">인터벌(ms)</label>
+                    <input id="intervalInput" type="number" min="1000" step="1000" value="1000" readonly />
+                </div>
+                <div class="field">
+                    <label class="label" for="topNInput">노출 개수</label>
+                    <input id="topNInput" type="number" min="3" max="12" step="1" value="5" />
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button id="renderButton">렌더링</button>
+                <button id="playButton" class="secondary">재생</button>
+                <button id="pauseButton" class="secondary">정지</button>
+            </div>
+
+            <div class="hint">
+                예시 입력 형식: `항목명 / 2021 / 2022 / 2023 ...`
+                <br />
+                엑셀 범위를 복사해서 그대로 붙여넣으면 탭 구분을 자동 인식합니다.
+            </div>
+        </section>
+
+        <section class="panel stage">
+            <div class="stage-top">
+                <div>
+                    <p class="kicker">Filmora Style Preview</p>
+                    <h2 id="chartTitle">Streaming Platform Growth</h2>
+                    <p class="subtitle" id="chartDescription">데이터를 렌더링하면 연도별 애니메이션이 시작됩니다.</p>
+                </div>
+                <div class="year-badge" id="yearBadge">2021</div>
+            </div>
+
+            <div class="status">
+                <span id="frameStatus">0 / 0</span>
+                <span id="playStatus">대기 중</span>
+            </div>
+
+            <div class="tabs" id="tabs">
+                <button class="tab-button active" data-tab="bar">막대 그래프</button>
+                <button class="tab-button" data-tab="line">꺾은선 그래프</button>
+                <button class="tab-button" data-tab="pie">파이 그래프</button>
+            </div>
+
+            <div class="tab-panels">
+                <div class="tab-panel active" data-panel="bar">
+                    <div id="chartList"></div>
+                </div>
+
+                <div class="tab-panel" data-panel="line">
+                    <div class="line-wrap">
+                        <div class="line-card">
+                            <svg class="line-svg" id="lineChart" viewBox="0 0 720 360" aria-label="line chart"></svg>
+                        </div>
+                        <div class="line-legend" id="lineLegend"></div>
+                    </div>
+                </div>
+
+                <div class="tab-panel" data-panel="pie">
+                    <div class="pie-wrap">
+                        <div class="pie-card">
+                            <svg class="pie-svg" id="pieChart" viewBox="0 0 340 340" aria-label="pie chart"></svg>
+                        </div>
+                        <div class="pie-list" id="pieLegend"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="timeline" id="timeline"></div>
+        </section>
+    </div>
+
+    <script>
+        const excelInput = document.getElementById("excelInput");
+        const intervalInput = document.getElementById("intervalInput");
+        const topNInput = document.getElementById("topNInput");
+        const renderButton = document.getElementById("renderButton");
+        const playButton = document.getElementById("playButton");
+        const pauseButton = document.getElementById("pauseButton");
+        const chartList = document.getElementById("chartList");
+        const timeline = document.getElementById("timeline");
+        const yearBadge = document.getElementById("yearBadge");
+        const frameStatus = document.getElementById("frameStatus");
+        const playStatus = document.getElementById("playStatus");
+        const chartDescription = document.getElementById("chartDescription");
+        const tabs = document.getElementById("tabs");
+        const lineChart = document.getElementById("lineChart");
+        const lineLegend = document.getElementById("lineLegend");
+        const pieChart = document.getElementById("pieChart");
+        const pieLegend = document.getElementById("pieLegend");
+
+        const palette = ["#5fd1ff", "#ffd166", "#ff7d7d", "#a0ffcf", "#c4a1ff", "#ff9f5f", "#7ee7ff", "#8aff80"];
+        const frameDuration = 1000;
+        const transitionDuration = 820;
+
+        let parsedData = null;
+        let currentFrame = 0;
+        let timerId = null;
+        let animationFrameId = null;
+        let transitionToken = 0;
+        let activeTab = "bar";
+
+        function parseExcelText(text) {
+            const rows = text
+                .trim()
+                .split(/\r?\n/)
+                .map((line) => line.split("\t").map((cell) => cell.trim()))
+                .filter((cells) => cells.length > 1 && cells.some(Boolean));
+
+            if (rows.length < 2) {
+                throw new Error("헤더와 데이터 행이 필요합니다.");
+            }
+
+            const headers = rows[0];
+            const labels = headers.slice(1);
+            const series = rows.slice(1).map((row) => {
+                const name = row[0];
+                const values = labels.map((_, index) => {
+                    const raw = row[index + 1] ?? "0";
+                    const normalized = raw.replace(/,/g, "");
+                    const value = Number(normalized);
+                    return Number.isFinite(value) ? value : 0;
+                });
+                return { name, values };
+            });
+
+            return { labels, series };
+        }
+
+        function getTopN() {
+            return Math.max(3, Math.min(12, Number(topNInput.value) || 5));
+        }
+
+        function mapFrameItems(frameIndex) {
+            return parsedData.series.map((item, index) => ({
+                name: item.name,
+                value: item.values[frameIndex] ?? 0,
+                color: palette[index % palette.length],
+                series: item.values
+            }));
+        }
+
+        function getFrameItems(frameIndex) {
+            return mapFrameItems(frameIndex).sort((a, b) => b.value - a.value);
+        }
+
+        function getInterpolatedFrameItems(fromFrame, toFrame, progress) {
+            const items = parsedData.series.map((item, index) => {
+                const start = item.values[fromFrame] ?? 0;
+                const end = item.values[toFrame] ?? 0;
+                return {
+                    name: item.name,
+                    value: start + (end - start) * progress,
+                    color: palette[index % palette.length],
+                    series: item.values
+                };
+            });
+
+            return items.sort((a, b) => b.value - a.value);
+        }
+
+        function buildBarShell(topN) {
+            chartList.innerHTML = "";
+            for (let i = 0; i < topN; i += 1) {
+                const row = document.createElement("div");
+                row.className = "chart";
+                row.innerHTML = `
+          <div class="name">-</div>
+          <div class="bar-track"><div class="bar-fill"></div></div>
+          <div class="value">0</div>
+        `;
+                chartList.appendChild(row);
+            }
+        }
+
+        function buildTimeline(labels) {
+            timeline.innerHTML = "";
+            labels.forEach((label, index) => {
+                const tick = document.createElement("div");
+                tick.className = "tick";
+                tick.textContent = label;
+                timeline.appendChild(tick);
+            });
+        }
+
+        function updateTimeline(frameIndex) {
+            Array.from(timeline.children).forEach((tick, index) => {
+                tick.classList.toggle("active", index === frameIndex);
+            });
+        }
+
+        function renderBarFrame(frameItems) {
+            const rows = Array.from(chartList.querySelectorAll(".chart"));
+            const maxValue = Math.max(...frameItems.map((item) => item.value), 1);
+
+            rows.forEach((row, index) => {
+                const item = frameItems[index];
+                const nameEl = row.querySelector(".name");
+                const fillEl = row.querySelector(".bar-fill");
+                const valueEl = row.querySelector(".value");
+
+                if (!item) {
+                    nameEl.textContent = "-";
+                    fillEl.style.width = "0%";
+                    fillEl.style.background = "linear-gradient(90deg, var(--accent), var(--accent-2))";
+                    valueEl.textContent = "0";
+                    return;
+                }
+
+                const width = (item.value / maxValue) * 100;
+                nameEl.textContent = item.name;
+                fillEl.style.width = width + "%";
+                fillEl.style.background = `linear-gradient(90deg, ${item.color}, var(--accent-2))`;
+                valueEl.textContent = Math.round(item.value).toLocaleString("ko-KR");
+            });
+        }
+
+        function renderLineFrame(frameItems, framePosition) {
+            const topItems = frameItems.slice(0, Math.min(4, frameItems.length));
+            const labels = parsedData.labels;
+            const width = 720;
+            const height = 360;
+            const padding = { top: 24, right: 24, bottom: 42, left: 42 };
+            const maxValue = Math.max(...topItems.flatMap((item) => item.series), 1);
+            const usableWidth = width - padding.left - padding.right;
+            const usableHeight = height - padding.top - padding.bottom;
+            const stepX = labels.length > 1 ? usableWidth / (labels.length - 1) : usableWidth;
+            const scanX = padding.left + stepX * framePosition;
+            const bandWidth = Math.max(28, stepX * 0.6);
+            const bandX = Math.max(padding.left, scanX - bandWidth / 2);
+            const activeIndex = Math.round(framePosition);
+
+            let svg = "";
+
+            for (let i = 0; i < 5; i += 1) {
+                const y = padding.top + (usableHeight / 4) * i;
+                svg += `<line class="grid-line" x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}"></line>`;
+            }
+
+            svg += `<line class="axis-line" x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${height - padding.bottom}"></line>`;
+            svg += `<line class="axis-line" x1="${padding.left}" y1="${height - padding.bottom}" x2="${width - padding.right}" y2="${height - padding.bottom}"></line>`;
+
+            labels.forEach((label, index) => {
+                const x = padding.left + stepX * index;
+                svg += `<text x="${x}" y="${height - 14}" fill="#97aac8" font-size="12" text-anchor="middle">${label}</text>`;
+            });
+
+            svg += `<rect class="line-scan-band" x="${bandX}" y="${padding.top}" width="${Math.min(bandWidth, width - padding.right - bandX)}" height="${usableHeight}"></rect>`;
+            svg += `<circle class="line-scan-pulse" cx="${scanX}" cy="${padding.top + usableHeight / 2}" r="32"></circle>`;
+            svg += `<line class="line-scan-line" x1="${scanX}" y1="${padding.top}" x2="${scanX}" y2="${height - padding.bottom}"></line>`;
+
+            topItems.forEach((item) => {
+                const points = item.series.map((value, index) => {
+                    const x = padding.left + stepX * index;
+                    const y = padding.top + usableHeight - (value / maxValue) * usableHeight;
+                    return { x, y };
+                });
+
+                const d = points.map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ");
+                svg += `<path class="line-path" d="${d}" stroke="${item.color}"></path>`;
+
+                points.forEach((point, index) => {
+                    const isActive = index === activeIndex;
+                    svg += `<circle class="${isActive ? "point active" : "point"}" cx="${point.x}" cy="${point.y}" r="${isActive ? 8 : 5}" fill="${isActive ? "#a0ffcf" : item.color}"></circle>`;
+                });
+            });
+
+            lineChart.innerHTML = svg;
+            lineLegend.innerHTML = topItems.map((item) => `
+        <div class="legend-row">
+          <span><strong style="color:${item.color}">${item.name}</strong></span>
+          <span>${Math.round(item.value).toLocaleString("ko-KR")}</span>
+        </div>
+      `).join("");
+        }
+
+        function polarToCartesian(cx, cy, radius, angle) {
+            const radians = (angle - 90) * (Math.PI / 180);
+            return {
+                x: cx + radius * Math.cos(radians),
+                y: cy + radius * Math.sin(radians)
+            };
+        }
+
+        function describeArc(cx, cy, radius, startAngle, endAngle) {
+            const start = polarToCartesian(cx, cy, radius, endAngle);
+            const end = polarToCartesian(cx, cy, radius, startAngle);
+            const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+            return `M ${cx} ${cy} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 0 ${end.x} ${end.y} Z`;
+        }
+
+        function renderPieFrame(frameItems) {
+            const topItems = frameItems.slice(0, getTopN());
+            const total = Math.max(topItems.reduce((sum, item) => sum + item.value, 0), 1);
+            let angle = 0;
+
+            const slices = topItems.map((item) => {
+                const sliceAngle = (item.value / total) * 360;
+                const path = describeArc(170, 170, 130, angle, angle + sliceAngle);
+                const ratio = (item.value / total) * 100;
+                angle += sliceAngle;
+                return { ...item, path, ratio };
+            });
+
+            pieChart.innerHTML = `
+        ${slices.map((slice) => `<path class="slice" d="${slice.path}" fill="${slice.color}"></path>`).join("")}
+        <circle class="pie-center" cx="170" cy="170" r="68"></circle>
+        <text class="pie-total" x="170" y="162">${Math.round(total).toLocaleString("ko-KR")}</text>
+        <text class="pie-sub" x="170" y="188">TOTAL</text>
+      `;
+
+            pieLegend.innerHTML = slices.map((slice) => `
+        <div class="pie-item">
+          <span class="dot" style="background:${slice.color}"></span>
+          <span>${slice.name}</span>
+          <span class="percent">${slice.ratio.toFixed(1)}%</span>
+          <span>${Math.round(slice.value).toLocaleString("ko-KR")}</span>
+        </div>
+      `).join("");
+        }
+
+        function renderFrameState(frameItems, framePosition, labelIndex) {
+            renderBarFrame(frameItems);
+            renderLineFrame(frameItems, framePosition);
+            renderPieFrame(frameItems);
+            updateTimeline(labelIndex);
+            yearBadge.textContent = parsedData.labels[labelIndex] ?? "";
+            frameStatus.textContent = `${labelIndex + 1} / ${parsedData.labels.length}`;
+        }
+
+        function renderFrame(frameIndex) {
+            renderFrameState(getFrameItems(frameIndex).slice(0, getTopN()), frameIndex, frameIndex);
+        }
+
+        function cancelTransition() {
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+        }
+
+        function animateToFrame(targetFrame, options = {}) {
+            if (!parsedData) {
+                return;
+            }
+
+            const immediate = options.immediate === true;
+            cancelTransition();
+            transitionToken += 1;
+            const token = transitionToken;
+            const fromFrame = currentFrame;
+            const toFrame = targetFrame;
+
+            if (immediate || fromFrame === toFrame) {
+                currentFrame = toFrame;
+                renderFrame(toFrame);
+                return;
+            }
+
+            const startedAt = performance.now();
+
+            function step(now) {
+                if (token !== transitionToken) {
+                    return;
+                }
+
+                const rawProgress = Math.min((now - startedAt) / transitionDuration, 1);
+                const eased = 1 - Math.pow(1 - rawProgress, 3);
+                const frameItems = getInterpolatedFrameItems(fromFrame, toFrame, eased).slice(0, getTopN());
+                const framePosition = fromFrame + (toFrame - fromFrame) * eased;
+                const labelIndex = rawProgress < 0.5 ? fromFrame : toFrame;
+
+                renderFrameState(frameItems, framePosition, labelIndex);
+
+                if (rawProgress < 1) {
+                    animationFrameId = requestAnimationFrame(step);
+                    return;
+                }
+
+                animationFrameId = null;
+                currentFrame = toFrame;
+                renderFrame(toFrame);
+            }
+
+            animationFrameId = requestAnimationFrame(step);
+        }
+
+        function stopPlayback() {
+            if (timerId) {
+                clearTimeout(timerId);
+                timerId = null;
+            }
+            cancelTransition();
+            playStatus.textContent = "정지됨";
+        }
+
+        function scheduleNextPlaybackTick() {
+            if (!parsedData) {
+                return;
+            }
+
+            timerId = setTimeout(() => {
+                const nextFrame = (currentFrame + 1) % parsedData.labels.length;
+                animateToFrame(nextFrame);
+                scheduleNextPlaybackTick();
+            }, frameDuration);
+        }
+
+        function playPlayback() {
+            if (!parsedData) {
+                return;
+            }
+
+            stopPlayback();
+            playStatus.textContent = "재생 중 (1초 인터벌)";
+            scheduleNextPlaybackTick();
+        }
+
+        function setActiveTab(tabName) {
+            activeTab = tabName;
+            Array.from(document.querySelectorAll(".tab-button")).forEach((button) => {
+                button.classList.toggle("active", button.dataset.tab === tabName);
+            });
+            Array.from(document.querySelectorAll(".tab-panel")).forEach((panel) => {
+                panel.classList.toggle("active", panel.dataset.panel === tabName);
+            });
+        }
+
+        function renderAll() {
+            try {
+                parsedData = parseExcelText(excelInput.value);
+                currentFrame = 0;
+                intervalInput.value = "1000";
+                buildBarShell(getTopN());
+                buildTimeline(parsedData.labels);
+                cancelTransition();
+                renderFrame(0);
+                chartDescription.textContent = `항목 ${parsedData.series.length}개, 시점 ${parsedData.labels.length}개를 막대/꺾은선/파이 탭으로 1초 간격 재생합니다.`;
+                playStatus.textContent = "렌더링 완료";
+            } catch (error) {
+                stopPlayback();
+                chartList.innerHTML = `<p class="subtitle">${error.message}</p>`;
+                lineChart.innerHTML = "";
+                lineLegend.innerHTML = "";
+                pieChart.innerHTML = "";
+                pieLegend.innerHTML = "";
+                timeline.innerHTML = "";
+                yearBadge.textContent = "-";
+                frameStatus.textContent = "0 / 0";
+            }
+        }
+
+        renderButton.addEventListener("click", () => {
+            stopPlayback();
+            renderAll();
+        });
+
+        playButton.addEventListener("click", () => {
+            if (!parsedData) {
+                renderAll();
+            }
+            playPlayback();
+        });
+
+        pauseButton.addEventListener("click", stopPlayback);
+
+        topNInput.addEventListener("change", () => {
+            stopPlayback();
+            renderAll();
+        });
+
+        tabs.addEventListener("click", (event) => {
+            const button = event.target.closest(".tab-button");
+            if (!button) {
+                return;
+            }
+            setActiveTab(button.dataset.tab);
+            renderFrame(currentFrame);
+        });
+
+        renderAll();
+        setActiveTab(activeTab);
+    </script>
+</body>
+
+</html>
