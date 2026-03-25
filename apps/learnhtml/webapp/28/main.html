@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desert Rich Tree Outline</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&display=swap');
+        
+        :root {
+            --desert-bg: #f4ece1;
+            --desert-paper: #fdfaf5;
+            --desert-ink: #4a3f35;
+            --desert-line: #d2b48c;
+        }
+
+        body { 
+            font-family: 'Noto Serif KR', serif; 
+            background-color: var(--desert-bg);
+            color: var(--desert-ink);
+            background-image: url("https://www.transparenttextures.com/patterns/paper.png");
+        }
+
+        /* 계층별 폰트 스타일 */
+        .depth-0 { font-size: 1.75rem; font-weight: 800; color: #2d241e; margin-bottom: 0.5rem; }
+        .depth-1 { font-size: 1.35rem; font-weight: 700; color: #3e332a; }
+        .depth-2 { font-size: 1.1rem; font-weight: 600; color: #4a3f35; }
+        .depth-3 { font-size: 1rem; font-weight: 400; color: #5d5045; }
+        .depth-more { font-size: 0.9rem; font-weight: 400; color: #7a6b5d; }
+
+        /* 트리 구조 핵심 CSS */
+        .tree-root {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .tree-item {
+            position: relative;
+            padding-left: 24px; /* 수평선 길이 */
+            margin: 0;
+        }
+
+        /* 수직선 */
+        .tree-item::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: -10px; /* 위쪽 항목과 연결 */
+            bottom: 0;
+            width: 1.5px;
+            background-color: var(--desert-line);
+        }
+
+        /* 마지막 항목의 수직선 처리: 수평선 위치까지만 내려오게 함 */
+        .tree-item:last-child::before {
+            height: 32px; /* 수평선(top 22px) 보다 조금 더 길게 해서 꺾쇠 느낌 구현 */
+            bottom: auto;
+        }
+
+        /* 수평선 (니은 모양의 ㅡ 부분) */
+        .tree-item::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 22px; /* 텍스트 높이에 맞춤 */
+            width: 20px;
+            height: 1.5px;
+            background-color: var(--desert-line);
+        }
+
+        /* 최상위 노드(Depth 0)는 선이 필요 없음 */
+        .root-item > .tree-item::before, 
+        .root-item > .tree-item::after {
+            display: none;
+        }
+        .root-item > .tree-item {
+            padding-left: 0;
+        }
+
+        /* 자식들을 감싸는 컨테이너 */
+        .tree-children {
+            padding-left: 12px;
+            margin-left: 0;
+        }
+
+        /* 노드 내용 스타일 */
+        .node-content {
+            display: flex;
+            align-items: center;
+            min-height: 44px;
+            padding: 4px 0;
+            cursor: default;
+        }
+
+        .node-text {
+            word-wrap: break-word;
+            word-break: break-all;
+            line-height: 1.4;
+            transition: all 0.2s;
+        }
+
+        .action-btns {
+            opacity: 0;
+            display: flex;
+            gap: 8px;
+            margin-left: 16px;
+            transition: opacity 0.2s;
+        }
+
+        .node-content:hover .action-btns {
+            opacity: 1;
+        }
+
+        /* 입력창 디자인 */
+        textarea {
+            tab-size: 4;
+            background-color: rgba(255, 255, 255, 0.4);
+            border: 1px solid var(--desert-line);
+            line-height: 1.8;
+        }
+
+        #captureTarget {
+            background-color: var(--desert-paper);
+            background-image: url("https://www.transparenttextures.com/patterns/paper.png");
+            min-height: 500px;
+            border: 1px solid #e8dccb;
+        }
+
+        .export-clone,
+        .export-clone * {
+            box-sizing: border-box;
+        }
+
+        .export-clone {
+            margin: 0;
+            overflow: visible !important;
+            min-height: 0 !important;
+            background-image: none !important;
+            box-shadow: none !important;
+        }
+
+        .export-clone .action-btns {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="p-6 md:p-12 lg:p-16">
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl font-bold text-[#2d241e] tracking-tight mb-2">DESERT MANUSCRIPT</h1>
+            <div class="w-20 h-0.5 bg-[#d2b48c] mx-auto mb-4"></div>
+            <p class="text-[#7a6b5d] italic font-medium">끊김 없이 이어지는 사막의 기록 트리</p>
+        </header>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-12">
+            <!-- Left: Text Editor -->
+            <div class="flex flex-col gap-5">
+                <div class="flex justify-between items-end px-1">
+                    <label class="font-bold text-lg text-[#3e332a]">원고 작성</label>
+                    <span class="text-xs text-[#9a8b7d]">Tab으로 깊이를 조절하세요</span>
+                </div>
+                <textarea id="outlineInput" class="w-full h-[600px] p-8 rounded-2xl outline-none focus:ring-2 focus:ring-[#d2b48c] font-serif shadow-inner" placeholder="주제&#10;    하위 주제&#10;        세부 내용"></textarea>
+                <button id="updateBtn" class="w-full bg-[#4a3f35] hover:bg-[#2d241e] text-[#fdfaf5] font-bold py-4 rounded-xl shadow-lg transition-transform active:scale-[0.98]">
+                    트리 다시 그리기
+                </button>
+            </div>
+
+            <!-- Right: Visual Tree -->
+            <div class="flex flex-col gap-5">
+                <div class="flex justify-between items-end px-1">
+                    <label class="font-bold text-lg text-[#3e332a]">트리 미리보기</label>
+                    <div id="toast" class="hidden text-xs bg-[#4a3f35] text-white px-2 py-1 rounded animate-fade">저장됨</div>
+                </div>
+                
+                <div id="captureTarget" class="rounded-2xl shadow-2xl p-10 md:p-16 overflow-auto">
+                    <div id="treeContainer" class="tree-root root-item">
+                        <!-- Tree will be rendered here -->
+                    </div>
+                </div>
+
+                <button id="downloadBtn" class="w-full border-2 border-[#4a3f35] text-[#4a3f35] hover:bg-[#4a3f35] hover:text-white font-bold py-4 rounded-xl transition-all shadow-md active:scale-[0.98]">
+                    Preview HTML 다운로드
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-[#fdfaf5] w-full max-w-md rounded-2xl shadow-2xl p-8 border border-[#d2b48c] animate-in zoom-in duration-200">
+            <h3 class="text-xl font-bold mb-6 text-[#2d241e] border-b border-[#d2b48c] pb-2 italic">내용 다듬기</h3>
+            <textarea id="modalText" class="w-full p-5 border border-[#d2b48c] rounded-xl h-40 outline-none focus:ring-1 focus:ring-[#4a3f35] bg-white/50 text-lg leading-relaxed"></textarea>
+            <div class="flex gap-3 mt-8">
+                <button onclick="closeModal()" class="flex-1 py-3 text-[#7a6b5d] font-bold hover:bg-black/5 rounded-xl transition-colors">취소</button>
+                <button id="saveEditBtn" class="flex-1 py-3 bg-[#4a3f35] text-white font-bold rounded-xl hover:bg-[#2d241e]">저장하기</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let treeData = [];
+        let currentId = null;
+
+        const inputArea = document.getElementById('outlineInput');
+        const treeContainer = document.getElementById('treeContainer');
+        const updateBtn = document.getElementById('updateBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const editModal = document.getElementById('editModal');
+        const modalText = document.getElementById('modalText');
+        const toast = document.getElementById('toast');
+        const captureTarget = document.getElementById('captureTarget');
+
+        // Initial Data
+        inputArea.value = "고전 문학의 이해\n    서사시의 기원\n        고대 그리스 문학\n            호메로스의 일리아드와 오디세이아\n            비극과 희극의 발전 양상\n    소설의 시대\n        근대 리얼리즘의 탄생\n        내면의 흐름과 의식의 흐름 기법\n    비평의 역할\n        텍스트 분석과 해석의 다양성";
+
+        // Tab Key
+        inputArea.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const s = this.selectionStart;
+                const en = this.selectionEnd;
+                this.value = this.value.substring(0, s) + "    " + this.value.substring(en);
+                this.selectionStart = this.selectionEnd = s + 4;
+            }
+        });
+
+        // Parser
+        updateBtn.onclick = () => {
+            const lines = inputArea.value.split('\n').filter(l => l.trim() !== '');
+            if (lines.length === 0) return;
+
+            treeData = [];
+            const stack = [{ level: -1, children: treeData }];
+
+            lines.forEach(line => {
+                const indent = line.search(/\S/);
+                const content = line.trim();
+                const level = Math.floor(indent / 4);
+
+                while (stack.length > 1 && stack.length - 1 > level) {
+                    stack.pop();
+                }
+
+                const newNode = {
+                    id: 'n-' + Math.random().toString(36).substr(2, 9),
+                    text: content,
+                    children: []
+                };
+
+                stack[stack.length - 1].children.push(newNode);
+                stack.push({ level: level, children: newNode.children });
+            });
+
+            render();
+            showToast("트리가 갱신되었습니다.");
+        };
+
+        // Render Tree
+        function render() {
+            treeContainer.innerHTML = '';
+            treeData.forEach(node => {
+                treeContainer.appendChild(createNodeUI(node, 0));
+            });
+        }
+
+        function createNodeUI(node, depth) {
+            const item = document.createElement('div');
+            item.className = "tree-item";
+
+            const depthClass = depth === 0 ? 'depth-0' : depth === 1 ? 'depth-1' : depth === 2 ? 'depth-2' : depth === 3 ? 'depth-3' : 'depth-more';
+
+            const content = document.createElement('div');
+            content.className = "node-content group";
+            
+            content.innerHTML = `
+                <div class="node-text ${depthClass}">${node.text}</div>
+                <div class="action-btns">
+                    <button onclick="openEdit('${node.id}')" class="text-[#d2b48c] hover:text-[#4a3f35]">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 113 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    </button>
+                    <button onclick="addChild('${node.id}')" class="text-[#d2b48c] hover:text-[#4a3f35]">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14m7-7H5"></path></svg>
+                    </button>
+                    <button onclick="deleteNode('${node.id}')" class="text-[#d2b48c] hover:text-red-700">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>
+                    </button>
+                </div>
+            `;
+            item.appendChild(content);
+
+            if (node.children && node.children.length > 0) {
+                const childrenContainer = document.createElement('div');
+                childrenContainer.className = "tree-children";
+                node.children.forEach(child => {
+                    childrenContainer.appendChild(createNodeUI(child, depth + 1));
+                });
+                item.appendChild(childrenContainer);
+            }
+
+            return item;
+        }
+
+        // Logic
+        function find(nodes, id) {
+            for (let n of nodes) {
+                if (n.id === id) return n;
+                if (n.children) {
+                    const res = find(n.children, id);
+                    if (res) return res;
+                }
+            }
+            return null;
+        }
+
+        function remove(nodes, id) {
+            for (let i = 0; i < nodes.length; i++) {
+                if (nodes[i].id === id) {
+                    nodes.splice(i, 1); return true;
+                }
+                if (nodes[i].children && remove(nodes[i].children, id)) return true;
+            }
+            return false;
+        }
+
+        window.openEdit = (id) => {
+            const node = find(treeData, id);
+            if (!node) return;
+            currentId = id;
+            modalText.value = node.text;
+            editModal.classList.remove('hidden');
+        };
+
+        window.closeModal = () => editModal.classList.add('hidden');
+
+        document.getElementById('saveEditBtn').onclick = () => {
+            const node = find(treeData, currentId);
+            if (node) {
+                node.text = modalText.value;
+                render(); closeModal(); showToast("수정되었습니다.");
+            }
+        };
+
+        window.addChild = (id) => {
+            const node = find(treeData, id);
+            if (node) {
+                node.children.push({ id: 'n-' + Math.random().toString(36).substr(2, 9), text: "새 기록", children: [] });
+                render(); showToast("추가되었습니다.");
+            }
+        };
+
+        window.deleteNode = (id) => {
+            if (remove(treeData, id)) {
+                render(); showToast("삭제되었습니다.");
+            }
+        };
+
+        function buildExportStyles() {
+            return `
+                @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&display=swap');
+                :root {
+                    --desert-bg: #f4ece1;
+                    --desert-paper: #fdfaf5;
+                    --desert-ink: #4a3f35;
+                    --desert-line: #d2b48c;
+                }
+                * {
+                    box-sizing: border-box;
+                }
+                body {
+                    margin: 0;
+                    padding: 32px;
+                    font-family: 'Noto Serif KR', serif;
+                    background-color: var(--desert-bg);
+                    color: var(--desert-ink);
+                    background-image: url("https://www.transparenttextures.com/patterns/paper.png");
+                }
+                .preview-shell {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                }
+                .preview-card {
+                    background-color: var(--desert-paper);
+                    background-image: url("https://www.transparenttextures.com/patterns/paper.png");
+                    min-height: 500px;
+                    border: 1px solid #e8dccb;
+                    border-radius: 1rem;
+                    box-shadow: 0 20px 50px rgba(74, 63, 53, 0.18);
+                    padding: 40px 64px;
+                    overflow: visible;
+                }
+                .tree-root {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                }
+                .tree-item {
+                    position: relative;
+                    padding-left: 24px;
+                    margin: 0;
+                }
+                .tree-item::before {
+                    content: "";
+                    position: absolute;
+                    left: 0;
+                    top: -10px;
+                    bottom: 0;
+                    width: 1.5px;
+                    background-color: var(--desert-line);
+                }
+                .tree-item:last-child::before {
+                    height: 32px;
+                    bottom: auto;
+                }
+                .tree-item::after {
+                    content: "";
+                    position: absolute;
+                    left: 0;
+                    top: 22px;
+                    width: 20px;
+                    height: 1.5px;
+                    background-color: var(--desert-line);
+                }
+                .root-item > .tree-item::before,
+                .root-item > .tree-item::after {
+                    display: none;
+                }
+                .root-item > .tree-item {
+                    padding-left: 0;
+                }
+                .tree-children {
+                    padding-left: 12px;
+                    margin-left: 0;
+                }
+                .node-content {
+                    display: flex;
+                    align-items: center;
+                    min-height: 44px;
+                    padding: 4px 0;
+                    cursor: default;
+                }
+                .node-text {
+                    word-wrap: break-word;
+                    word-break: break-all;
+                    line-height: 1.4;
+                    transition: all 0.2s;
+                }
+                .depth-0 { font-size: 1.75rem; font-weight: 800; color: #2d241e; margin-bottom: 0.5rem; }
+                .depth-1 { font-size: 1.35rem; font-weight: 700; color: #3e332a; }
+                .depth-2 { font-size: 1.1rem; font-weight: 600; color: #4a3f35; }
+                .depth-3 { font-size: 1rem; font-weight: 400; color: #5d5045; }
+                .depth-more { font-size: 0.9rem; font-weight: 400; color: #7a6b5d; }
+                .action-btns {
+                    display: none !important;
+                }
+                @media (max-width: 768px) {
+                    body {
+                        padding: 20px;
+                    }
+                    .preview-card {
+                        padding: 28px 24px;
+                    }
+                }
+            `;
+        }
+
+        function createExportClone(target) {
+            const clone = target.cloneNode(true);
+            clone.id = 'exportTree';
+            clone.className = 'tree-root root-item';
+            clone.querySelectorAll('.action-btns').forEach((buttons) => buttons.remove());
+            return clone;
+        }
+
+        function buildPreviewHtml() {
+            const clone = createExportClone(treeContainer);
+            const styles = buildExportStyles();
+            return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desert Tree Preview</title>
+    <style>
+${styles}
+    </style>
+</head>
+<body>
+    <main class="preview-shell">
+        <section class="preview-card">
+            ${clone.outerHTML}
+        </section>
+    </main>
+</body>
+</html>
+            `;
+        }
+
+        // Export
+        downloadBtn.onclick = () => {
+            downloadBtn.disabled = true;
+            try {
+                const html = buildPreviewHtml();
+                const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = `rich-desert-tree-preview-${Date.now()}.html`;
+                link.href = url;
+                link.click();
+                URL.revokeObjectURL(url);
+                showToast("Preview HTML이 저장되었습니다.");
+            } catch (e) {
+                console.error(e);
+                showToast("내보내기에 실패했습니다.");
+            } finally {
+                downloadBtn.disabled = false;
+            }
+        };
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2000);
+        }
+
+        // Run
+        updateBtn.click();
+    </script>
+</body>
+</html>
