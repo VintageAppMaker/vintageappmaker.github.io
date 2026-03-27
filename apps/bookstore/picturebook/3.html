@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Narration Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Noto+Sans+KR:wght@300;400;500;700&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a202c', // Charcoal Grey
+                        accent: '#0d9488',  // Soft Teal
+                        bgLight: '#f8fafc', // Crisp White/Grey
+                        glass: 'rgba(255, 255, 255, 0.8)',
+                    },
+                    fontFamily: {
+                        display: ['Montserrat', 'Outfit', 'sans-serif'],
+                        body: ['Noto Sans KR', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out forwards',
+                        'slide-up': 'slideUp 0.6s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #1a202c;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+        }
+        .image-shadow {
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+        .audio-container audio::-webkit-media-controls-panel {
+            background-color: #f1f5f9;
+        }
+        .audio-container audio {
+            width: 100%;
+            border-radius: 50px;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="font-body selection:bg-accent selection:text-white">
+
+    <!-- Header Section -->
+    <header class="pt-12 pb-8 px-6 animate-fade-in">
+        <div class="max-w-4xl mx-auto text-center">
+            <span class="text-accent font-display font-semibold tracking-widest text-xs uppercase mb-2 block">AI Powered Visualization</span>
+            <h1 class="font-display text-4xl md:text-5xl font-extrabold text-primary tracking-tight">
+                Image Narration Assistant
+            </h1>
+            <div class="h-1.5 w-20 bg-accent mx-auto mt-6 rounded-full"></div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-5xl mx-auto px-6 pb-24 space-y-20">
+
+        <!-- Image Section -->
+        <section class="animate-slide-up" style="animation-delay: 0.2s;">
+            <div class="relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-accent to-blue-400 rounded-3xl blur opacity-10 group-hover:opacity-20 transition duration-1000 group-hover:duration-200"></div>
+                <div class="relative bg-white rounded-3xl overflow-hidden image-shadow flex flex-col items-center">
+                    <div class="w-full space-y-4 p-4 md:p-8">
+                        <div class="overflow-hidden rounded-2xl flex flex-col gap-6 items-center">
+                            <!-- Provided Media 1 -->
+                            <div class="w-full max-w-3xl transform transition duration-500 hover:scale-[1.02]">
+                                <img src="3.jpg" alt="Event Venue Visual 1" class="w-full h-auto rounded-xl object-cover">
+                            </div>
+                            <!-- Provided Media 2 -->
+                            <div class="w-full max-w-3xl transform transition duration-500 hover:scale-[1.02]">
+                                <img src="3_1.jpg" alt="Event Venue Visual 2" class="w-full h-auto rounded-xl object-cover">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Script Section -->
+        <section class="max-w-[80ch] mx-auto animate-slide-up" style="animation-delay: 0.4s;">
+            <div class="glass-card p-8 md:p-12 shadow-sm border border-slate-100">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="p-2 bg-accent/10 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <h2 class="font-display text-xl font-bold text-primary tracking-wide uppercase">Narration Script</h2>
+                </div>
+                
+                <div class="space-y-6 text-slate-700 text-lg leading-relaxed md:leading-[2] font-normal">
+                    <p>
+                        옅은 노을빛이 도심의 빌딩 사이로 스며들며 차가운 공기가 머무는 광장. 텅 빈 듯한 이 공간 위로 거대한 존재감이 시선을 압도합니다. 잎을 다 떨군 앙상한 겨울 나무들 너머로 우뚝 솟은 건물의 외벽, 그곳에는 짙은 어둠을 배경으로 'BTS'라는 거대한 철자와 함께 일곱 멤버의 실루엣이 새겨져 있습니다. '3월 오직 NETFLIX에서'. 단호한 붉은색 글씨가 다가올 거대한 이벤트를 예고하듯 조용히 빛을 발하며 광장의 정적인 분위기와 대비를 이룬다. 
+                    </p>
+                    <p>
+                        넓게 펼쳐진 화강암 계단과 광장 주변은 아직 대중의 발길이 닿지 않아 차분한 정적을 유지하고 있습니다. 하지만 그 이면에는 행사를 앞둔 팽팽한 긴장감과 분주함이 흐릅니다. 
+                    </p>
+                    <p>
+                        시선을 광장 안쪽으로 돌리면, 앙상한 가지를 뻗은 거대한 나무들 아래로 길게 늘어선 은빛 철제 바리케이드가 끝없이 이어져 있습니다. 촘촘하게 세워진 통제선 주변으로는 두꺼운 외투를 챙겨 입은 경호 인력과 스태프들이 드문드문 자리한 채 현장을 주시하고 있습니다. 진입을 통제하는 안내판과 그 위로 길게 드리워진 늦은 오후의 그림자, 그리고 바리케이드 너머 저 멀리 우뚝 솟아있는 거대한 무대 조명탑과 스크린의 형태는 이곳에서 곧 대규모 행사가 열릴 것임을 암시합니다.
+                    </p>
+                    <p>
+                        화려한 전광판의 묵직한 존재감과 철저하게 통제된 지상의 풍경. 이 고요한 도심의 광장은 마치 폭풍 전야와도 같습니다. 곧 수많은 인파의 환호성으로 가득 찰 이 공간은, 빈틈없는 바리케이드와 통제 속에서 다가올 거대한 열광의 순간을 숨죽여 기다리고 있습니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Audio Player Section -->
+        <section class="max-w-2xl mx-auto animate-slide-up" style="animation-delay: 0.6s;">
+            <div class="bg-primary rounded-[2rem] p-6 md:p-8 shadow-2xl flex flex-col items-center">
+                <div class="mb-4 text-center">
+                    <p class="text-white/60 text-xs font-semibold tracking-widest uppercase mb-1">Now Playing</p>
+                    <h3 class="text-white font-display text-lg">Atmospheric Narration</h3>
+                </div>
+                <div class="w-full audio-container">
+                    <!-- Provided Audio -->
+                    <audio controls src="3.wav" class="w-full"></audio>
+                </div>
+                <div class="mt-6 flex items-center justify-between w-full px-4 text-white/40 text-[10px] font-mono">
+                    <span>HQ AUDIO ENGINE</span>
+                    <div class="flex gap-1">
+                        <div class="w-1 h-3 bg-accent animate-pulse"></div>
+                        <div class="w-1 h-3 bg-accent/60 animate-pulse" style="animation-delay: 0.2s"></div>
+                        <div class="w-1 h-3 bg-accent/30 animate-pulse" style="animation-delay: 0.4s"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // Subtle interaction: Log when audio is played
+        const audio = document.querySelector('audio');
+        if (audio) {
+            audio.addEventListener('play', () => {
+                console.log('Narration started...');
+            });
+        }
+    </script>
+</body>
+</html>
