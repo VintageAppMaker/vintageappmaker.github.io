@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게임 중독 이야기 인덱스</title>
+    <style>
+        :root {
+            --bg: #f5f5f4;
+            --surface: #ffffff;
+            --surface-alt: #f0ece6;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --line: #ddd6ce;
+            --accent: #c26d3b;
+            --accent-soft: #f3dfd2;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+            background: linear-gradient(180deg, #f8f6f2 0%, var(--bg) 100%);
+            color: var(--text);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .page {
+            width: min(1100px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 48px 0 64px;
+        }
+
+        .hero {
+            margin-bottom: 28px;
+            padding: 8px 0 24px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .eyebrow {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 14px 0 10px;
+            font-size: clamp(32px, 6vw, 54px);
+            line-height: 1.04;
+            letter-spacing: -0.04em;
+        }
+
+        .hero p {
+            margin: 0;
+            max-width: 760px;
+            color: var(--muted);
+            font-size: 17px;
+            line-height: 1.7;
+        }
+
+        .list {
+            display: grid;
+            gap: 18px;
+        }
+
+        .item {
+            display: grid;
+            grid-template-columns: 220px minmax(0, 1fr);
+            gap: 24px;
+            padding: 18px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+        }
+
+        .thumb {
+            display: block;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            object-fit: cover;
+            border-radius: 12px;
+            background: var(--surface-alt);
+            border: 1px solid #ebe3db;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: var(--muted);
+            font-size: 13px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: var(--surface-alt);
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 26px;
+            line-height: 1.2;
+            letter-spacing: -0.03em;
+        }
+
+        .summary {
+            margin: 0;
+            color: #4b5563;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-top: 1px solid #eee7df;
+        }
+
+        .link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .link::after {
+            content: "↗";
+            font-size: 14px;
+        }
+
+        .file {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        @media (max-width: 780px) {
+            .page {
+                width: min(100% - 24px, 1100px);
+                padding-top: 28px;
+            }
+
+            .item {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .thumb {
+                aspect-ratio: 16 / 10;
+            }
+
+            .footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <section class="hero">
+            <span class="eyebrow">Narrative Archive</span>
+            <h1>게임 중독 이야기 페이지 모음</h1>
+            <p>현재 폴더의 4개 HTML은 하나의 서사로 이어지는 짧은 이야기입니다. 시작, 중독, 각성, 회복의 흐름에 맞춰 각 장면의 핵심 내용을 정리하고 원본 페이지와 오디오 파일로 바로 이동할 수 있게 구성했습니다.</p>
+        </section>
+
+        <section class="list">
+            <article class="item">
+                <img class="thumb" src="1.jpg" alt="숫자의 덫 대표 이미지">
+                <div class="content">
+                    <div class="meta">
+                        <span class="badge">1</span>
+                        <span>도입 · 집착의 시작 · 게임 속 숫자</span>
+                    </div>
+                    <h2>숫자의 덫</h2>
+                    <p class="summary">주인공 지훈은 퇴근 후 작은 게임으로 휴식을 찾지만, 어느 순간부터 랭킹과 레벨, 경험치 같은 숫자에 자신의 가치를 걸기 시작합니다. 가벼운 오락이 삶을 잠식하는 첫 장면을 보여주는 도입부입니다.</p>
+                    <div class="footer">
+                        <a class="link" href="1.html">1.html 열기</a>
+                        <span class="file">이미지: 1.jpg · 오디오: 1.wav</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="item">
+                <img class="thumb" src="2.jpg" alt="가짜 성취감의 감옥 대표 이미지">
+                <div class="content">
+                    <div class="meta">
+                        <span class="badge">2</span>
+                        <span>심화 · 보상 중독 · 공허함</span>
+                    </div>
+                    <h2>가짜 성취감의 감옥</h2>
+                    <p class="summary">게임 속 캐릭터는 점점 강해지지만 현실의 지훈은 더 피폐해집니다. 높은 수치가 성취처럼 보이지만 마음은 비어 가고, 그는 보상 체계에 갇힌 중독자의 상태로 깊이 빠져드는 국면을 담고 있습니다.</p>
+                    <div class="footer">
+                        <a class="link" href="2.html">2.html 열기</a>
+                        <span class="file">이미지: 2.jpg · 오디오: 2.wav</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="item">
+                <img class="thumb" src="3.jpg" alt="가짜 세상의 각성 대표 이미지">
+                <div class="content">
+                    <div class="meta">
+                        <span class="badge">3</span>
+                        <span>전환 · 자각 · 현실의 상실</span>
+                    </div>
+                    <h2>가짜 세상의 각성</h2>
+                    <p class="summary">새벽의 피로한 순간, 세계 1위 타이틀 뒤에 남은 자신의 초라한 모습을 마주한 지훈은 가족, 건강, 계절의 변화까지 놓쳐 왔다는 사실을 깨닫습니다. 후회와 함께 현실을 다시 보는 각성의 장면입니다.</p>
+                    <div class="footer">
+                        <a class="link" href="3.html">3.html 열기</a>
+                        <span class="file">이미지: 3.jpg · 오디오: 3.wav</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="item">
+                <img class="thumb" src="4.jpg" alt="진짜 삶을 찾아서 대표 이미지">
+                <div class="content">
+                    <div class="meta">
+                        <span class="badge">4</span>
+                        <span>결말 · 회복 · 삶의 재발견</span>
+                    </div>
+                    <h2>진짜 삶을 찾아서</h2>
+                    <p class="summary">지훈은 아침 공기를 마시며 게임기를 상자 안에 넣고, 숫자가 아닌 자신의 마음이 들려주는 행복의 소리에 귀를 기울이기로 합니다. 중독에서 빠져나와 삶의 감각을 되찾는 결말 페이지입니다.</p>
+                    <div class="footer">
+                        <a class="link" href="4.html">4.html 열기</a>
+                        <span class="file">이미지: 4.jpg · 오디오: 4.wav</span>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

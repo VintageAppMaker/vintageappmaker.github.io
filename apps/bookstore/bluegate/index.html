@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파란 대문 연작 인덱스</title>
+    <style>
+        :root {
+            --bg: #eef2f6;
+            --surface: rgba(255, 255, 255, 0.78);
+            --surface-strong: #ffffff;
+            --line: rgba(74, 85, 104, 0.14);
+            --text: #1a202c;
+            --muted: #667085;
+            --accent: #3f5878;
+            --accent-soft: rgba(63, 88, 120, 0.1);
+            --shadow: 0 24px 60px rgba(26, 32, 44, 0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(63, 88, 120, 0.14), transparent 32%),
+                radial-gradient(circle at top right, rgba(102, 112, 133, 0.12), transparent 26%),
+                linear-gradient(180deg, #f7f9fc 0%, var(--bg) 100%);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .page {
+            width: min(1120px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 48px 0 72px;
+        }
+
+        .hero {
+            margin-bottom: 28px;
+            padding: 18px 0 28px;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--accent);
+            box-shadow: 0 0 0 6px rgba(63, 88, 120, 0.12);
+        }
+
+        h1 {
+            margin: 18px 0 14px;
+            font-size: clamp(34px, 6vw, 60px);
+            line-height: 1.02;
+            letter-spacing: -0.05em;
+        }
+
+        .hero p {
+            margin: 0;
+            max-width: 780px;
+            color: var(--muted);
+            font-size: 17px;
+            line-height: 1.8;
+        }
+
+        .summary-bar {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .summary-chip {
+            padding: 18px 20px;
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.55);
+            backdrop-filter: blur(14px);
+        }
+
+        .summary-chip strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            color: var(--accent);
+            letter-spacing: 0.04em;
+        }
+
+        .summary-chip span {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .list {
+            display: grid;
+            gap: 18px;
+        }
+
+        .item {
+            display: grid;
+            grid-template-columns: 180px minmax(0, 1fr);
+            gap: 24px;
+            padding: 22px;
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .poster {
+            position: relative;
+            min-height: 220px;
+            border-radius: 18px;
+            overflow: hidden;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0)),
+                linear-gradient(160deg, #223046 0%, #415a77 48%, #7f8ea3 100%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .poster img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: relative;
+            z-index: 1;
+        }
+
+        .poster::before {
+            content: "";
+            position: absolute;
+            inset: auto -30px -50px auto;
+            width: 140px;
+            height: 140px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.12);
+            filter: blur(4px);
+        }
+
+        .poster::after {
+            content: "";
+            position: absolute;
+            inset: 18px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+        }
+
+        .poster-inner {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+            padding: 18px;
+            color: #f8fafc;
+        }
+
+        .poster-kicker {
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            opacity: 0.82;
+        }
+
+        .poster-no {
+            font-size: 56px;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.06em;
+        }
+
+        .poster-label {
+            font-size: 13px;
+            line-height: 1.5;
+            opacity: 0.92;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 48px;
+            height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-weight: 800;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 28px;
+            line-height: 1.16;
+            letter-spacing: -0.04em;
+        }
+
+        .summary {
+            margin: 0;
+            color: #475467;
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-top: 1px solid rgba(71, 84, 103, 0.1);
+        }
+
+        .link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            font-weight: 800;
+        }
+
+        .link::after {
+            content: "↗";
+            font-size: 14px;
+        }
+
+        .file {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        @media (max-width: 860px) {
+            .summary-bar {
+                grid-template-columns: 1fr;
+            }
+
+            .item {
+                grid-template-columns: 1fr;
+            }
+
+            .poster {
+                min-height: 160px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page {
+                width: min(100% - 24px, 1120px);
+                padding-top: 28px;
+            }
+
+            .hero p {
+                font-size: 15px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            .footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <section class="hero">
+            <span class="eyebrow">Mystery Narrative</span>
+            <h1>파란 대문 연작</h1>
+            <p>현재 폴더의 HTML은 비 오는 밤, 마지막 배송지에 도착한 배달 기사 강지훈이 실종자들의 흔적과 자기 자신의 이름까지 마주하게 되는 5편짜리 미스터리 단편으로 이어집니다. 기존 인덱스의 다른 이야기 설명을 걷어내고, 실제 파일 제목과 전개 순서에 맞춰 다시 정리했습니다.</p>
+        </section>
+
+        <section class="summary-bar" aria-label="작품 개요">
+            <div class="summary-chip">
+                <strong>배경</strong>
+                <span>항구 근처의 비 내리는 골목, 낡은 파란 대문, 마지막 배송지</span>
+            </div>
+            <div class="summary-chip">
+                <strong>전개</strong>
+                <span>실종자 명단의 이름, 기괴한 손목, 우편함 속 수집된 사람들</span>
+            </div>
+            <div class="summary-chip">
+                <strong>결말</strong>
+                <span>배송은 끝나지 않고, 수취인은 결국 강지훈 자신으로 향합니다</span>
+            </div>
+        </section>
+
+        <section class="list">
+            <article class="item">
+                <div class="poster" aria-hidden="true">
+                    <img src="assets/images/1.svg" alt="">
+                </div>
+                <div class="content">
+                    <div class="meta">
+                        <span class="badge">1편</span>
+                        <span>도입 · 항구 골목 · 불길한 정적</span>
+                    </div>
+                    <h2>마지막 배송지의 침묵</h2>
+                    <p class="summary">밤늦은 배달을 마무리하던 지훈은 항구 근처 골목 가장 깊은 곳의 낡은 파란 대문 집으로 향합니다. 비와 엔진 소음이 잦아든 순간, 주변이 비현실적으로 고요해지며 이야기는 불길한 분위기 속에서 시작됩니다.</p>
+                    <div class="footer">
+                        <a class="link" href="1.html">1.html 열기</a>
+                        <span class="file">파일: 1.html</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="item">
+                <div class="poster" aria-hidden="true">
+                    <img src="assets/images/2.svg" alt="">
+                </div>
+                <div class="content">
+                    <div class="meta">
+                        <span class="badge">2편</span>
+                        <span>이상 징후 · 수취인 확인 · 실종 뉴스</span>
+                    </div>
+                    <h2>실종자 배달</h2>
+                    <p class="summary">송장에 적힌 수취인 이름 ‘박성호’를 본 지훈은 며칠 전 뉴스에서 본 지역 실종자 명단을 떠올립니다. 발자국 하나 없는 적막한 집 앞에서, 평범한 배송이 실종 사건과 겹쳐 보이기 시작합니다.</p>
+                    <div class="footer">
+                        <a class="link" href="2.html">2.html 열기</a>
+                        <span class="file">파일: 2.html</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="item">
+                <div class="poster" aria-hidden="true">
+                    <img src="assets/images/3.svg" alt="">
+                </div>
+                <div class="content">
+                    <div class="meta">
+                        <span class="badge">3편</span>
+                        <span>대면 · 익숙한 남자 · 복도 안쪽 소리</span>
+                    </div>
+                    <h2>묶인 손목</h2>
+                    <p class="summary">문은 지훈이 누르기도 전에 열리고, 익숙한 단골 고객이 미소를 지으며 상자를 받으러 나옵니다. 그러나 남자의 손목을 감싼 기괴한 끈과 집 안쪽에서 들려오는 금속성 마찰음이 공포를 노골적으로 드러냅니다.</p>
+                    <div class="footer">
+                        <a class="link" href="3.html">3.html 열기</a>
+                        <span class="file">파일: 3.html</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="item">
+                <div class="poster" aria-hidden="true">
+                    <img src="assets/images/4.svg" alt="">
+                </div>
+                <div class="content">
+                    <div class="meta">
+                        <span class="badge">4편</span>
+                        <span>발견 · 우편함 · 실종자 수집</span>
+                    </div>
+                    <h2>수집된 이름들</h2>
+                    <p class="summary">강한 바람에 떨어진 송장을 줍다가 지훈은 현관 너머 벽면의 낡은 우편함들을 보게 됩니다. 그 안에 적힌 이름들은 뉴스 속 실종자들과 일치하고, 이 집이 사람들의 흔적을 모아둔 장소임이 드러납니다.</p>
+                    <div class="footer">
+                        <a class="link" href="4.html">4.html 열기</a>
+                        <span class="file">파일: 4.html</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="item">
+                <div class="poster" aria-hidden="true">
+                    <img src="assets/images/5.svg" alt="">
+                </div>
+                <div class="content">
+                    <div class="meta">
+                        <span class="badge">5편</span>
+                        <span>결말 · 순환 · 수취인 강지훈</span>
+                    </div>
+                    <h2>수취인: 강지훈</h2>
+                    <p class="summary">지훈이 도망치듯 오토바이에 올라 다음 배송지를 확인하자, 배송 목록은 다시 같은 파란 대문 집을 가리킵니다. 새로 채워진 상자들의 수취인은 모두 ‘강지훈’으로 적혀 있고, 그는 이 골목에서 벗어날 수 없다는 결말에 도달합니다.</p>
+                    <div class="footer">
+                        <a class="link" href="5.html">5.html 열기</a>
+                        <span class="file">파일: 5.html</span>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

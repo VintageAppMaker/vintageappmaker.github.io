@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Picturebook Index</title>
+    <style>
+        :root {
+            --bg: #f5f5f4;
+            --surface: #ffffff;
+            --surface-alt: #f0ece6;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --line: #ddd6ce;
+            --accent: #c26d3b;
+            --accent-soft: #f3dfd2;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+            background: linear-gradient(180deg, #f8f6f2 0%, var(--bg) 100%);
+            color: var(--text);
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .page {
+            width: min(1100px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 48px 0 64px;
+        }
+
+        .hero {
+            margin-bottom: 28px;
+            padding: 8px 0 24px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .eyebrow {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 14px 0 10px;
+            font-size: clamp(32px, 6vw, 54px);
+            line-height: 1.04;
+            letter-spacing: -0.04em;
+        }
+
+        .hero p {
+            margin: 0;
+            max-width: 720px;
+            color: var(--muted);
+            font-size: 17px;
+            line-height: 1.7;
+        }
+
+        .list {
+            display: grid;
+            gap: 18px;
+        }
+
+        .item {
+            display: grid;
+            grid-template-columns: 220px minmax(0, 1fr);
+            gap: 24px;
+            padding: 18px;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+        }
+
+        .thumb {
+            display: block;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            object-fit: cover;
+            border-radius: 12px;
+            background: var(--surface-alt);
+            border: 1px solid #ebe3db;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 28px;
+            padding: 0 10px;
+            border-radius: 999px;
+            background: var(--surface-alt);
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 26px;
+            line-height: 1.2;
+            letter-spacing: -0.03em;
+        }
+
+        .summary {
+            margin: 0;
+            color: #4b5563;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .footer {
+            margin-top: auto;
+            padding-top: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-top: 1px solid #eee7df;
+        }
+
+        .link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .link::after {
+            content: "↗";
+            font-size: 14px;
+        }
+
+        .file {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        @media (max-width: 780px) {
+            .page {
+                width: min(100% - 24px, 1100px);
+                padding-top: 28px;
+            }
+
+            .item {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .thumb {
+                aspect-ratio: 16 / 10;
+            }
+
+            .footer {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <section class="hero">
+            <span class="eyebrow">Picturebook Archive</span>
+            <h1>번호 순서로 보는 작품 리스트</h1>
+            <p>현재 폴더의 번호형 HTML을 순서대로 정리한 인덱스입니다. 각 항목은 대표 썸네일, 장면 요약, 원본 페이지 링크로 구성했습니다.</p>
+        </section>
+
+        <section class="list">
+            <article class="item">
+                <img class="thumb" src="1.png" alt="1번 HTML 썸네일">
+                <div class="content">
+                    <div class="meta">
+                        <span class="badge">1</span>
+                        <span>도시 야경 · 블루아워 · 현장 풍경</span>
+                    </div>
+                    <h2>도시가 숨을 고르는 저녁 현장</h2>
+                    <p class="summary">푸른 저녁빛이 내려앉은 도심 거리와 포장마차, 공사 가림막, 가로등이 함께 만드는 장면입니다. 본격적인 밤의 활기가 시작되기 직전의 짧은 정적과 도시의 거친 리듬을 서정적으로 담고 있습니다.</p>
+                    <div class="footer">
+                        <a class="link" href="1.html">1.html 열기</a>
+                        <span class="file">이미지: 1.png · 오디오: 1.wav</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="item">
+                <img class="thumb" src="2.png" alt="2번 HTML 썸네일">
+                <div class="content">
+                    <div class="meta">
+                        <span class="badge">2</span>
+                        <span>루프탑 시선 · 서울 풍경 · 늦은 오후</span>
+                    </div>
+                    <h2>테라스에서 바라본 고요한 서울</h2>
+                    <p class="summary">건물 4층 테라스에서 내려다본 서울의 오후 풍경을 중심으로 구성된 페이지입니다. 갈색 유리 너머의 사람들, 겹겹이 놓인 건물 실루엣, 부드러운 공기감이 어우러져 차분한 도시 감성을 전달합니다.</p>
+                    <div class="footer">
+                        <a class="link" href="2.html">2.html 열기</a>
+                        <span class="file">이미지: 2.png · 오디오: 2.wav</span>
+                    </div>
+                </div>
+            </article>
+
+            <article class="item">
+                <img class="thumb" src="3.jpg" alt="3번 HTML 썸네일">
+                <div class="content">
+                    <div class="meta">
+                        <span class="badge">3</span>
+                        <span>광장 · 대형 이벤트 · BTS 비주얼</span>
+                    </div>
+                    <h2>거대한 이벤트를 기다리는 광장</h2>
+                    <p class="summary">BTS 전광판과 통제선, 무대 시설이 만든 긴장감 있는 광장 풍경을 다룹니다. 아직 인파가 몰리기 전의 빈 공간이지만, 곧 시작될 대형 행사의 열기와 기대감을 강하게 예고하는 장면입니다.</p>
+                    <div class="footer">
+                        <a class="link" href="3.html">3.html 열기</a>
+                        <span class="file">이미지: 3.jpg · 오디오: 3.mp3</span>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+</body>
+</html>

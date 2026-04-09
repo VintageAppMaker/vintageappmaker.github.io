@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Flipbook Index</title>
+  <style>
+    :root{
+      --paper: #f4f0e6;
+      --paper-2: #efe7d6;
+      --ink: #1a1a1a;
+      --ink-soft: #2a2a2a;
+      --muted: #5a5a5a;
+      --line: rgba(0,0,0,.12);
+      --shadow: rgba(0,0,0,.18);
+      --accent: #8c6b3f;
+      --accent-2: #c2ab7f;
+      --radius: 16px;
+      --font: ui-serif, "Noto Serif KR", "Apple SD Gothic Neo", "Nanum Myeongjo", serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--ink);
+      font-family:var(--font);
+      background:
+        radial-gradient(1400px 700px at 25% 20%, #ffffff 0%, #f6f2ea 45%, #efe7d8 100%);
+    }
+
+    a{
+      color:inherit;
+      text-decoration:none;
+    }
+
+    .page{
+      width:min(1180px, calc(100% - 32px));
+      margin:0 auto;
+      padding:36px 0 56px;
+    }
+
+    .hero{
+      position:relative;
+      overflow:hidden;
+      padding:28px 28px 30px;
+      border:1px solid var(--line);
+      border-radius:24px;
+      background:rgba(255,255,255,.44);
+      box-shadow:0 24px 60px rgba(64,44,18,.08);
+      margin-bottom:22px;
+    }
+
+    .hero:before,
+    .hero:after{
+      content:"";
+      position:absolute;
+      border-radius:999px;
+      opacity:.55;
+      pointer-events:none;
+    }
+
+    .hero:before{
+      width:280px;
+      height:280px;
+      right:-80px;
+      top:-120px;
+      background:radial-gradient(circle, rgba(194,171,127,.45), rgba(194,171,127,0));
+    }
+
+    .hero:after{
+      width:220px;
+      height:220px;
+      left:-90px;
+      bottom:-120px;
+      background:radial-gradient(circle, rgba(140,107,63,.18), rgba(140,107,63,0));
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border:1px solid rgba(88,68,36,.18);
+      border-radius:999px;
+      background:rgba(255,255,255,.68);
+      color:var(--accent);
+      font-size:12px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+
+    h1{
+      margin:14px 0 10px;
+      font-size:clamp(34px, 5vw, 56px);
+      line-height:1.02;
+      letter-spacing:-.04em;
+    }
+
+    .hero p{
+      margin:0;
+      max-width:780px;
+      color:var(--muted);
+      font-size:16px;
+      line-height:1.75;
+    }
+
+    .hero-note{
+      margin-top:16px;
+      padding-top:14px;
+      border-top:1px solid rgba(0,0,0,.08);
+      color:var(--ink-soft);
+      font-size:13px;
+      line-height:1.6;
+    }
+
+    .list{
+      display:grid;
+      gap:18px;
+    }
+
+    .item{
+      display:grid;
+      grid-template-columns:260px minmax(0, 1fr);
+      gap:24px;
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:22px;
+      background:rgba(255,255,255,.5);
+      box-shadow:0 20px 40px rgba(54,35,12,.06);
+    }
+
+    .cover{
+      position:relative;
+      min-height:220px;
+      border-radius:18px;
+      overflow:hidden;
+      background:
+        linear-gradient(135deg, rgba(140,107,63,.22), rgba(255,255,255,.16)),
+        linear-gradient(180deg, #dfd0b2 0%, #c9b089 100%);
+      border:1px solid rgba(88,68,36,.18);
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.65);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+
+    .cover:before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        linear-gradient(90deg, rgba(0,0,0,.14), rgba(0,0,0,0) 10%, rgba(255,255,255,.2) 55%, rgba(0,0,0,.08) 100%);
+      pointer-events:none;
+    }
+
+    .cover:after{
+      content:"";
+      position:absolute;
+      left:20px;
+      top:18px;
+      bottom:18px;
+      width:12px;
+      border-radius:10px;
+      background:linear-gradient(180deg, rgba(88,68,36,.55), rgba(88,68,36,.22));
+      box-shadow:
+        inset -1px 0 0 rgba(255,255,255,.3),
+        1px 0 0 rgba(0,0,0,.08);
+    }
+
+    .cover-inner{
+      position:relative;
+      z-index:1;
+      width:100%;
+      height:100%;
+      border-radius:14px;
+      border:1px solid rgba(88,68,36,.14);
+      background:
+        radial-gradient(circle at top right, rgba(255,255,255,.36), rgba(255,255,255,0) 42%),
+        repeating-linear-gradient(
+          0deg,
+          rgba(255,255,255,.08) 0,
+          rgba(255,255,255,.08) 2px,
+          rgba(0,0,0,0) 2px,
+          rgba(0,0,0,0) 8px
+        );
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      padding:22px 18px 18px 34px;
+    }
+
+    .cover-kicker{
+      color:rgba(26,26,26,.58);
+      font-size:11px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+    }
+
+    .cover-title{
+      margin:0;
+      font-size:26px;
+      line-height:1.08;
+      letter-spacing:-.03em;
+    }
+
+    .cover-meta{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      color:rgba(26,26,26,.72);
+      font-size:12px;
+    }
+
+    .content{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+
+    .meta{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:10px;
+    }
+
+    .badge,
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:28px;
+      padding:0 10px;
+      border-radius:999px;
+      border:1px solid rgba(0,0,0,.08);
+      background:rgba(255,255,255,.62);
+    }
+
+    .badge{
+      min-width:46px;
+      font-family:var(--mono);
+      color:var(--accent);
+      font-weight:700;
+    }
+
+    h2{
+      margin:0 0 10px;
+      font-size:30px;
+      line-height:1.14;
+      letter-spacing:-.03em;
+    }
+
+    .summary{
+      margin:0;
+      color:#4e4e4e;
+      font-size:15px;
+      line-height:1.76;
+    }
+
+    .footer{
+      margin-top:auto;
+      padding-top:18px;
+      border-top:1px solid rgba(0,0,0,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+
+    .link{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      color:var(--accent);
+      font-weight:700;
+    }
+
+    .link:after{
+      content:"↗";
+      font-size:14px;
+    }
+
+    .desc{
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+    }
+
+    @media (max-width: 860px){
+      .page{
+        width:min(100% - 24px, 1180px);
+        padding-top:24px;
+      }
+
+      .item{
+        grid-template-columns:1fr;
+        gap:16px;
+      }
+
+      .cover{
+        min-height:200px;
+      }
+
+      .cover-inner{
+        padding-left:30px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <span class="eyebrow">Flipbook Archive</span>
+      <h1>현재 폴더 기준 플립북 인덱스</h1>
+      <p>참조 HTML의 종이 질감과 서체 톤을 따라 인덱스를 다시 구성했습니다. 실제 미디어 파일을 공유하거나 추출하지 않고, 썸네일 영역은 책 표지처럼 보이는 도형 카드로만 채웠습니다.</p>
+      <div class="hero-note">이미지 썸네일, 음성 파일명, 오디오 링크는 인덱스에 표시하지 않습니다. 현재 폴더에 있는 실제 HTML 파일만 정리했습니다.</div>
+    </section>
+
+    <section class="list" aria-label="플립북 목록">
+      <article class="item">
+        <div class="cover" aria-hidden="true">
+          <div class="cover-inner">
+            <div class="cover-kicker">Standard Render</div>
+            <h2 class="cover-title">Flipbook Export</h2>
+            <div class="cover-meta">
+              <span>Preview Card</span>
+              <span>01</span>
+            </div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="meta">
+            <span class="badge">01</span>
+            <span class="chip">기본 테마</span>
+            <span>일반 플립북 렌더링</span>
+          </div>
+          <h2>1.html</h2>
+          <p class="summary">기본 플립북 테마가 적용된 메인 결과물입니다. 좌측 목차, 중앙 편집 패널, 우측 책 미리보기 구조를 유지한 상태로 내용을 확인할 수 있는 표준 버전입니다.</p>
+          <div class="footer">
+            <a class="link" href="1.html">열기</a>
+            <span class="desc">미디어 추출 없이 HTML 문서만 연결</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="item">
+        <div class="cover" aria-hidden="true">
+          <div class="cover-inner">
+            <div class="cover-kicker">ASCII Theme</div>
+            <h2 class="cover-title">Flipbook Export</h2>
+            <div class="cover-meta">
+              <span>Preview Card</span>
+              <span>01A</span>
+            </div>
+          </div>
+        </div>
+        <div class="content">
+          <div class="meta">
+            <span class="badge">01A</span>
+            <span class="chip">ASCII 변형</span>
+            <span>대체 스타일 버전</span>
+          </div>
+          <h2>1_ascii.html</h2>
+          <p class="summary">동일한 플립북 결과를 ASCII 계열 변형 스타일로 제공하는 버전입니다. 기본 구조는 유지하면서 대체 테마를 비교하거나 별도 배포본처럼 확인할 때 사용할 수 있습니다.</p>
+          <div class="footer">
+            <a class="link" href="1_ascii.html">열기</a>
+            <span class="desc">썸네일 이미지와 음성 노출 없음</span>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

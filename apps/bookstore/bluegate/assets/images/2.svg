@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">실종자 배달</title>
+  <desc id="desc">송장과 실종자 명단의 불길한 연결을 표현한 표지 이미지</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#191d2d"/>
+      <stop offset="55%" stop-color="#3f425b"/>
+      <stop offset="100%" stop-color="#908c99"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="900" fill="url(#bg)"/>
+  <rect x="760" y="130" width="280" height="420" rx="20" fill="#ece8e2" transform="rotate(8 760 130)"/>
+  <rect x="720" y="180" width="280" height="420" rx="20" fill="#faf7f2" stroke="#c9c3ba" stroke-width="2" transform="rotate(-7 720 180)"/>
+  <rect x="210" y="520" width="700" height="170" rx="18" fill="#d6dce4" opacity="0.15"/>
+  <text x="782" y="310" font-size="34" font-weight="700" font-family="Pretendard, Noto Sans KR, sans-serif" fill="#4b5563" transform="rotate(-7 720 180)">박성호</text>
+  <text x="778" y="362" font-size="24" font-family="Pretendard, Noto Sans KR, sans-serif" fill="#6b7280" transform="rotate(-7 720 180)">실종자 명단과 같은 이름</text>
+  <g fill="#f8fbff">
+    <text x="110" y="152" font-size="34" font-family="Pretendard, Noto Sans KR, sans-serif" opacity="0.78" letter-spacing="6">DELIVERY OF THE MISSING</text>
+    <text x="110" y="718" font-size="88" font-weight="700" font-family="Pretendard, Noto Sans KR, sans-serif">실종자 배달</text>
+    <text x="110" y="784" font-size="28" font-family="Pretendard, Noto Sans KR, sans-serif" opacity="0.82">수취인의 이름이 뉴스 속 실종자와 겹친다</text>
+  </g>
+</svg>
