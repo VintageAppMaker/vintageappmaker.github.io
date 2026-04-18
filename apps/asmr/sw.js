@@ -1,7 +1,7 @@
-const CACHE_NAME = 'asmr-collection-v1';
+const CACHE_NAME = 'asmr-collection-v2';
 const ASSETS = [
   './',
-  './template.html',
+  './index.html',
   './manifest.webmanifest',
   './icon.svg'
 ];
@@ -33,7 +33,7 @@ self.addEventListener('fetch', (event) => {
         return cached;
       }
 
-      return fetch(event.request).catch(() => caches.match('./template.html'));
+      return fetch(event.request).catch(() => caches.match('./index.html'));
     })
   );
 });

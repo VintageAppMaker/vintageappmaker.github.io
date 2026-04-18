@@ -2,7 +2,7 @@
   "name": "ASMR Collection",
   "short_name": "ASMR",
   "description": "A quiet YouTube collection for rain, island, and street ambience.",
-  "start_url": "./template.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f6faf6",
