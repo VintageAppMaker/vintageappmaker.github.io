@@ -161,6 +161,7 @@
 <button class="px-4 py-2 bg-primary-container text-on-primary-container rounded-full text-xs font-bold tracking-widest uppercase active:scale-95 transition-transform" data-category="Rain" type="button">Rain</button>
 <button class="px-4 py-2 bg-surface-container-high text-on-surface-variant rounded-full text-xs font-bold tracking-widest uppercase active:scale-95 transition-transform" data-category="island" type="button">Island</button>
 <button class="px-4 py-2 bg-surface-container-high text-on-surface-variant rounded-full text-xs font-bold tracking-widest uppercase active:scale-95 transition-transform" data-category="street" type="button">Street</button>
+<button class="px-4 py-2 bg-surface-container-high text-on-surface-variant rounded-full text-xs font-bold tracking-widest uppercase active:scale-95 transition-transform" data-category="food" type="button">Food</button>
 </div>
 </div>
 <button class="mt-8 w-full py-4 bg-primary text-on-primary rounded-full font-bold tracking-wider uppercase text-xs active:scale-[0.98] transition-transform" id="search-button">
@@ -269,6 +270,60 @@
                 duration: '2:26:59',
                 thumbnail: 'https://i.ytimg.com/vi/YlNDqTN8e_g/hqdefault.jpg',
                 thumbnailAlt: 'Sunset walk on side streets and iconic sights in Kyoto'
+            },
+            {
+                category: 'food',
+                url: 'https://www.youtube.com/watch?v=KR1hM4TDZBo',
+                title: '미국인들도 극찬하는?! 압도적 퀄리티 K-수제버거 모음 TOP 8! Absolute Best Handmade Burgers l Korean street food',
+                meta: '끼룩푸드 seagull food • food',
+                duration: '2:21:51',
+                thumbnail: 'https://i.ytimg.com/vi/KR1hM4TDZBo/hqdefault.jpg',
+                thumbnailAlt: '미국인들도 극찬하는 K-수제버거 모음 TOP 8'
+            },
+            {
+                category: 'food',
+                url: 'https://www.youtube.com/watch?v=ub1WfnpqXFc',
+                title: 'How to Make Korean Comfort Food "Tteokbokki", Spicy Rice Cake - Korean Food [ASMR]',
+                meta: '딜라이트 • food',
+                duration: '23:22',
+                thumbnail: 'https://i.ytimg.com/vi/ub1WfnpqXFc/hqdefault.jpg',
+                thumbnailAlt: 'How to Make Korean Comfort Food Tteokbokki'
+            },
+            {
+                category: 'food',
+                url: 'https://www.youtube.com/watch?v=BCEZrasP27s',
+                title: 'Fantastic & Mouth-watering! Amazing Korean Street Food Compilation #2',
+                meta: 'FoodyTrip 푸디트립 • food',
+                duration: '45:52',
+                thumbnail: 'https://i.ytimg.com/vi/BCEZrasP27s/hqdefault.jpg',
+                thumbnailAlt: 'Amazing Korean Street Food Compilation #2'
+            },
+            {
+                category: 'food',
+                url: 'https://www.youtube.com/watch?v=InZ3I14oP6k',
+                title: '식품공장 Amazing scale! Food Factory Mass Production Collection #2 - Korean food factory',
+                meta: 'FoodyTrip 푸디트립 • food',
+                duration: '54:01',
+                thumbnail: 'https://i.ytimg.com/vi/InZ3I14oP6k/hqdefault.jpg',
+                thumbnailAlt: 'Food Factory Mass Production Collection #2'
+            },
+            {
+                category: 'food',
+                url: 'https://www.youtube.com/watch?v=zhWER6Np3GU',
+                title: 'Fantastic Performance! Amazing Craftsmanship Street Food Master Compilation #2',
+                meta: 'FoodyTrip 푸디트립 • food',
+                duration: '49:47',
+                thumbnail: 'https://i.ytimg.com/vi/zhWER6Np3GU/hqdefault.jpg',
+                thumbnailAlt: 'Amazing Craftsmanship Street Food Master Compilation #2'
+            },
+            {
+                category: 'food',
+                url: 'https://www.youtube.com/watch?v=NbFEgxve8bQ',
+                title: 'Popular Japanese Food Videos Top 7',
+                meta: 'Soon Films 순필름 • food',
+                duration: '1:12:26',
+                thumbnail: 'https://i.ytimg.com/vi/NbFEgxve8bQ/hqdefault.jpg',
+                thumbnailAlt: 'Popular Japanese Food Videos Top 7'
             }
         ];
 
@@ -307,7 +362,10 @@
                 duration.className = 'absolute bottom-3 right-3 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded font-medium tracking-widest';
                 duration.textContent = item.duration;
 
-                thumbnailWrap.append(thumbnail, duration);
+                thumbnailWrap.append(thumbnail);
+                if (item.duration) {
+                    thumbnailWrap.append(duration);
+                }
 
                 const info = document.createElement('div');
                 info.className = 'mt-4 flex gap-4';
