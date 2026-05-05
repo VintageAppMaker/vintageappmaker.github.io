@@ -1,0 +1,1358 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HTML 2 MP4</title>
+  <meta name="theme-color" content="#1f6f78">
+  <meta name="description" content="이미지와 자막으로 짧은 MP4/WebM 영상을 만드는 도구">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <style>
+    :root {
+      --bg: #f4f1eb;
+      --panel: #fffdfa;
+      --ink: #1f2328;
+      --muted: #68707c;
+      --line: #d7d0c4;
+      --accent: #1f6f78;
+      --accent-2: #b84a39;
+      --shadow: 0 12px 28px rgba(32, 28, 22, .12);
+      color-scheme: light;
+      font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.62), rgba(255,255,255,0) 220px),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid #1f2328;
+      background: #fff;
+      color: var(--ink);
+      min-height: 36px;
+      padding: 0 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 2px 0 rgba(0,0,0,.16);
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(1px); box-shadow: none; }
+    button.primary { background: var(--accent); color: #fff; border-color: #15545b; }
+    button.danger { color: #8d241b; border-color: #9f3328; }
+    button.ghost { border-color: var(--line); box-shadow: none; background: #fbfaf7; }
+    button.selected {
+      background: #1f2328;
+      color: #fff;
+      border-color: #1f2328;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      border-bottom: 2px solid #222;
+      background: rgba(255,253,250,.92);
+      backdrop-filter: blur(10px);
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(22px, 3vw, 34px);
+      letter-spacing: 0;
+      line-height: 1;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(420px, 1fr) minmax(360px, 46vw);
+      gap: 0;
+      min-height: 0;
+    }
+
+    .left, .right {
+      min-width: 0;
+      padding: 22px;
+    }
+
+    .left {
+      border-right: 2px solid #222;
+      overflow: auto;
+    }
+
+    .right {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .list-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .scene-list {
+      display: grid;
+      gap: 14px;
+      padding-bottom: 40px;
+    }
+
+    .scene-card {
+      background: var(--panel);
+      border: 2px solid #222;
+      border-radius: 8px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 10px;
+    }
+
+    .scene-card.dragging { opacity: .55; }
+
+    .scene-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .scene-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      font-weight: 700;
+    }
+
+    .grab {
+      width: 34px;
+      height: 34px;
+      display: inline-grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #f8f4ee;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .scene-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .dropzone {
+      border: 2px dashed #777;
+      border-radius: 6px;
+      background: #f8f8f6;
+      min-height: 190px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .dropzone img {
+      width: 100%;
+      height: 100%;
+      min-height: 190px;
+      object-fit: contain;
+      display: block;
+      background: #111;
+    }
+
+    .dropzone span {
+      color: var(--muted);
+      text-align: center;
+      padding: 20px;
+      line-height: 1.45;
+    }
+
+    .crop-editor {
+      display: grid;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px;
+      background: #fbfaf7;
+    }
+
+    .crop-frame {
+      width: min(100%, 360px);
+      aspect-ratio: 16 / 9;
+      border: 2px solid #222;
+      background: #111;
+      cursor: crosshair;
+      justify-self: center;
+      overflow: hidden;
+      position: relative;
+      touch-action: none;
+    }
+
+    .crop-frame.portrait {
+      width: min(100%, 220px);
+      aspect-ratio: 9 / 16;
+    }
+
+    .crop-frame img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .crop-marker {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(0,0,0,.7);
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .crop-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .crop-actions .hint {
+      flex: 1 1 180px;
+    }
+
+    .caption-input {
+      width: 100%;
+      min-height: 74px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .settings {
+      display: none;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+    }
+
+    .scene-card.open .settings { display: grid; }
+
+    label {
+      display: grid;
+      gap: 5px;
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    input[type="number"], select, input[type="text"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      min-height: 36px;
+      padding: 6px 9px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .preview-box {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: 2px solid #222;
+      background: #111;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .preview-box.portrait {
+      width: min(100%, 430px);
+      aspect-ratio: 9 / 16;
+      justify-self: center;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #111;
+    }
+
+    .controls, .export-options {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 13px;
+      min-height: 20px;
+      margin: 0;
+    }
+
+    .empty {
+      border: 2px dashed var(--line);
+      border-radius: 8px;
+      padding: 34px 18px;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(255,255,255,.45);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      place-items: center;
+      background: rgba(0,0,0,.4);
+      z-index: 30;
+      padding: 18px;
+    }
+
+    .modal.open { display: grid; }
+
+    .sheet-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: end;
+      justify-content: center;
+      background: rgba(0,0,0,.36);
+      z-index: 40;
+      padding: 18px;
+    }
+
+    .sheet-modal.open { display: flex; }
+
+    .dialog {
+      width: min(520px, 100%);
+      background: var(--panel);
+      border: 2px solid #222;
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 14px;
+    }
+
+    .bottom-sheet {
+      width: min(520px, 100%);
+      background: var(--panel);
+      border: 2px solid #222;
+      border-radius: 8px 8px 0 0;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 14px;
+    }
+
+    .dialog h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .bottom-sheet h2 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+
+    .format-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .format-choice {
+      min-height: 72px;
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      text-align: left;
+      box-shadow: none;
+    }
+
+    .format-choice strong,
+    .format-choice span {
+      display: block;
+    }
+
+    .format-choice span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    @media (max-width: 920px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+      .left {
+        border-right: 0;
+        border-bottom: 0;
+        order: 2;
+      }
+      .right {
+        border-bottom: 2px solid #222;
+        order: 1;
+      }
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .header-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .left, .right { padding: 14px; }
+      .settings { grid-template-columns: 1fr; }
+      .toolbar { align-items: flex-start; flex-direction: column; }
+      button { width: 100%; }
+      .scene-actions, .controls, .export-options, .dialog-actions, .list-actions, .crop-actions { width: 100%; }
+      .format-options { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>HTML 2 MP4</h1>
+      <div class="header-actions">
+        <button id="formatButton" class="ghost" type="button">판형: 가로형</button>
+        <button id="addScene" class="primary" type="button">장면추가</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="left" aria-label="장면 목록">
+        <div class="toolbar">
+          <div>
+            <strong>장면</strong>
+            <p class="hint">이미지와 자막을 넣고 드래그해서 순서를 바꿉니다.</p>
+          </div>
+          <div class="list-actions">
+            <button id="saveList" class="ghost" type="button">리스트 저장</button>
+            <button id="importList" class="ghost" type="button">리스트 가져오기</button>
+          </div>
+        </div>
+        <div id="sceneList" class="scene-list"></div>
+      </section>
+
+      <section class="right" aria-label="미리보기와 다운로드">
+        <div class="preview-box">
+          <canvas id="stage" width="1280" height="720"></canvas>
+        </div>
+        <div class="controls">
+          <button id="runPreview" class="primary" type="button">실행</button>
+          <button id="stopPreview" class="ghost" type="button">정지</button>
+          <button id="downloadVideo" type="button">다운로드</button>
+        </div>
+        <div class="export-options">
+          <label>해상도
+            <select id="resolution">
+              <option value="1280x720">1280 x 720</option>
+              <option value="1080x1920">1080 x 1920</option>
+            </select>
+          </label>
+          <label>FPS
+            <select id="fps">
+              <option>30</option>
+              <option>24</option>
+              <option>60</option>
+            </select>
+          </label>
+        </div>
+        <p id="status" class="status"></p>
+      </section>
+    </main>
+  </div>
+
+  <div id="modal" class="modal" role="dialog" aria-modal="true">
+    <div class="dialog">
+      <h2>장면 설정</h2>
+      <label>다음 장면으로 넘어가는 시간(초)
+        <input id="modalDuration" type="number" min="0.5" step="0.1">
+      </label>
+      <label>이미지 애니메이션
+        <select id="modalImageEffect">
+          <option value="kenburns">천천히 확대</option>
+          <option value="still">고정</option>
+          <option value="panLeft">왼쪽 이동</option>
+          <option value="panRight">오른쪽 이동</option>
+        </select>
+      </label>
+      <label>자막 애니메이션
+        <select id="modalTextEffect">
+          <option value="fadeUp">페이드 업</option>
+          <option value="type">타이핑</option>
+          <option value="fade">페이드</option>
+          <option value="none">없음</option>
+        </select>
+      </label>
+      <label>페이지 전환
+        <select id="modalTransition">
+          <option value="fade">페이드</option>
+          <option value="slide">슬라이드</option>
+          <option value="cut">컷</option>
+        </select>
+      </label>
+      <div class="dialog-actions">
+        <button id="cancelSettings" class="ghost" type="button">취소</button>
+        <button id="saveSettings" class="primary" type="button">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="formatSheet" class="sheet-modal" role="dialog" aria-modal="true" aria-labelledby="formatSheetTitle">
+    <div class="bottom-sheet">
+      <h2 id="formatSheetTitle">카드 판형</h2>
+      <div class="format-options">
+        <button id="portraitFormat" class="format-choice" type="button" data-format="portrait">
+          <strong>세로형</strong>
+          <span>1080 x 1920</span>
+        </button>
+        <button id="landscapeFormat" class="format-choice selected" type="button" data-format="landscape">
+          <strong>가로형</strong>
+          <span>1280 x 720</span>
+        </button>
+      </div>
+      <div class="dialog-actions">
+        <button id="closeFormatSheet" class="ghost" type="button">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <input id="filePicker" class="file-input" type="file" accept="image/*">
+  <input id="listFilePicker" class="file-input" type="file" accept="application/json,.json">
+
+  <script>
+    const sceneList = document.getElementById("sceneList");
+    const addSceneButton = document.getElementById("addScene");
+    const formatButton = document.getElementById("formatButton");
+    const saveListButton = document.getElementById("saveList");
+    const importListButton = document.getElementById("importList");
+    const runPreviewButton = document.getElementById("runPreview");
+    const stopPreviewButton = document.getElementById("stopPreview");
+    const downloadButton = document.getElementById("downloadVideo");
+    const statusText = document.getElementById("status");
+    const canvas = document.getElementById("stage");
+    const ctx = canvas.getContext("2d");
+    const resolutionSelect = document.getElementById("resolution");
+    const fpsSelect = document.getElementById("fps");
+    const filePicker = document.getElementById("filePicker");
+    const listFilePicker = document.getElementById("listFilePicker");
+    const modal = document.getElementById("modal");
+    const modalDuration = document.getElementById("modalDuration");
+    const modalImageEffect = document.getElementById("modalImageEffect");
+    const modalTextEffect = document.getElementById("modalTextEffect");
+    const modalTransition = document.getElementById("modalTransition");
+    const saveSettingsButton = document.getElementById("saveSettings");
+    const cancelSettingsButton = document.getElementById("cancelSettings");
+    const previewBox = document.querySelector(".preview-box");
+    const formatSheet = document.getElementById("formatSheet");
+    const formatChoices = [...document.querySelectorAll(".format-choice")];
+    const closeFormatSheetButton = document.getElementById("closeFormatSheet");
+
+    const formatPresets = {
+      landscape: { label: "가로형", resolution: "1280x720" },
+      portrait: { label: "세로형", resolution: "1080x1920" }
+    };
+
+    let scenes = [];
+    let cardFormat = "landscape";
+    let activeSceneId = null;
+    let selectedImageSceneId = null;
+    let rafId = null;
+    let isPlaying = false;
+    let recorder = null;
+    let recordedChunks = [];
+
+    function createId() {
+      if (window.crypto && typeof window.crypto.randomUUID === "function") {
+        return window.crypto.randomUUID();
+      }
+      return `scene-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    const defaultScene = () => ({
+      id: createId(),
+      imageSrc: "",
+      imageName: "",
+      loadedImage: null,
+      caption: "",
+      duration: 3,
+      imageEffect: "kenburns",
+      textEffect: "fadeUp",
+      transition: "fade",
+      cropX: 0.5,
+      cropY: 0.5,
+      cropOpen: false
+    });
+
+    function setStatus(message) {
+      statusText.textContent = message || "";
+    }
+
+    function openFormatSheet() {
+      formatSheet.classList.add("open");
+    }
+
+    function closeFormatSheet() {
+      formatSheet.classList.remove("open");
+    }
+
+    function setCardFormat(format, redraw = true) {
+      if (!formatPresets[format]) return;
+      cardFormat = format;
+      resolutionSelect.value = formatPresets[format].resolution;
+      formatButton.textContent = `판형: ${formatPresets[format].label}`;
+      previewBox.classList.toggle("portrait", format === "portrait");
+      formatChoices.forEach((button) => {
+        button.classList.toggle("selected", button.dataset.format === format);
+      });
+      if (redraw) {
+        renderSceneList();
+      }
+    }
+
+    function renderSceneList() {
+      sceneList.innerHTML = "";
+      if (!scenes.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "장면추가 버튼으로 장면을 만들거나 리스트 가져오기로 저장된 작업을 불러오세요.";
+        sceneList.appendChild(empty);
+        drawEmpty();
+        return;
+      }
+
+      scenes.forEach((scene, index) => {
+        const card = document.createElement("article");
+        card.className = "scene-card";
+        card.draggable = true;
+        card.dataset.id = scene.id;
+
+        const top = document.createElement("div");
+        top.className = "scene-top";
+
+        const title = document.createElement("div");
+        title.className = "scene-title";
+        title.innerHTML = `<span class="grab" title="드래그로 순서 변경">↕</span><span>${index + 1}. ${escapeHtml(scene.imageName || "빈 장면")}</span>`;
+
+        const actions = document.createElement("div");
+        actions.className = "scene-actions";
+
+        const settingsButton = document.createElement("button");
+        settingsButton.type = "button";
+        settingsButton.textContent = "설정";
+        settingsButton.addEventListener("click", () => openSettings(scene.id));
+
+        const cropButton = document.createElement("button");
+        cropButton.type = "button";
+        cropButton.textContent = "영역";
+        cropButton.disabled = !scene.imageSrc;
+        cropButton.addEventListener("click", () => toggleCropEditor(scene.id));
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "danger";
+        deleteButton.textContent = "삭제";
+        deleteButton.addEventListener("click", () => deleteScene(scene.id));
+
+        actions.append(settingsButton, cropButton, deleteButton);
+        top.append(title, actions);
+
+        const dropzone = document.createElement("div");
+        dropzone.className = "dropzone";
+        dropzone.addEventListener("click", () => pickImage(scene.id));
+        dropzone.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          dropzone.style.borderColor = "var(--accent)";
+        });
+        dropzone.addEventListener("dragleave", () => {
+          dropzone.style.borderColor = "";
+        });
+        dropzone.addEventListener("drop", (event) => {
+          event.preventDefault();
+          dropzone.style.borderColor = "";
+          const file = event.dataTransfer.files[0];
+          if (file) setSceneImage(scene.id, file);
+        });
+
+        if (scene.imageSrc) {
+          const img = document.createElement("img");
+          img.src = scene.imageSrc;
+          img.alt = scene.imageName || "장면 이미지";
+          dropzone.appendChild(img);
+        } else {
+          const empty = document.createElement("span");
+          empty.textContent = "이미지를 클릭하거나 끌어다 놓으세요.";
+          dropzone.appendChild(empty);
+        }
+
+        const caption = document.createElement("textarea");
+        caption.className = "caption-input";
+        caption.placeholder = "자막내용";
+        caption.value = scene.caption;
+        caption.addEventListener("input", () => {
+          scene.caption = caption.value;
+          drawScene(scene, 0, 0);
+        });
+
+        card.addEventListener("dragstart", () => {
+          card.classList.add("dragging");
+        });
+        card.addEventListener("dragend", () => {
+          card.classList.remove("dragging");
+          syncDragOrder();
+        });
+        card.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          const dragging = document.querySelector(".scene-card.dragging");
+          if (!dragging || dragging === card) return;
+          const box = card.getBoundingClientRect();
+          const after = event.clientY > box.top + box.height / 2;
+          sceneList.insertBefore(dragging, after ? card.nextSibling : card);
+        });
+
+        if (scene.imageSrc && scene.cropOpen) {
+          card.append(top, dropzone, createCropEditor(scene), caption);
+        } else {
+          card.append(top, dropzone, caption);
+        }
+        sceneList.appendChild(card);
+      });
+
+      drawScene(scenes[0], 0, 0);
+    }
+
+    function toggleCropEditor(id) {
+      const scene = scenes.find((item) => item.id === id);
+      if (!scene || !scene.imageSrc) return;
+      scene.cropOpen = !scene.cropOpen;
+      renderSceneList();
+    }
+
+    function createCropEditor(scene) {
+      const editor = document.createElement("div");
+      editor.className = "crop-editor";
+
+      const frame = document.createElement("div");
+      frame.className = `crop-frame ${cardFormat === "portrait" ? "portrait" : ""}`;
+
+      const img = document.createElement("img");
+      img.src = scene.imageSrc;
+      img.alt = scene.imageName || "이미지 영역";
+
+      const marker = document.createElement("span");
+      marker.className = "crop-marker";
+
+      const syncFrame = () => {
+        const x = `${clamp01(scene.cropX) * 100}%`;
+        const y = `${clamp01(scene.cropY) * 100}%`;
+        img.style.objectPosition = `${x} ${y}`;
+        marker.style.left = x;
+        marker.style.top = y;
+      };
+
+      const updateCrop = (event) => {
+        const rect = frame.getBoundingClientRect();
+        scene.cropX = clamp01((event.clientX - rect.left) / rect.width);
+        scene.cropY = clamp01((event.clientY - rect.top) / rect.height);
+        syncFrame();
+        drawScene(scene, 0, 0);
+      };
+
+      frame.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        const card = frame.closest(".scene-card");
+        if (card) card.draggable = false;
+        frame.setPointerCapture(event.pointerId);
+        updateCrop(event);
+      });
+      frame.addEventListener("pointermove", (event) => {
+        if (event.buttons === 1) updateCrop(event);
+      });
+      frame.addEventListener("pointerup", () => {
+        const card = frame.closest(".scene-card");
+        if (card) card.draggable = true;
+      });
+      frame.addEventListener("lostpointercapture", () => {
+        const card = frame.closest(".scene-card");
+        if (card) card.draggable = true;
+      });
+
+      frame.append(img, marker);
+      syncFrame();
+
+      const actions = document.createElement("div");
+      actions.className = "crop-actions";
+
+      const hint = document.createElement("p");
+      hint.className = "hint";
+      hint.textContent = "보일 중심 영역을 클릭하거나 드래그하세요.";
+
+      const resetButton = document.createElement("button");
+      resetButton.type = "button";
+      resetButton.className = "ghost";
+      resetButton.textContent = "가운데";
+      resetButton.addEventListener("click", () => {
+        scene.cropX = 0.5;
+        scene.cropY = 0.5;
+        syncFrame();
+        drawScene(scene, 0, 0);
+      });
+
+      actions.append(hint, resetButton);
+      editor.append(frame, actions);
+      return editor;
+    }
+
+    function clamp01(value) {
+      return Math.min(1, Math.max(0, Number(value) || 0));
+    }
+
+    function escapeHtml(value) {
+      return value.replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    function syncDragOrder() {
+      const ids = [...sceneList.querySelectorAll(".scene-card")].map((card) => card.dataset.id);
+      scenes = ids.map((id) => scenes.find((scene) => scene.id === id)).filter(Boolean);
+      renderSceneList();
+    }
+
+    function addScene(scene = defaultScene()) {
+      scenes.push(scene);
+      renderSceneList();
+      setStatus("새 장면이 추가되었습니다.");
+    }
+
+    function deleteScene(id) {
+      const scene = scenes.find((item) => item.id === id);
+      const label = scene?.imageName || "이 장면";
+      if (!confirm(`${label}을 삭제할까요?`)) return;
+      scenes = scenes.filter((item) => item.id !== id);
+      renderSceneList();
+      setStatus("장면을 삭제했습니다.");
+    }
+
+    function pickImage(id) {
+      selectedImageSceneId = id;
+      filePicker.value = "";
+      filePicker.click();
+    }
+
+    async function setSceneImage(id, file) {
+      const scene = scenes.find((item) => item.id === id);
+      if (!scene) return;
+      try {
+        const dataUrl = await readFileAsDataUrl(file);
+        scene.loadedImage = await loadImageElement(dataUrl);
+        scene.imageSrc = dataUrl;
+        scene.imageName = file.name;
+        scene.cropX = 0.5;
+        scene.cropY = 0.5;
+        renderSceneList();
+        setStatus(`${file.name} 이미지를 불러왔습니다.`);
+      } catch (error) {
+        console.error(error);
+        setStatus("이미지를 불러오지 못했습니다.");
+      }
+    }
+
+    function openSettings(id) {
+      activeSceneId = id;
+      const scene = scenes.find((item) => item.id === id);
+      if (!scene) return;
+      modalDuration.value = scene.duration;
+      modalImageEffect.value = scene.imageEffect;
+      modalTextEffect.value = scene.textEffect;
+      modalTransition.value = scene.transition;
+      modal.classList.add("open");
+    }
+
+    function closeSettings() {
+      modal.classList.remove("open");
+      activeSceneId = null;
+    }
+
+    function saveSettings() {
+      const scene = scenes.find((item) => item.id === activeSceneId);
+      if (!scene) return;
+      scene.duration = Math.max(0.5, Number(modalDuration.value) || 3);
+      scene.imageEffect = modalImageEffect.value;
+      scene.textEffect = modalTextEffect.value;
+      scene.transition = modalTransition.value;
+      closeSettings();
+      renderSceneList();
+      setStatus("장면 설정을 저장했습니다.");
+    }
+
+    function setCanvasResolution() {
+      const [width, height] = formatPresets[cardFormat].resolution.split("x").map(Number);
+      if (canvas.width !== width) canvas.width = width;
+      if (canvas.height !== height) canvas.height = height;
+    }
+
+    function drawEmpty() {
+      setCanvasResolution();
+      ctx.fillStyle = "#111";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#d8d1c7";
+      ctx.font = "600 34px Malgun Gothic, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("장면을 추가하세요", canvas.width / 2, canvas.height / 2);
+    }
+
+    function drawCoverImage(img, progress, effect, cropX = 0.5, cropY = 0.5) {
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const imageRatio = img.width / img.height;
+      const canvasRatio = cw / ch;
+      let drawW = cw;
+      let drawH = ch;
+      if (imageRatio > canvasRatio) drawW = ch * imageRatio;
+      else drawH = cw / imageRatio;
+
+      let scale = 1;
+      let offsetX = 0;
+      if (effect === "kenburns") scale = 1 + progress * 0.08;
+      if (effect === "panLeft") offsetX = -cw * 0.06 * progress;
+      if (effect === "panRight") offsetX = cw * 0.06 * progress;
+
+      drawW *= scale;
+      drawH *= scale;
+      const minX = Math.min(0, cw - drawW);
+      const minY = Math.min(0, ch - drawH);
+      const x = Math.min(0, Math.max(minX, (cw - drawW) * clamp01(cropX) + offsetX));
+      const y = Math.min(0, Math.max(minY, (ch - drawH) * clamp01(cropY)));
+      ctx.drawImage(img, x, y, drawW, drawH);
+    }
+
+    function drawCaption(text, progress, effect) {
+      if (!text.trim()) return;
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const visibleText = effect === "type"
+        ? text.slice(0, Math.ceil(text.length * Math.min(1, progress * 1.5)))
+        : text;
+      const alpha = effect === "none" || effect === "type" ? 1 : Math.min(1, progress * 2.4);
+      const lift = effect === "fadeUp" ? (1 - Math.min(1, progress * 2)) * 28 : 0;
+
+      const lines = wrapText(visibleText, cw * 0.76, Math.max(28, cw * 0.028));
+      const lineHeight = Math.max(38, cw * 0.038);
+      const boxHeight = lines.length * lineHeight + 34;
+      const boxY = ch - boxHeight - ch * 0.07 + lift;
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = "rgba(0,0,0,.68)";
+      roundedRect(cw * 0.08, boxY, cw * 0.84, boxHeight, 8);
+      ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.font = `700 ${Math.max(28, cw * 0.028)}px Malgun Gothic, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      lines.forEach((line, index) => {
+        ctx.fillText(line, cw / 2, boxY + 24 + index * lineHeight + lineHeight / 2);
+      });
+      ctx.restore();
+    }
+
+    function wrapText(text, maxWidth, fontSize) {
+      ctx.font = `700 ${fontSize}px Malgun Gothic, sans-serif`;
+      const words = text.replace(/\n/g, " \n ").split(/\s+/);
+      const lines = [];
+      let line = "";
+      for (const word of words) {
+        if (word === "\n") {
+          lines.push(line);
+          line = "";
+          continue;
+        }
+        const test = line ? `${line} ${word}` : word;
+        if (ctx.measureText(test).width > maxWidth && line) {
+          lines.push(line);
+          line = word;
+        } else {
+          line = test;
+        }
+      }
+      if (line) lines.push(line);
+      return lines.slice(0, 4);
+    }
+
+    function roundedRect(x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.arcTo(x + width, y, x + width, y + height, radius);
+      ctx.arcTo(x + width, y + height, x, y + height, radius);
+      ctx.arcTo(x, y + height, x, y, radius);
+      ctx.arcTo(x, y, x + width, y, radius);
+      ctx.closePath();
+    }
+
+    function drawScene(scene, progress, transitionProgress) {
+      setCanvasResolution();
+      ctx.fillStyle = "#111";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      if (scene && scene.loadedImage) {
+        drawCoverImage(scene.loadedImage, progress, scene.imageEffect, scene.cropX, scene.cropY);
+      }
+      if (transitionProgress > 0 && scene.transition === "fade") {
+        ctx.fillStyle = `rgba(0,0,0,${transitionProgress})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+      drawCaption((scene && scene.caption) || "", progress, (scene && scene.textEffect) || "fadeUp");
+    }
+
+    function play(record = false) {
+      if (!scenes.length) {
+        setStatus("먼저 장면을 추가하세요.");
+        return;
+      }
+      if (!scenes.some((scene) => scene.loadedImage)) {
+        setStatus("먼저 이미지를 불러오세요.");
+        return;
+      }
+      stop();
+      isPlaying = true;
+      setCanvasResolution();
+
+      if (record && !startRecording()) {
+        isPlaying = false;
+        return;
+      }
+      const total = scenes.reduce((sum, scene) => sum + scene.duration, 0);
+      const started = performance.now();
+
+      const frame = (now) => {
+        if (!isPlaying) return;
+        const elapsed = (now - started) / 1000;
+        if (elapsed >= total) {
+          drawScene(scenes[scenes.length - 1], 1, 0);
+          stop();
+          if (record) stopRecording();
+          setStatus(record ? "동영상 변환을 마무리하고 있습니다." : "실행이 끝났습니다.");
+          return;
+        }
+
+        let cursor = 0;
+        let current = scenes[0];
+        for (const scene of scenes) {
+          if (elapsed < cursor + scene.duration) {
+            current = scene;
+            break;
+          }
+          cursor += scene.duration;
+        }
+
+        const local = elapsed - cursor;
+        const progress = Math.min(1, local / current.duration);
+        const transitionProgress = current.transition === "cut" ? 0 : Math.max(0, (local - current.duration + 0.45) / 0.45);
+        drawScene(current, progress, transitionProgress);
+        rafId = requestAnimationFrame(frame);
+      };
+
+      setStatus(record ? "동영상 녹화 중입니다." : "미리보기를 실행 중입니다.");
+      rafId = requestAnimationFrame(frame);
+    }
+
+    function stop() {
+      isPlaying = false;
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+
+    function startRecording() {
+      if (!canvas.captureStream || typeof MediaRecorder === "undefined") {
+        setStatus("이 브라우저는 로컬 HTML에서 동영상 녹화를 지원하지 않습니다. Chrome 또는 Edge 최신 버전에서 열어주세요.");
+        return false;
+      }
+      recordedChunks = [];
+      const fps = Number(fpsSelect.value) || 30;
+      const stream = canvas.captureStream(fps);
+      const mp4Type = "video/mp4;codecs=avc1.42E01E";
+      const webmType = "video/webm;codecs=vp9";
+      const mimeType = MediaRecorder.isTypeSupported(mp4Type)
+        ? mp4Type
+        : (MediaRecorder.isTypeSupported(webmType) ? webmType : "video/webm");
+      try {
+        recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 8_000_000 });
+      } catch (error) {
+        console.error(error);
+        setStatus("동영상 녹화기를 시작하지 못했습니다. 다른 브라우저에서 다시 시도하세요.");
+        return false;
+      }
+      recorder.ondataavailable = (event) => {
+        if (event.data.size) recordedChunks.push(event.data);
+      };
+      recorder.onstop = () => {
+        if (!recordedChunks.length) {
+          setStatus("녹화된 데이터가 없습니다. 다시 실행해보세요.");
+          return;
+        }
+        const blob = new Blob(recordedChunks, { type: recorder.mimeType });
+        const extension = recorder.mimeType.includes("mp4") ? "mp4" : "webm";
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `html-2-mp4-${cardFormat}.${extension}`;
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        setStatus(extension === "mp4" ? "MP4 다운로드가 완료되었습니다." : "이 브라우저는 MP4 녹화를 지원하지 않아 WebM으로 저장했습니다.");
+      };
+      recorder.start();
+      return true;
+    }
+
+    function stopRecording() {
+      if (recorder && recorder.state !== "inactive") recorder.stop();
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function readFileAsText(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsText(file, "utf-8");
+      });
+    }
+
+    function loadImageElement(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    function saveSceneList() {
+      if (!scenes.length) {
+        setStatus("저장할 장면이 없습니다.");
+        return;
+      }
+      const data = {
+        version: 1,
+        savedAt: new Date().toISOString(),
+        cardFormat,
+        resolution: resolutionSelect.value,
+        fps: fpsSelect.value,
+        scenes: scenes.map((scene) => ({
+          imageSrc: scene.imageSrc,
+          imageName: scene.imageName,
+          caption: scene.caption,
+          duration: scene.duration,
+          imageEffect: scene.imageEffect,
+          textEffect: scene.textEffect,
+          transition: scene.transition,
+          cropX: scene.cropX,
+          cropY: scene.cropY
+        }))
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `html-2-mp4-list-${cardFormat}-${dateStamp()}.json`;
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setStatus("리스트를 저장했습니다.");
+    }
+
+    function openListPicker() {
+      listFilePicker.value = "";
+      listFilePicker.click();
+    }
+
+    async function importSceneList(file) {
+      if (!file) return;
+      try {
+        const data = JSON.parse(await readFileAsText(file));
+        if (!Array.isArray(data.scenes)) throw new Error("Invalid scene list");
+        const importedScenes = await Promise.all(data.scenes.map(async (item) => {
+          const scene = {
+            ...defaultScene(),
+            imageSrc: typeof item.imageSrc === "string" ? item.imageSrc : "",
+            imageName: typeof item.imageName === "string" ? item.imageName : "",
+            caption: typeof item.caption === "string" ? item.caption : "",
+            duration: Math.max(0.5, Number(item.duration) || 3),
+            imageEffect: item.imageEffect || "kenburns",
+            textEffect: item.textEffect || "fadeUp",
+            transition: item.transition || "fade",
+            cropX: clamp01(item.cropX ?? 0.5),
+            cropY: clamp01(item.cropY ?? 0.5),
+            cropOpen: false
+          };
+          if (scene.imageSrc) scene.loadedImage = await loadImageElement(scene.imageSrc);
+          return scene;
+        }));
+        scenes = importedScenes;
+        const importedFormat = data.cardFormat || (data.resolution === "1080x1920" ? "portrait" : "landscape");
+        setCardFormat(importedFormat, false);
+        if (data.fps) fpsSelect.value = data.fps;
+        renderSceneList();
+        setStatus(`${scenes.length}개 장면을 가져왔습니다.`);
+      } catch (error) {
+        console.error(error);
+        setStatus("리스트 파일을 가져오지 못했습니다.");
+      }
+    }
+
+    function dateStamp() {
+      const date = new Date();
+      const pad = (value) => String(value).padStart(2, "0");
+      return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}`;
+    }
+
+    filePicker.addEventListener("change", () => {
+      const file = filePicker.files[0];
+      if (file && selectedImageSceneId) setSceneImage(selectedImageSceneId, file);
+    });
+    listFilePicker.addEventListener("change", () => {
+      importSceneList(listFilePicker.files[0]);
+    });
+    addSceneButton.addEventListener("click", () => addScene());
+    formatButton.addEventListener("click", openFormatSheet);
+    closeFormatSheetButton.addEventListener("click", closeFormatSheet);
+    formatChoices.forEach((button) => {
+      button.addEventListener("click", () => {
+        setCardFormat(button.dataset.format);
+        closeFormatSheet();
+        setStatus(`${formatPresets[cardFormat].label} 판형으로 변경했습니다.`);
+      });
+    });
+    saveListButton.addEventListener("click", saveSceneList);
+    importListButton.addEventListener("click", openListPicker);
+    runPreviewButton.addEventListener("click", () => play(false));
+    stopPreviewButton.addEventListener("click", () => {
+      stop();
+      setStatus("정지했습니다.");
+    });
+    downloadButton.addEventListener("click", () => play(true));
+    saveSettingsButton.addEventListener("click", saveSettings);
+    cancelSettingsButton.addEventListener("click", closeSettings);
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) closeSettings();
+    });
+    formatSheet.addEventListener("click", (event) => {
+      if (event.target === formatSheet) closeFormatSheet();
+    });
+    resolutionSelect.addEventListener("change", () => {
+      setCardFormat(resolutionSelect.value === "1080x1920" ? "portrait" : "landscape");
+    });
+
+    setCardFormat(cardFormat, false);
+    renderSceneList();
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch((error) => {
+          console.warn("Service worker registration failed:", error);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
