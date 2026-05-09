@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Narration Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: '#F8FAFC',
+                            card: '#FFFFFF',
+                            primary: '#1E293B', // Charcoal grey
+                            secondary: '#64748B', // Muted blue-grey
+                            accent: '#0D9488', // Soft Teal
+                            divider: '#E2E8F0'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Montserrat', 'sans-serif'],
+                        body: ['"Noto Sans KR"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'premium': '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02)',
+                        'glass': 'inset 0 0 0 1px rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F8FAFC;
+            background-image: radial-gradient(#E2E8F0 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+            scroll-behavior: smooth;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .content-fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        audio::-webkit-media-controls-panel {
+            background-color: #F1F5F9;
+        }
+        .image-container img {
+            transition: transform 0.5s ease;
+        }
+        .image-container:hover img {
+            transform: scale(1.02);
+        }
+    </style>
+</head>
+<body class="font-body text-brand-primary min-h-screen flex flex-col items-center">
+
+    <!-- Header -->
+    <header class="w-full py-12 px-6 glass-effect sticky top-0 z-50 border-b border-brand-divider">
+        <div class="max-w-4xl mx-auto text-center">
+            <h1 class="font-display text-3xl md:text-4xl font-bold tracking-tight text-brand-primary">
+                Image Narration Assistant
+            </h1>
+            <div class="mt-2 h-1 w-20 bg-brand-accent mx-auto rounded-full"></div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="w-full max-w-4xl px-6 py-12 space-y-20 flex flex-col items-center content-fade-in">
+
+        <!-- Image Section -->
+        <section class="w-full flex flex-col items-center">
+            <div class="image-container relative rounded-2xl overflow-hidden shadow-premium bg-white p-2 border border-brand-divider w-full">
+                <img src='6.jpg' alt='media_1' class="w-full h-auto rounded-xl object-cover" />
+            </div>
+            <div class="mt-4 flex items-center gap-2 text-brand-secondary text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span>Uploaded Scene Analysis</span>
+            </div>
+        </section>
+
+        <!-- Script Section -->
+        <section class="w-full bg-white rounded-3xl p-8 md:p-12 shadow-premium border border-brand-divider max-w-[80ch]">
+            <div class="flex items-center gap-3 mb-8">
+                <div class="p-2 bg-brand-accent/10 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-brand-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </div>
+                <h2 class="font-display text-xl font-semibold text-brand-primary">Narrative Script</h2>
+            </div>
+            
+            <div class="space-y-6 leading-relaxed text-lg md:text-xl text-brand-secondary font-light">
+                <p>맑고 푸른 하늘 위로 거대한 뭉게구름이 웅장하게 피어오른 어느 여름날의 도심 풍경입니다. 강렬한 햇살을 머금은 구름은 눈이 시리도록 하얗게 빛나며, 깊고 투명한 푸른색 하늘과 대비를 이뤄 청량한 분위기를 자아냅니다.</p>
+
+                <p>시선을 아래로 옮기면 현대적인 건축물들이 스카이라인을 메우고 있습니다. 좌측에는 'HILLS'라는 문구가 적힌 높은 아파트 단지가 우뚝 솟아 있고, 그 옆으로 'FINE HILL' 등 다양한 상업 및 주거용 건물들이 질서 정연하게 늘어서 있습니다. 건물들의 무채색 외벽은 도심의 정갈함을 더해줍니다.</p>
+
+                <p>화면의 하단부는 보행자를 위한 인도와 도로가 차지하고 있습니다. 바닥에는 시각장애인을 위한 노란색 점자 블록이 곧게 뻗어 있으며, 보도 옆으로는 튼튼한 금속제 난간이 설치되어 안전한 경계를 이룹니다. 난간 너머로는 짙은 녹색의 수풀이 무성하게 자라나 회색빛 도심 속에 생동감 넘치는 초록빛 에너지를 불어넣습니다.</p>
+
+                <p>수풀 사이로 고개를 내민 초록색 도로 표지판은 이곳의 위치를 짐작게 합니다. '서초 IC'까지 5km, '사당역'까지 1km 남았음을 알리는 이정표는 이곳이 서울의 주요 거점을 잇는 활기찬 길목임을 보여줍니다.</p>
+
+                <p>따스한 햇살과 선명한 색조, 그리고 고요하면서도 활기찬 도시의 기반 시설들이 어우러진 이 장면은, 바쁜 일상 속에서도 잠시 고개를 들어 하늘을 바라보게 만드는 평화로운 오후의 순간을 담고 있습니다.</p>
+            </div>
+        </section>
+
+        <!-- Audio Player Section -->
+        <section class="w-full flex flex-col items-center">
+            <div class="w-full max-w-lg bg-brand-primary rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+                <!-- Abstract background pattern for audio card -->
+                <div class="absolute top-0 right-0 opacity-10 pointer-events-none">
+                    <svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="150" cy="50" r="80" fill="white" />
+                    </svg>
+                </div>
+                
+                <div class="relative z-10">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 bg-brand-accent rounded-full flex items-center justify-center animate-pulse">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-white font-display font-medium">Audio Narration</h3>
+                            <p class="text-slate-400 text-sm">Korean Voice Synthesis</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/5 rounded-xl p-2 backdrop-blur-sm">
+                        <audio src='6.wav' controls class="w-full h-12"></audio>
+                    </div>
+                </div>
+            </div>
+            <p class="mt-4 text-brand-secondary text-xs uppercase tracking-widest font-semibold">Press play to listen</p>
+        </section>
+
+    </main>
+
+    <!-- Spacer to provide padding at bottom since footer is prohibited -->
+    <div class="py-12"></div>
+
+    <script>
+        // Smooth entry for components as user scrolls
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('content-fade-in');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section').forEach(section => {
+            section.style.opacity = "0";
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>
+

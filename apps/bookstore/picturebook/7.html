@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Narration Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            bg: '#F8FAFC',
+                            text: '#1E293B',
+                            accent: '#0D9488', // Teal accent
+                            muted: '#64748B'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Montserrat', 'Noto Sans KR', 'sans-serif'],
+                        body: ['Noto Sans KR', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'premium': '0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02)',
+                        'glow': '0 0 20px rgba(13, 148, 136, 0.15)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F8FAFC;
+            background-image: radial-gradient(circle at 50% 0%, #E2E8F0 0%, transparent 50%);
+            min-height: 100vh;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .image-container img {
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .image-container:hover img {
+            transform: scale(1.02);
+        }
+        audio::-webkit-media-controls-panel {
+            background-color: #F1F5F9;
+        }
+        .fade-in {
+            animation: fadeIn 1.2s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="font-body text-brand-text antialiased">
+
+    <!-- Header -->
+    <header class="pt-12 pb-8 px-6 text-center fade-in" style="animation-delay: 0.1s;">
+        <h1 class="font-display text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-brand-text">
+            Image Narration Assistant
+        </h1>
+        <div class="mt-4 h-1 w-16 bg-brand-accent mx-auto rounded-full"></div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-6 pb-24 space-y-16">
+        
+        <!-- Image Section -->
+        <section class="image-section fade-in" style="animation-delay: 0.3s;">
+            <div class="image-container relative rounded-3xl overflow-hidden shadow-premium bg-white p-2 md:p-3">
+                <div class="aspect-auto overflow-hidden rounded-2xl">
+                    <img src='7.jpg' alt='media_1' class="w-full h-auto object-cover block" />
+                </div>
+            </div>
+        </section>
+
+        <!-- Script Section -->
+        <section class="script-section fade-in" style="animation-delay: 0.5s;">
+            <div class="max-w-[75ch] mx-auto">
+                <div class="flex items-center space-x-3 mb-6">
+                    <span class="text-xs font-bold uppercase tracking-widest text-brand-accent">Narration Script</span>
+                    <div class="flex-grow h-px bg-slate-200"></div>
+                </div>
+                
+                <div class="glass-card rounded-3xl p-8 md:p-12 shadow-sm border border-slate-100">
+                    <div class="space-y-6 text-lg md:text-xl leading-relaxed text-slate-700 font-light">
+                        <p>햇살이 가득 내려앉은 서울 동작구의 어느 나른한 오후입니다. 버스 정류장의 그늘 아래 잠시 멈춰 서서 도심이 주는 뜻밖의 평온함을 마주합니다.</p>
+
+                        <p>머리 위로 높게 뻗은 플라타너스 나무들이 가장 먼저 시선을 사로잡습니다. 세월을 견뎌온 얼룩덜룩한 나무껍질은 강인한 생명력을 보여주고, 그 끝에 매달린 투명한 초록빛 잎사귀들은 오후의 햇살을 머금어 눈부시게 반짝입니다. 나뭇잎 사이를 비집고 들어온 볕은 보도블록 위에 부드러운 빛의 조각들을 수놓습니다.</p>
+
+                        <p>정류장 한편에 자리 잡은 ‘DONGJAK 도착’ 스마트 키오스크는 묵묵히 제 자리를 지키며 누군가의 기다림을 돕고 있습니다. 옆면의 커다란 유리창에는 거리의 풍경이 길게 반영되어, 도시의 일상이 마치 한 폭의 그림처럼 겹쳐 보입니다.</p>
+
+                        <p>그 고요한 풍경 속으로 자전거를 탄 한 사람이 유유히 멀어집니다. 바쁜 도심의 속도에서 한 발짝 물러난 듯한 그 뒷모습에서 이 오후가 가진 느긋한 리듬이 전해집니다.</p>
+
+                        <p>차가운 아스팔트와 따스한 자연이 조화롭게 어우러진 이 순간. 소란스러운 도시의 소음조차 나뭇잎 흔들리는 소리에 묻혀 멀어지는, 참으로 맑고 싱그러운 동작구의 오후입니다.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Audio Player Section -->
+        <section class="audio-section fade-in" style="animation-delay: 0.7s;">
+            <div class="max-w-2xl mx-auto flex flex-col items-center">
+                <div class="w-full bg-white rounded-full shadow-premium p-4 md:p-6 border border-slate-50 flex flex-col items-center gap-4">
+                    <div class="flex items-center gap-3 text-brand-muted mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-headphones text-brand-accent"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-7a9 9 0 0 1 18 0v7a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"></path></svg>
+                        <span class="text-sm font-medium">Listen to the Narration</span>
+                    </div>
+                    <div class="w-full">
+                        <audio src='7.wav' alt='media_2' controls class="w-full"></audio>
+                    </div>
+                </div>
+                
+                <!-- Interaction Micro-tip -->
+                <p class="mt-4 text-slate-400 text-xs uppercase tracking-widest font-medium">Click play to begin experience</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Custom Cursor / Subtle Glow follows -->
+    <div class="fixed top-0 left-0 w-full h-full pointer-events-none z-[-1] opacity-40">
+        <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-teal-100 rounded-full blur-[128px]"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-100 rounded-full blur-[128px]"></div>
+    </div>
+
+</body>
+</html>
+

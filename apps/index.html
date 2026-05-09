@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Apps Index Outline</title>
+  <meta name="description" content="apps 하위 폴더에 있는 index.html 페이지들을 outline 형식으로 정리한 목록입니다.">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f4;
+      --panel: #ffffff;
+      --ink: #20231f;
+      --muted: #656b61;
+      --line: #d9ded3;
+      --accent: #276a5f;
+      --accent-soft: #e5f1ed;
+      --shadow: 0 18px 50px rgba(36, 44, 34, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+      line-height: 1.55;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 42px 0 56px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: end;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 720px;
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(92px, 1fr));
+      gap: 10px;
+      min-width: 300px;
+    }
+
+    .metric {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 8px 24px rgba(36, 44, 34, 0.06);
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 1.7rem;
+      line-height: 1;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .outline {
+      margin-top: 28px;
+      display: grid;
+      gap: 18px;
+    }
+
+    details {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    summary {
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+      padding: 18px 20px;
+      list-style: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: "+";
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    details[open] summary::after {
+      content: "-";
+    }
+
+    .folder-name {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: baseline;
+    }
+
+    .folder-name strong {
+      font-size: 1.28rem;
+    }
+
+    .folder-name span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .folder-desc {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .items {
+      margin: 0;
+      padding: 0 20px 20px;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfa;
+    }
+
+    .item:hover {
+      border-color: #9fb8af;
+      background: #f4faf7;
+    }
+
+    .item h2 {
+      margin: 0;
+      font-size: 1.02rem;
+      line-height: 1.35;
+    }
+
+    .item p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .path {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 3px 7px;
+      border-radius: 6px;
+      background: #eef0eb;
+      color: #4a5047;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.78rem;
+      word-break: break-all;
+    }
+
+    .open-link {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.86rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .note {
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        width: min(100% - 22px, 1120px);
+        padding-top: 26px;
+      }
+
+      header {
+        grid-template-columns: 1fr;
+      }
+
+      .summary {
+        min-width: 0;
+      }
+
+      summary,
+      .item {
+        grid-template-columns: 1fr;
+      }
+
+      summary::after {
+        display: none;
+      }
+
+      .open-link {
+        width: fit-content;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div>
+        <h1>Apps Outline</h1>
+        <p class="lead">현재 폴더의 하위 디렉터리에 있는 <code>index.html</code> 페이지들을 폴더 구조에 맞춰 정리했습니다. 각 항목은 페이지 성격과 바로가기 링크를 함께 제공합니다.</p>
+      </div>
+      <section class="summary" aria-label="요약">
+        <div class="metric">
+          <strong>8</strong>
+          <span>상위 폴더</span>
+        </div>
+        <div class="metric">
+          <strong>14</strong>
+          <span>index.html</span>
+        </div>
+        <div class="metric">
+          <strong>7</strong>
+          <span>bookstore 하위 페이지</span>
+        </div>
+      </section>
+    </header>
+
+    <section class="outline" aria-label="하위 index.html outline">
+      <details open>
+        <summary>
+          <div>
+            <div class="folder-name"><strong>asmr</strong><span>콘텐츠 컬렉션</span></div>
+            <p class="folder-desc">ASMR 및 YouTube 콘텐츠를 모아 보여주는 페이지입니다.</p>
+          </div>
+        </summary>
+        <ul class="items">
+          <li class="item">
+            <a href="asmr/index.html">
+              <h2>Botanical Ether | YouTube Content</h2>
+              <p>ASMR Collection을 제목으로 한 영상 콘텐츠 모음 페이지입니다.</p>
+              <span class="path">asmr/index.html</span>
+            </a>
+            <a class="open-link" href="asmr/index.html">열기</a>
+          </li>
+        </ul>
+      </details>
+
+      <details open>
+        <summary>
+          <div>
+            <div class="folder-name"><strong>bookstore</strong><span>책과 플립북 모음</span></div>
+            <p class="folder-desc">그림책, 플립북, 주제별 전자책 페이지가 들어 있는 가장 큰 묶음입니다.</p>
+          </div>
+        </summary>
+        <ul class="items">
+          <li class="item">
+            <a href="bookstore/bluegate/index.html">
+              <h2>파란 대문 연작 인덱스</h2>
+              <p>파란 대문 연작을 한 곳에서 찾아볼 수 있는 인덱스 페이지입니다.</p>
+              <span class="path">bookstore/bluegate/index.html</span>
+            </a>
+            <a class="open-link" href="bookstore/bluegate/index.html">열기</a>
+          </li>
+          <li class="item">
+            <a href="bookstore/etc/index.html">
+              <h2>Picturebook Index</h2>
+              <p>번호 순서로 작품 리스트를 정리한 기타 그림책 인덱스입니다.</p>
+              <span class="path">bookstore/etc/index.html</span>
+            </a>
+            <a class="open-link" href="bookstore/etc/index.html">열기</a>
+          </li>
+          <li class="item">
+            <a href="bookstore/father/index.html">
+              <h2>book.html</h2>
+              <p>재즈와 감상의 흐름을 넘겨 읽는 전자책 형식 페이지입니다.</p>
+              <span class="path">bookstore/father/index.html</span>
+            </a>
+            <a class="open-link" href="bookstore/father/index.html">열기</a>
+          </li>
+          <li class="item">
+            <a href="bookstore/flipbook/index.html">
+              <h2>Flipbook Index</h2>
+              <p>현재 폴더 기준의 플립북 페이지들을 모아 보여주는 인덱스입니다.</p>
+              <span class="path">bookstore/flipbook/index.html</span>
+            </a>
+            <a class="open-link" href="bookstore/flipbook/index.html">열기</a>
+          </li>
+          <li class="item">
+            <a href="bookstore/gamer/index.html">
+              <h2>게임 중독 이야기 인덱스</h2>
+              <p>게임 중독 이야기 페이지들을 모아 놓은 주제별 책 인덱스입니다.</p>
+              <span class="path">bookstore/gamer/index.html</span>
+            </a>
+            <a class="open-link" href="bookstore/gamer/index.html">열기</a>
+          </li>
+          <li class="item">
+            <a href="bookstore/picturebook/index.html">
+              <h2>Picturebook Index</h2>
+              <p>번호 순서로 그림책 작품 리스트를 보여주는 대표 인덱스입니다.</p>
+              <span class="path">bookstore/picturebook/index.html</span>
+            </a>
+            <a class="open-link" href="bookstore/picturebook/index.html">열기</a>
+          </li>
+          <li class="item">
+            <a href="bookstore/vibecoding/index.html">
+              <h2>Vibe coding Book</h2>
+              <p>바이브 코딩 내용을 책 형식으로 볼 수 있는 페이지입니다.</p>
+              <span class="path">bookstore/vibecoding/index.html</span>
+            </a>
+            <a class="open-link" href="bookstore/vibecoding/index.html">열기</a>
+          </li>
+        </ul>
+      </details>
+
+      <details open>
+        <summary>
+          <div>
+            <div class="folder-name"><strong>capture</strong><span>HTML 캡처 도구</span></div>
+            <p class="folder-desc">로컬 HTML 화면을 캡처하는 용도의 앱 페이지입니다.</p>
+          </div>
+        </summary>
+        <ul class="items">
+          <li class="item">
+            <a href="capture/index.html">
+              <h2>로컬 HTML 캡처 앱</h2>
+              <p>로컬 HTML 파일을 화면 이미지로 캡처하는 작업용 도구입니다.</p>
+              <span class="path">capture/index.html</span>
+            </a>
+            <a class="open-link" href="capture/index.html">열기</a>
+          </li>
+        </ul>
+      </details>
+
+      <details open>
+        <summary>
+          <div>
+            <div class="folder-name"><strong>excalidraw_export</strong><span>Excalidraw 뷰어</span></div>
+            <p class="folder-desc">Excalidraw 파일을 브라우저에서 확인하는 뷰어 페이지입니다.</p>
+          </div>
+        </summary>
+        <ul class="items">
+          <li class="item">
+            <a href="excalidraw_export/index.html">
+              <h2>Excalidraw Viewer</h2>
+              <p>Excalidraw File Viewer를 제목으로 한 드로잉 파일 확인용 앱입니다.</p>
+              <span class="path">excalidraw_export/index.html</span>
+            </a>
+            <a class="open-link" href="excalidraw_export/index.html">열기</a>
+          </li>
+        </ul>
+      </details>
+
+      <details open>
+        <summary>
+          <div>
+            <div class="folder-name"><strong>learnhtml</strong><span>HTML 학습 노트</span></div>
+            <p class="folder-desc">HTML로 정리한 노트와 학습 자료를 보여주는 페이지입니다.</p>
+          </div>
+        </summary>
+        <ul class="items">
+          <li class="item">
+            <a href="learnhtml/index.html">
+              <h2>HTML로 정리한 노트</h2>
+              <p>HTML 학습 또는 정리용 노트를 브라우저에서 읽는 페이지입니다.</p>
+              <span class="path">learnhtml/index.html</span>
+            </a>
+            <a class="open-link" href="learnhtml/index.html">열기</a>
+          </li>
+        </ul>
+      </details>
+
+      <details open>
+        <summary>
+          <div>
+            <div class="folder-name"><strong>makepuzzle</strong><span>퍼즐 제작 도구</span></div>
+            <p class="folder-desc">퍼즐을 만들고 다루는 단일 페이지 앱입니다.</p>
+          </div>
+        </summary>
+        <ul class="items">
+          <li class="item">
+            <a href="makepuzzle/index.html">
+              <h2>Puzzle Makers SPA</h2>
+              <p>퍼즐 제작 기능을 제공하는 브라우저 기반 SPA입니다.</p>
+              <span class="path">makepuzzle/index.html</span>
+            </a>
+            <a class="open-link" href="makepuzzle/index.html">열기</a>
+          </li>
+        </ul>
+      </details>
+
+      <details open>
+        <summary>
+          <div>
+            <div class="folder-name"><strong>outline</strong><span>문서 outline 도구</span></div>
+            <p class="folder-desc">트리 구조의 outline 문서를 다루는 페이지입니다.</p>
+          </div>
+        </summary>
+        <ul class="items">
+          <li class="item">
+            <a href="outline/index.html">
+              <h2>Desert Rich Tree Outline</h2>
+              <p>DESERT MANUSCRIPT 스타일의 트리 outline 문서 앱입니다.</p>
+              <span class="path">outline/index.html</span>
+            </a>
+            <a class="open-link" href="outline/index.html">열기</a>
+          </li>
+        </ul>
+      </details>
+
+      <details open>
+        <summary>
+          <div>
+            <div class="folder-name"><strong>videomaker</strong><span>영상 제작 도구</span></div>
+            <p class="folder-desc">이미지와 자막을 이용해 짧은 MP4/WebM 영상을 만드는 도구입니다.</p>
+          </div>
+        </summary>
+        <ul class="items">
+          <li class="item">
+            <a href="videomaker/index.html">
+              <h2>HTML 2 MP4</h2>
+              <p>이미지와 자막으로 짧은 MP4/WebM 영상을 만드는 브라우저 도구입니다.</p>
+              <span class="path">videomaker/index.html</span>
+            </a>
+            <a class="open-link" href="videomaker/index.html">열기</a>
+          </li>
+        </ul>
+      </details>
+    </section>
+
+    <p class="note">목록 기준: <code>apps</code> 폴더 아래에서 발견된 모든 하위 <code>index.html</code> 파일입니다.</p>
+  </main>
+</body>
+</html>
