@@ -1,0 +1,1103 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>세로형 GIF 메이커</title>
+  <style>
+    :root {
+      --bg: #f6f7f4;
+      --panel: #ffffff;
+      --ink: #202327;
+      --muted: #6b7280;
+      --line: #d8ddd2;
+      --accent: #176b5f;
+      --accent-dark: #0f5047;
+      --danger: #b42318;
+      --shadow: 0 10px 26px rgba(25, 31, 35, .09);
+      font-family: "Segoe UI", "Malgun Gothic", system-ui, sans-serif;
+      color-scheme: light;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    button {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      padding: 0 12px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    button:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent-dark);
+      color: #fff;
+    }
+
+    button.danger {
+      color: var(--danger);
+      border-color: #efb4ad;
+      background: #fffafa;
+    }
+
+    input, select {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      padding: 7px 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: rgba(255,255,255,.94);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0;
+      line-height: 1.15;
+    }
+
+    main {
+      width: min(1160px, 100%);
+      margin: 0 auto;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: minmax(280px, 390px) 1fr;
+      gap: 14px;
+    }
+
+    .preview-panel,
+    .work-panel {
+      min-width: 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+    }
+
+    .preview-panel {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .phone-frame {
+      width: min(100%, 330px);
+      aspect-ratio: 9 / 16;
+      margin: 0 auto;
+      border: 2px solid #1f2328;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #111;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #111;
+    }
+
+    .controls,
+    .settings,
+    .frame-actions {
+      display: grid;
+      gap: 8px;
+    }
+
+    .settings {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .status {
+      min-height: 20px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .work-panel {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .panel-top {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-title {
+      display: grid;
+      gap: 4px;
+    }
+
+    .panel-title strong {
+      font-size: 16px;
+    }
+
+    .hint {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .dropbox {
+      border: 2px dashed #9aa4b2;
+      border-radius: 8px;
+      background: #fbfcfa;
+      padding: 18px;
+      min-height: 96px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .dropbox.active {
+      border-color: var(--accent);
+      background: #eef8f5;
+      color: var(--accent-dark);
+    }
+
+    .frame-list {
+      display: grid;
+      gap: 10px;
+      padding-bottom: 24px;
+    }
+
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: 8px;
+      padding: 28px 16px;
+      color: var(--muted);
+      text-align: center;
+      background: #fbfcfa;
+    }
+
+    .frame-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 74px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .frame-card.dragging {
+      opacity: .55;
+    }
+
+    .thumb {
+      width: 74px;
+      aspect-ratio: 9 / 16;
+      border: 1px solid #1f2328;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #111;
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .frame-main {
+      min-width: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .frame-title {
+      min-width: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+    }
+
+    .frame-title span {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .small-buttons {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .small-buttons button {
+      min-height: 34px;
+      padding: 0 10px;
+      font-size: 12px;
+    }
+
+    .frame-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    @media (max-width: 820px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+
+      .preview-panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 520px) {
+      header {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      header button,
+      .controls button {
+        width: 100%;
+      }
+
+      main {
+        padding: 10px;
+      }
+
+      .settings,
+      .frame-fields {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-top {
+        flex-direction: column;
+      }
+
+      .panel-top button {
+        width: 100%;
+      }
+
+      .frame-card {
+        grid-template-columns: 62px 1fr;
+      }
+
+      .thumb {
+        width: 62px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>세로형 GIF 메이커</h1>
+      <button id="addImagesTop" class="primary" type="button">이미지 추가</button>
+    </header>
+
+    <main>
+      <section class="preview-panel" aria-label="미리보기와 저장">
+        <div class="phone-frame">
+          <canvas id="stage" width="540" height="960"></canvas>
+        </div>
+
+        <div class="settings">
+          <label>GIF 너비(px)
+            <select id="outputWidth">
+              <option value="360">360</option>
+              <option value="480" selected>480</option>
+              <option value="540">540</option>
+              <option value="720">720</option>
+            </select>
+          </label>
+          <label>기본 간격(ms)
+            <input id="defaultDelay" type="number" min="20" step="10" value="700">
+          </label>
+          <label>맞춤 방식
+            <select id="fitMode">
+              <option value="cover" selected>채우기</option>
+              <option value="contain">전체보기</option>
+            </select>
+          </label>
+          <label>반복
+            <select id="loopMode">
+              <option value="0" selected>무한 반복</option>
+              <option value="1">1회</option>
+            </select>
+          </label>
+          <label>화질
+            <select id="qualityMode">
+              <option value="optimized" selected>최적화</option>
+              <option value="original">원본 우선</option>
+            </select>
+          </label>
+          <label>진행 표시
+            <select id="progressMode">
+              <option value="show" selected>표시</option>
+              <option value="hide">숨김</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="controls">
+          <button id="previewButton" class="primary" type="button">미리보기</button>
+          <button id="stopButton" type="button">정지</button>
+          <button id="saveButton" type="button">GIF 저장</button>
+        </div>
+        <p id="status" class="status"></p>
+      </section>
+
+      <section class="work-panel" aria-label="이미지 프레임 목록">
+        <div class="panel-top">
+          <div class="panel-title">
+            <strong>이미지 리스트</strong>
+            <p class="hint">모바일 화면에 맞는 9:16 세로형 GIF로 저장됩니다. 각 이미지마다 프레임 간격을 따로 지정할 수 있습니다.</p>
+          </div>
+          <button id="applyDefaultDelay" type="button">기본 간격 적용</button>
+        </div>
+
+        <div id="dropbox" class="dropbox" tabindex="0" role="button">
+          이미지를 여기에 끌어놓거나 탭해서 추가
+        </div>
+
+        <div id="frameList" class="frame-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <input id="filePicker" class="file-input" type="file" accept="image/*" multiple>
+
+  <script>
+    const canvas = document.getElementById("stage");
+    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+    const frameList = document.getElementById("frameList");
+    const filePicker = document.getElementById("filePicker");
+    const addImagesTop = document.getElementById("addImagesTop");
+    const dropbox = document.getElementById("dropbox");
+    const previewButton = document.getElementById("previewButton");
+    const stopButton = document.getElementById("stopButton");
+    const saveButton = document.getElementById("saveButton");
+    const applyDefaultDelayButton = document.getElementById("applyDefaultDelay");
+    const outputWidth = document.getElementById("outputWidth");
+    const defaultDelay = document.getElementById("defaultDelay");
+    const fitMode = document.getElementById("fitMode");
+    const loopMode = document.getElementById("loopMode");
+    const qualityMode = document.getElementById("qualityMode");
+    const progressMode = document.getElementById("progressMode");
+    const statusText = document.getElementById("status");
+
+    const palette = buildRgb332Palette();
+    let frames = [];
+    let previewTimer = null;
+    let previewIndex = 0;
+
+    function createId() {
+      return window.crypto && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `frame-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function setStatus(message) {
+      statusText.textContent = message || "";
+    }
+
+    function openPicker() {
+      filePicker.value = "";
+      filePicker.click();
+    }
+
+    function renderList() {
+      frameList.innerHTML = "";
+      if (!frames.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = "아직 추가된 이미지가 없습니다.";
+        frameList.appendChild(empty);
+        drawEmpty();
+        return;
+      }
+
+      frames.forEach((frame, index) => {
+        const card = document.createElement("article");
+        card.className = "frame-card";
+        card.draggable = true;
+        card.dataset.id = frame.id;
+
+        const thumb = document.createElement("div");
+        thumb.className = "thumb";
+        const img = document.createElement("img");
+        img.src = frame.src;
+        img.alt = frame.name;
+        thumb.appendChild(img);
+
+        const main = document.createElement("div");
+        main.className = "frame-main";
+
+        const title = document.createElement("div");
+        title.className = "frame-title";
+        const titleText = document.createElement("span");
+        titleText.textContent = `${index + 1}. ${frame.name}`;
+
+        const buttons = document.createElement("div");
+        buttons.className = "small-buttons";
+
+        const upButton = document.createElement("button");
+        upButton.type = "button";
+        upButton.textContent = "위";
+        upButton.disabled = index === 0;
+        upButton.addEventListener("click", () => moveFrame(index, index - 1));
+
+        const downButton = document.createElement("button");
+        downButton.type = "button";
+        downButton.textContent = "아래";
+        downButton.disabled = index === frames.length - 1;
+        downButton.addEventListener("click", () => moveFrame(index, index + 1));
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.className = "danger";
+        deleteButton.textContent = "삭제";
+        deleteButton.addEventListener("click", () => deleteFrame(frame.id));
+
+        buttons.append(upButton, downButton, deleteButton);
+        title.append(titleText, buttons);
+
+        const fields = document.createElement("div");
+        fields.className = "frame-fields";
+
+        const delayLabel = document.createElement("label");
+        delayLabel.textContent = "간격(ms)";
+        const delayInput = document.createElement("input");
+        delayInput.type = "number";
+        delayInput.min = "20";
+        delayInput.step = "10";
+        delayInput.value = frame.delay;
+        delayInput.addEventListener("input", () => {
+          frame.delay = Math.max(20, Number(delayInput.value) || Number(defaultDelay.value) || 700);
+        });
+        delayLabel.appendChild(delayInput);
+
+        const fitLabel = document.createElement("label");
+        fitLabel.textContent = "프레임 맞춤";
+        const fitSelect = document.createElement("select");
+        fitSelect.innerHTML = `
+          <option value="auto">전체 설정</option>
+          <option value="cover">채우기</option>
+          <option value="contain">전체보기</option>
+        `;
+        fitSelect.value = frame.fit;
+        fitSelect.addEventListener("change", () => {
+          frame.fit = fitSelect.value;
+          drawFrame(frames[previewIndex] || frames[0], previewIndex);
+        });
+        fitLabel.appendChild(fitSelect);
+
+        fields.append(delayLabel, fitLabel);
+        main.append(title, fields);
+        card.append(thumb, main);
+        frameList.appendChild(card);
+
+        card.addEventListener("dragstart", () => card.classList.add("dragging"));
+        card.addEventListener("dragend", () => {
+          card.classList.remove("dragging");
+          syncDragOrder();
+        });
+        card.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          const dragging = frameList.querySelector(".dragging");
+          if (!dragging || dragging === card) return;
+          const box = card.getBoundingClientRect();
+          const after = event.clientY > box.top + box.height / 2;
+          frameList.insertBefore(dragging, after ? card.nextSibling : card);
+        });
+      });
+
+      drawFrame(frames[previewIndex] || frames[0], previewIndex);
+    }
+
+    function moveFrame(from, to) {
+      if (to < 0 || to >= frames.length) return;
+      const [item] = frames.splice(from, 1);
+      frames.splice(to, 0, item);
+      previewIndex = to;
+      renderList();
+    }
+
+    function syncDragOrder() {
+      const ids = [...frameList.querySelectorAll(".frame-card")].map((card) => card.dataset.id);
+      frames = ids.map((id) => frames.find((frame) => frame.id === id)).filter(Boolean);
+      previewIndex = Math.min(previewIndex, Math.max(0, frames.length - 1));
+      renderList();
+    }
+
+    function deleteFrame(id) {
+      frames = frames.filter((frame) => frame.id !== id);
+      previewIndex = Math.min(previewIndex, Math.max(0, frames.length - 1));
+      renderList();
+      setStatus("이미지를 삭제했습니다.");
+    }
+
+    async function addFiles(fileList) {
+      const files = [...fileList].filter((file) => file.type.startsWith("image/"));
+      if (!files.length) {
+        setStatus("이미지 파일을 선택하세요.");
+        return;
+      }
+      setStatus("이미지를 불러오는 중입니다.");
+      const imported = [];
+      for (const file of files) {
+        const src = await readFileAsDataUrl(file);
+        const image = await loadImage(src);
+        imported.push({
+          id: createId(),
+          name: file.name,
+          src,
+          image,
+          delay: Math.max(20, Number(defaultDelay.value) || 700),
+          fit: "auto"
+        });
+      }
+      frames.push(...imported);
+      renderList();
+      setStatus(`${imported.length}개 이미지를 추가했습니다.`);
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = reject;
+        image.src = src;
+      });
+    }
+
+    function outputSize() {
+      const width = Number(outputWidth.value) || 480;
+      return { width, height: Math.round(width * 16 / 9) };
+    }
+
+    function setCanvasSize() {
+      const { width, height } = outputSize();
+      if (canvas.width !== width) canvas.width = width;
+      if (canvas.height !== height) canvas.height = height;
+    }
+
+    function drawEmpty() {
+      setCanvasSize();
+      ctx.fillStyle = "#111";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#e9ece7";
+      ctx.font = "700 24px Malgun Gothic, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("이미지를 추가하세요", canvas.width / 2, canvas.height / 2);
+    }
+
+    function drawFrame(frame, index = 0, includeProgress = true) {
+      setCanvasSize();
+      ctx.fillStyle = "#111";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      if (!frame || !frame.image) {
+        drawEmpty();
+        return;
+      }
+      const mode = frame.fit === "auto" ? fitMode.value : frame.fit;
+      drawImageFit(frame.image, mode);
+      if (includeProgress && progressMode.value === "show") {
+        drawProgressOverlay(index + 1, frames.length);
+      }
+    }
+
+    function drawImageFit(image, mode) {
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const imageRatio = image.width / image.height;
+      const canvasRatio = cw / ch;
+      let dw;
+      let dh;
+
+      if ((mode === "cover" && imageRatio > canvasRatio) || (mode === "contain" && imageRatio < canvasRatio)) {
+        dh = ch;
+        dw = ch * imageRatio;
+      } else {
+        dw = cw;
+        dh = cw / imageRatio;
+      }
+
+      const dx = (cw - dw) / 2;
+      const dy = (ch - dh) / 2;
+      ctx.drawImage(image, dx, dy, dw, dh);
+    }
+
+    function drawProgressOverlay(current, total) {
+      if (!total) return;
+      const cw = canvas.width;
+      const ch = canvas.height;
+      const progress = Math.min(1, Math.max(0, current / total));
+      const pad = Math.max(14, cw * 0.04);
+      const barHeight = Math.max(7, cw * 0.018);
+      const barWidth = cw - pad * 2;
+      const bottomGap = Math.max(10, cw * 0.022);
+      const barY = ch - bottomGap - barHeight;
+      const textY = barY - Math.max(10, cw * 0.018);
+
+      ctx.save();
+      ctx.fillStyle = "rgba(0, 0, 0, .08)";
+      roundedRect(pad - 8, textY - 22, barWidth + 16, ch - textY + 14, 8);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255, 255, 255, .09)";
+      roundedRect(pad, barY, barWidth, barHeight, barHeight / 2);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255, 255, 255, .29)";
+      roundedRect(pad, barY, barWidth * progress, barHeight, barHeight / 2);
+      ctx.fill();
+
+      ctx.shadowColor = "rgba(0, 0, 0, .30)";
+      ctx.shadowBlur = 3;
+      ctx.fillStyle = "rgba(255, 255, 255, .58)";
+      ctx.font = `700 ${Math.max(14, cw * 0.035)}px Malgun Gothic, Segoe UI, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(`${current} / ${total}`, cw / 2, textY);
+      ctx.restore();
+    }
+
+    function roundedRect(x, y, width, height, radius) {
+      const safeRadius = Math.min(radius, width / 2, height / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + safeRadius, y);
+      ctx.arcTo(x + width, y, x + width, y + height, safeRadius);
+      ctx.arcTo(x + width, y + height, x, y + height, safeRadius);
+      ctx.arcTo(x, y + height, x, y, safeRadius);
+      ctx.arcTo(x, y, x + width, y, safeRadius);
+      ctx.closePath();
+    }
+
+    function startPreview() {
+      if (!frames.length) {
+        setStatus("먼저 이미지를 추가하세요.");
+        return;
+      }
+      stopPreview();
+      previewIndex = 0;
+      const tick = () => {
+        const frame = frames[previewIndex];
+        drawFrame(frame, previewIndex);
+        previewIndex = (previewIndex + 1) % frames.length;
+        previewTimer = window.setTimeout(tick, Math.max(20, Number(frame.delay) || 700));
+      };
+      tick();
+      setStatus("미리보기를 재생 중입니다.");
+    }
+
+    function stopPreview() {
+      if (previewTimer) clearTimeout(previewTimer);
+      previewTimer = null;
+      if (frames.length) drawFrame(frames[previewIndex] || frames[0], previewIndex);
+    }
+
+    function applyDefaultDelay() {
+      const delay = Math.max(20, Number(defaultDelay.value) || 700);
+      frames.forEach((frame) => {
+        frame.delay = delay;
+      });
+      renderList();
+      setStatus(`모든 프레임 간격을 ${delay}ms로 맞췄습니다.`);
+    }
+
+    async function saveGif() {
+      if (!frames.length) {
+        setStatus("저장할 이미지가 없습니다.");
+        return;
+      }
+      stopPreview();
+      saveButton.disabled = true;
+      setStatus("GIF를 생성하는 중입니다. 이미지가 많으면 시간이 걸릴 수 있습니다.");
+
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      try {
+        const { width, height } = outputSize();
+        const useOriginalQuality = qualityMode.value === "original";
+        const encoder = new SimpleGifEncoder(width, height, Number(loopMode.value) || 0, palette);
+        frames.forEach((frame, index) => {
+          drawFrame(frame, index, true);
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const adaptiveFrame = useOriginalQuality ? adaptivePaletteAndIndexes(imageData.data) : null;
+          const indexed = adaptiveFrame ? adaptiveFrame.indexes : rgbaToRgb332Indexes(imageData.data);
+          encoder.addFrame(
+            indexed,
+            Math.max(2, Math.round((Number(frame.delay) || 700) / 10)),
+            adaptiveFrame ? adaptiveFrame.palette : null
+          );
+          setStatus(`${index + 1}/${frames.length} 프레임 처리 중입니다.`);
+        });
+        encoder.finish();
+        downloadBlob(encoder.toBlob(), `vertical-gif-${dateStamp()}.gif`);
+        setStatus("GIF 저장이 완료되었습니다.");
+      } catch (error) {
+        console.error(error);
+        setStatus("GIF 생성에 실패했습니다. 해상도를 낮추거나 이미지 수를 줄여보세요.");
+      } finally {
+        saveButton.disabled = false;
+      }
+    }
+
+    function buildRgb332Palette() {
+      const colors = [];
+      for (let r = 0; r < 8; r += 1) {
+        for (let g = 0; g < 8; g += 1) {
+          for (let b = 0; b < 4; b += 1) {
+            colors.push([
+              Math.round(r * 255 / 7),
+              Math.round(g * 255 / 7),
+              Math.round(b * 255 / 3)
+            ]);
+          }
+        }
+      }
+      return colors;
+    }
+
+    function rgbaToRgb332Indexes(data) {
+      const indexes = new Uint8Array(data.length / 4);
+      for (let i = 0, j = 0; i < data.length; i += 4, j += 1) {
+        const r = data[i] >> 5;
+        const g = data[i + 1] >> 5;
+        const b = data[i + 2] >> 6;
+        indexes[j] = (r << 5) | (g << 2) | b;
+      }
+      return indexes;
+    }
+
+    function adaptivePaletteAndIndexes(data) {
+      const counts = new Map();
+      for (let i = 0; i < data.length; i += 4) {
+        const key = rgb555Key(data[i], data[i + 1], data[i + 2]);
+        counts.set(key, (counts.get(key) || 0) + 1);
+      }
+
+      const selected = [...counts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 256)
+        .map(([key]) => key);
+      if (!selected.length) selected.push(0);
+
+      const localPalette = selected.map(rgb555ToColor);
+      while (localPalette.length < 256) localPalette.push([0, 0, 0]);
+
+      const directMap = new Map(selected.map((key, index) => [key, index]));
+      const nearestCache = new Map();
+      const indexes = new Uint8Array(data.length / 4);
+      for (let i = 0, j = 0; i < data.length; i += 4, j += 1) {
+        const key = rgb555Key(data[i], data[i + 1], data[i + 2]);
+        let index = directMap.get(key);
+        if (index === undefined) {
+          index = nearestCache.get(key);
+          if (index === undefined) {
+            index = nearestPaletteIndex(data[i], data[i + 1], data[i + 2], localPalette);
+            nearestCache.set(key, index);
+          }
+        }
+        indexes[j] = index;
+      }
+
+      return { palette: localPalette, indexes };
+    }
+
+    function rgb555Key(r, g, b) {
+      return ((r >> 3) << 10) | ((g >> 3) << 5) | (b >> 3);
+    }
+
+    function rgb555ToColor(key) {
+      const r = (key >> 10) & 31;
+      const g = (key >> 5) & 31;
+      const b = key & 31;
+      return [
+        Math.round(r * 255 / 31),
+        Math.round(g * 255 / 31),
+        Math.round(b * 255 / 31)
+      ];
+    }
+
+    function nearestPaletteIndex(r, g, b, colorPalette) {
+      let bestIndex = 0;
+      let bestDistance = Infinity;
+      for (let i = 0; i < colorPalette.length; i += 1) {
+        const color = colorPalette[i];
+        const dr = r - color[0];
+        const dg = g - color[1];
+        const db = b - color[2];
+        const distance = dr * dr + dg * dg + db * db;
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestIndex = i;
+          if (distance === 0) break;
+        }
+      }
+      return bestIndex;
+    }
+
+    class ByteWriter {
+      constructor() {
+        this.bytes = [];
+      }
+
+      byte(value) {
+        this.bytes.push(value & 255);
+      }
+
+      word(value) {
+        this.byte(value);
+        this.byte(value >> 8);
+      }
+
+      ascii(value) {
+        for (let i = 0; i < value.length; i += 1) this.byte(value.charCodeAt(i));
+      }
+
+      block(values) {
+        for (const value of values) this.byte(value);
+      }
+
+      subBlocks(values) {
+        for (let i = 0; i < values.length; i += 255) {
+          const slice = values.slice(i, i + 255);
+          this.byte(slice.length);
+          this.block(slice);
+        }
+        this.byte(0);
+      }
+
+      blob(type) {
+        return new Blob([new Uint8Array(this.bytes)], { type });
+      }
+    }
+
+    class BitWriter {
+      constructor() {
+        this.bytes = [];
+        this.current = 0;
+        this.bits = 0;
+      }
+
+      write(code, size) {
+        this.current |= code << this.bits;
+        this.bits += size;
+        while (this.bits >= 8) {
+          this.bytes.push(this.current & 255);
+          this.current >>= 8;
+          this.bits -= 8;
+        }
+      }
+
+      finish() {
+        if (this.bits > 0) this.bytes.push(this.current & 255);
+        return this.bytes;
+      }
+    }
+
+    class SimpleGifEncoder {
+      constructor(width, height, repeat, globalPalette) {
+        this.width = width;
+        this.height = height;
+        this.palette = globalPalette;
+        this.writer = new ByteWriter();
+        this.writer.ascii("GIF89a");
+        this.writer.word(width);
+        this.writer.word(height);
+        this.writer.byte(0xf7);
+        this.writer.byte(0);
+        this.writer.byte(0);
+        this.palette.forEach((color) => this.writer.block(color));
+        this.writeLoopExtension(repeat);
+      }
+
+      writeLoopExtension(repeat) {
+        this.writer.byte(0x21);
+        this.writer.byte(0xff);
+        this.writer.byte(11);
+        this.writer.ascii("NETSCAPE2.0");
+        this.writer.byte(3);
+        this.writer.byte(1);
+        this.writer.word(repeat);
+        this.writer.byte(0);
+      }
+
+      addFrame(indexes, delayCs, localPalette = null) {
+        this.writer.byte(0x21);
+        this.writer.byte(0xf9);
+        this.writer.byte(4);
+        this.writer.byte(0x04);
+        this.writer.word(delayCs);
+        this.writer.byte(0);
+        this.writer.byte(0);
+
+        this.writer.byte(0x2c);
+        this.writer.word(0);
+        this.writer.word(0);
+        this.writer.word(this.width);
+        this.writer.word(this.height);
+        this.writer.byte(localPalette ? 0x87 : 0);
+        if (localPalette) {
+          localPalette.forEach((color) => this.writer.block(color));
+        }
+
+        this.writer.byte(8);
+        this.writer.subBlocks(lzwEncode(indexes, 8));
+      }
+
+      finish() {
+        this.writer.byte(0x3b);
+      }
+
+      toBlob() {
+        return this.writer.blob("image/gif");
+      }
+    }
+
+    function lzwEncode(indexes, minCodeSize) {
+      const clearCode = 1 << minCodeSize;
+      const endCode = clearCode + 1;
+      const bits = new BitWriter();
+
+      // Keep the stream deliberately simple. Clearing before the decoder's
+      // table grows past 9-bit codes avoids fragile code-size transitions.
+      const codeSize = minCodeSize + 1;
+      const maxLiteralCodesPerClear = 254;
+      for (let i = 0; i < indexes.length; i += maxLiteralCodesPerClear) {
+        bits.write(clearCode, codeSize);
+        const end = Math.min(i + maxLiteralCodesPerClear, indexes.length);
+        for (let j = i; j < end; j += 1) {
+          bits.write(indexes[j], codeSize);
+        }
+      }
+
+      bits.write(endCode, codeSize);
+      return bits.finish();
+    }
+
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function dateStamp() {
+      const date = new Date();
+      const pad = (value) => String(value).padStart(2, "0");
+      return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}`;
+    }
+
+    addImagesTop.addEventListener("click", openPicker);
+    dropbox.addEventListener("click", openPicker);
+    dropbox.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") openPicker();
+    });
+    dropbox.addEventListener("dragover", (event) => {
+      event.preventDefault();
+      dropbox.classList.add("active");
+    });
+    dropbox.addEventListener("dragleave", () => dropbox.classList.remove("active"));
+    dropbox.addEventListener("drop", (event) => {
+      event.preventDefault();
+      dropbox.classList.remove("active");
+      addFiles(event.dataTransfer.files);
+    });
+    filePicker.addEventListener("change", () => addFiles(filePicker.files));
+    previewButton.addEventListener("click", startPreview);
+    stopButton.addEventListener("click", () => {
+      stopPreview();
+      setStatus("정지했습니다.");
+    });
+    saveButton.addEventListener("click", saveGif);
+    applyDefaultDelayButton.addEventListener("click", applyDefaultDelay);
+    outputWidth.addEventListener("change", () => drawFrame(frames[previewIndex] || frames[0], previewIndex));
+    fitMode.addEventListener("change", () => drawFrame(frames[previewIndex] || frames[0], previewIndex));
+    progressMode.addEventListener("change", () => drawFrame(frames[previewIndex] || frames[0], previewIndex));
+
+    renderList();
+  </script>
+</body>
+</html>
