@@ -4,7 +4,15 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta name="theme-color" content="#fffaf0"/>
+<meta name="description" content="오프라인에서도 사용할 수 있는 코넬노트 웹앱"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="코넬노트"/>
 <title>코넬노트 웹앱</title>
+<link rel="manifest" href="./manifest.webmanifest"/>
+<link rel="icon" href="./icons/icon-192.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="./icons/icon-192.svg"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Poor+Story&amp;display=swap" rel="stylesheet"/>
@@ -131,6 +139,11 @@ const saveJsonBtn=$('#saveJsonBtn'); if(saveJsonBtn) saveJsonBtn.onclick=saveJso
 $('#loadJsonInput').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{data=JSON.parse(r.result);render();toast('JSON을 불러왔습니다')}catch{alert('JSON 형식이 올바르지 않습니다')}};r.readAsText(f)};
 const copyJsonBtn=$('#copyJsonBtn'); if(copyJsonBtn) copyJsonBtn.onclick=async()=>{await navigator.clipboard.writeText(JSON.stringify(data,null,2));toast('JSON을 복사했습니다')};
 const exportHtmlBtn=$('#exportHtmlBtn'); if(exportHtmlBtn) exportHtmlBtn.onclick=exportPreviewHtml;render();
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./service-worker.js').catch(error=>console.warn('서비스 워커 등록 실패:',error));
+  });
+}
 </script>
 </body>
 </html>
