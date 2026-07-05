@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "세로형 GIF 메이커",
+  "short_name": "GIF 메이커",
+  "description": "여러 이미지로 세로형 GIF를 만들고 Animated GIF를 재생하는 도구",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f6f7f4",
+  "theme_color": "#176b5f",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -3,6 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#176b5f">
+  <meta name="application-name" content="GIF 메이커">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="GIF 메이커">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon.svg">
   <title>세로형 GIF 메이커</title>
   <style>
     :root {
@@ -104,6 +112,18 @@
       line-height: 1.15;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .view-switch[aria-pressed="true"] {
+      background: var(--accent);
+      border-color: var(--accent-dark);
+      color: #fff;
+    }
+
     main {
       width: min(1160px, 100%);
       margin: 0 auto;
@@ -111,6 +131,17 @@
       display: grid;
       grid-template-columns: minmax(280px, 390px) 1fr;
       gap: 14px;
+    }
+
+    .player-view {
+      width: 100%;
+      min-height: calc(100vh - 65px);
+      border: 0;
+      background: var(--bg);
+    }
+
+    [hidden] {
+      display: none !important;
     }
 
     .preview-panel,
@@ -326,6 +357,15 @@
         width: 100%;
       }
 
+      .header-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      #addImagesTop {
+        grid-column: 1 / -1;
+      }
+
       main {
         padding: 10px;
       }
@@ -357,10 +397,14 @@
   <div class="app">
     <header>
       <h1>세로형 GIF 메이커</h1>
-      <button id="addImagesTop" class="primary" type="button">이미지 추가</button>
+      <div class="header-actions">
+        <button id="makerViewButton" class="view-switch" type="button" aria-pressed="true">GIF 만들기</button>
+        <button id="playerViewButton" class="view-switch" type="button" aria-pressed="false">GIF 재생기</button>
+        <button id="addImagesTop" class="primary" type="button">이미지 추가</button>
+      </div>
     </header>
 
-    <main>
+    <main id="makerView">
       <section class="preview-panel" aria-label="미리보기와 저장">
         <div class="phone-frame">
           <canvas id="stage" width="540" height="960"></canvas>
@@ -428,6 +472,13 @@
         <div id="frameList" class="frame-list"></div>
       </section>
     </main>
+    <iframe
+      id="playerView"
+      class="player-view"
+      title="Animated GIF Player"
+      data-src="../gifplayer/index.html"
+      hidden
+    ></iframe>
   </div>
 
   <input id="filePicker" class="file-input" type="file" accept="image/*" multiple>
@@ -438,6 +489,10 @@
     const frameList = document.getElementById("frameList");
     const filePicker = document.getElementById("filePicker");
     const addImagesTop = document.getElementById("addImagesTop");
+    const makerView = document.getElementById("makerView");
+    const playerView = document.getElementById("playerView");
+    const makerViewButton = document.getElementById("makerViewButton");
+    const playerViewButton = document.getElementById("playerViewButton");
     const dropbox = document.getElementById("dropbox");
     const previewButton = document.getElementById("previewButton");
     const stopButton = document.getElementById("stopButton");
@@ -469,6 +524,21 @@
     function openPicker() {
       filePicker.value = "";
       filePicker.click();
+    }
+
+    function setActiveView(view) {
+      const showPlayer = view === "player";
+      makerView.hidden = showPlayer;
+      playerView.hidden = !showPlayer;
+      addImagesTop.hidden = showPlayer;
+      makerViewButton.setAttribute("aria-pressed", String(!showPlayer));
+      playerViewButton.setAttribute("aria-pressed", String(showPlayer));
+      document.title = showPlayer ? "Animated GIF Player" : "세로형 GIF 메이커";
+
+      if (showPlayer && !playerView.src) {
+        playerView.src = playerView.dataset.src;
+      }
+      if (showPlayer) stopPreview();
     }
 
     function renderList() {
@@ -1071,6 +1141,8 @@
     }
 
     addImagesTop.addEventListener("click", openPicker);
+    makerViewButton.addEventListener("click", () => setActiveView("maker"));
+    playerViewButton.addEventListener("click", () => setActiveView("player"));
     dropbox.addEventListener("click", openPicker);
     dropbox.addEventListener("keydown", (event) => {
       if (event.key === "Enter" || event.key === " ") openPicker();
@@ -1098,6 +1170,14 @@
     progressMode.addEventListener("change", () => drawFrame(frames[previewIndex] || frames[0], previewIndex));
 
     renderList();
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./service-worker.js").catch((error) => {
+          console.warn("서비스 워커를 등록하지 못했습니다.", error);
+        });
+      });
+    }
   </script>
 </body>
 </html>

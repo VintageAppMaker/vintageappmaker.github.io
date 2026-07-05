@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Animated GIF Player</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      --md-surface: #ffffff;
+      --md-surface-variant: #f2f5f8;
+      --md-primary: #006a6a;
+      --md-on-primary: #ffffff;
+      --md-outline: #d1d7dc;
+      --md-shadow: 0 1px 2px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.24);
+      --md-text: #1f3333;
+      --md-muted: #5a6b6b;
+      --danger: #b3261e;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #eef2f5;
+      color: var(--md-text);
+    }
+
+    .app-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: var(--md-surface);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 24px;
+      box-shadow: var(--md-shadow);
+      z-index: 20;
+    }
+
+    .app-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 22px;
+      background: rgba(0,106,106,0.12);
+      color: var(--md-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .app-logo svg { width: 24px; height: 24px; fill: currentColor; }
+
+    .app-title { display: grid; gap: 2px; }
+    .app-title strong { font-size: 20px; font-weight: 700; }
+    .app-title span { font-size: 13px; color: var(--md-muted); }
+
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 104px 24px 116px;
+      display: grid;
+      gap: 24px;
+    }
+
+    .md-card {
+      background: var(--md-surface);
+      border-radius: 16px;
+      box-shadow: var(--md-shadow);
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .hero {
+      grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+      align-items: stretch;
+    }
+
+    .viewer {
+      min-height: 520px;
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(0,106,106,0.08), transparent 26%),
+        linear-gradient(145deg, #ffffff, #edf4f4);
+      border: 1px solid var(--md-outline);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+      image-rendering: auto;
+      border-radius: 12px;
+      box-shadow: 0 8px 28px rgba(0,0,0,0.16);
+      background: transparent;
+      display: none;
+    }
+
+    .empty-state {
+      text-align: center;
+      display: grid;
+      gap: 14px;
+      justify-items: center;
+      padding: 32px;
+    }
+
+    .empty-state svg { width: 64px; height: 64px; fill: var(--md-primary); opacity: 0.85; }
+    .empty-state h1 { margin: 0; font-size: clamp(26px, 4vw, 42px); }
+    .empty-state p { margin: 0; max-width: 520px; color: var(--md-muted); line-height: 1.6; }
+
+    .drop-zone {
+      border: 2px dashed var(--md-outline);
+      border-radius: 20px;
+      padding: 24px;
+      display: grid;
+      gap: 14px;
+      place-items: center;
+      text-align: center;
+      background: var(--md-surface-variant);
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .drop-zone.dragover {
+      border-color: var(--md-primary);
+      background: rgba(0,106,106,0.08);
+      transform: translateY(-2px);
+    }
+
+    .drop-zone strong { font-size: 18px; }
+    .drop-zone span { color: var(--md-muted); font-size: 14px; }
+
+    .md-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 20px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      box-shadow: var(--md-shadow);
+      cursor: pointer;
+      transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+    }
+
+    .md-button:hover { transform: translateY(-1px); box-shadow: 0 3px 6px rgba(0,0,0,0.18); }
+    .md-button:active { transform: scale(0.98); }
+    .md-button input { display: none; }
+
+    .info-grid { display: grid; gap: 12px; }
+
+    .stat {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      border: 1px solid var(--md-outline);
+      border-radius: 14px;
+      padding: 13px 14px;
+      background: #fff;
+    }
+
+    .stat span:first-child { color: var(--md-muted); }
+    .stat span:last-child { font-weight: 700; text-align: right; }
+
+    .message {
+      min-height: 22px;
+      color: var(--md-muted);
+      line-height: 1.55;
+      font-size: 14px;
+    }
+
+    .message.error { color: var(--danger); font-weight: 700; }
+
+    .bottom-app-bar {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      transform: translateX(-50%);
+      width: min(1120px, calc(100vw - 32px));
+      min-height: 72px;
+      background: var(--md-surface);
+      border-radius: 28px;
+      box-shadow: 0 8px 22px rgba(0,0,0,0.20);
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 18px;
+      padding: 14px 18px;
+      z-index: 40;
+    }
+
+    .progress-wrap { display: grid; gap: 8px; min-width: 0; }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--md-muted);
+    }
+
+    .progress-track {
+      position: relative;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--md-surface-variant);
+      overflow: hidden;
+      cursor: pointer;
+    }
+
+    .progress-fill {
+      position: absolute;
+      inset: 0;
+      transform-origin: left center;
+      transform: scaleX(0);
+      background: var(--md-primary);
+      border-radius: inherit;
+      transition: transform 80ms linear;
+    }
+
+    .speed-field {
+      display: inline-grid;
+      gap: 4px;
+      min-width: 120px;
+    }
+
+    .speed-field label { font-size: 12px; color: var(--md-muted); font-weight: 700; }
+
+    select {
+      border-radius: 14px;
+      border: 1px solid var(--md-outline);
+      background: var(--md-surface);
+      color: var(--md-text);
+      padding: 10px 38px 10px 12px;
+      font: inherit;
+      font-weight: 700;
+      appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, #1f3333 50%), linear-gradient(135deg, #1f3333 50%, transparent 50%);
+      background-position: calc(100% - 22px) calc(50% - 3px), calc(100% - 17px) calc(50% - 3px);
+      background-size: 6px 6px;
+      background-repeat: no-repeat;
+    }
+
+    select:focus { outline: none; border-color: var(--md-primary); box-shadow: 0 0 0 3px rgba(0,106,106,0.14); }
+
+    .player-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+    .icon-button {
+      width: 48px;
+      height: 48px;
+      border-radius: 24px;
+      border: none;
+      background: transparent;
+      color: var(--md-text);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 120ms ease, transform 120ms ease;
+    }
+
+    .icon-button svg { width: 24px; height: 24px; fill: currentColor; }
+    .icon-button:hover { background: rgba(0,0,0,0.06); }
+    .icon-button:active { transform: scale(0.96); }
+    .icon-button.primary { background: rgba(0,106,106,0.12); color: var(--md-primary); }
+    .icon-button:disabled { opacity: 0.38; cursor: default; }
+    .icon-button:disabled:hover { background: transparent; }
+
+    .hint-list { margin: 0; padding-left: 20px; color: var(--md-muted); line-height: 1.7; }
+
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; }
+      .viewer { min-height: 420px; }
+      .bottom-app-bar { grid-template-columns: 1fr; border-radius: 24px; }
+      .player-actions { justify-content: center; }
+      .speed-field { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-bar">
+    <div class="app-logo" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 18.5v-13Zm3 1v11h10v-11H7Zm2 2.2 5.4 3.3L9 15.3V8.7Z"/></svg>
+    </div>
+    <div class="app-title">
+      <strong>Animated GIF Player</strong>
+      <span>Progress · Speed Control · Pause / Play</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="md-card hero">
+      <div class="viewer" id="viewer">
+        <canvas id="canvas"></canvas>
+        <div class="empty-state" id="emptyState">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 16H5V5h14v14ZM8 7h2v2H8V7Zm3 0h2v2h-2V7Zm3 0h2v2h-2V7ZM8 11h8v6H8v-6Zm2 2v2h4v-2h-4Z"/></svg>
+          <h1>GIF를 업로드하세요</h1>
+          <p>하단 프로그레스 바로 위치를 이동하고, 속도 선택 위젯으로 재생 속도를 조절할 수 있습니다.</p>
+        </div>
+      </div>
+
+      <aside class="md-card" style="box-shadow:none;border:1px solid var(--md-outline);">
+        <div class="drop-zone" id="dropZone">
+          <strong>Animated GIF 업로드</strong>
+          <span>파일을 끌어오거나 버튼을 눌러 선택하세요.</span>
+          <label class="md-button">
+            GIF 선택
+            <input id="fileInput" type="file" accept="image/gif" />
+          </label>
+        </div>
+
+        <div class="info-grid">
+          <div class="stat"><span>파일명</span><span id="fileName">-</span></div>
+          <div class="stat"><span>크기</span><span id="sizeInfo">-</span></div>
+          <div class="stat"><span>프레임</span><span id="frameInfo">0 / 0</span></div>
+          <div class="stat"><span>상태</span><span id="stateInfo">대기</span></div>
+        </div>
+
+        <p class="message" id="message">GIF 로딩 후 Space 키로 재생/정지, 좌우 방향키로 프레임 이동이 가능합니다.</p>
+        <ul class="hint-list">
+          <li>Pause 버튼을 누르면 현재 프레임에서 멈춥니다.</li>
+          <li>Play 버튼을 누르면 선택된 속도로 다시 재생됩니다.</li>
+          <li>Progress Bar를 클릭하면 해당 위치로 이동합니다.</li>
+        </ul>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="bottom-app-bar" aria-label="GIF player controls">
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span id="timeLabel">Frame 0</span>
+        <span id="percentLabel">0%</span>
+      </div>
+      <div class="progress-track" id="progressTrack" role="slider" aria-label="재생 위치" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <div class="speed-field">
+      <label for="speedSelect">속도</label>
+      <select id="speedSelect">
+        <option value="0.25">0.25x</option>
+        <option value="0.5">0.5x</option>
+        <option value="1" selected>1x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+        <option value="4">4x</option>
+      </select>
+    </div>
+
+    <div class="player-actions">
+      <button class="icon-button" id="pauseBtn" type="button" aria-label="멈춤" disabled>
+        <svg viewBox="0 0 24 24"><path d="M7 5h4v14H7V5Zm6 0h4v14h-4V5Z"/></svg>
+      </button>
+      <button class="icon-button primary" id="playBtn" type="button" aria-label="재생" disabled>
+        <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7L8 5Z"/></svg>
+      </button>
+    </div>
+  </footer>
+
+  <script>
+    const els = {
+      fileInput: document.getElementById('fileInput'),
+      dropZone: document.getElementById('dropZone'),
+      canvas: document.getElementById('canvas'),
+      emptyState: document.getElementById('emptyState'),
+      fileName: document.getElementById('fileName'),
+      sizeInfo: document.getElementById('sizeInfo'),
+      frameInfo: document.getElementById('frameInfo'),
+      stateInfo: document.getElementById('stateInfo'),
+      message: document.getElementById('message'),
+      progressTrack: document.getElementById('progressTrack'),
+      progressFill: document.getElementById('progressFill'),
+      timeLabel: document.getElementById('timeLabel'),
+      percentLabel: document.getElementById('percentLabel'),
+      speedSelect: document.getElementById('speedSelect'),
+      pauseBtn: document.getElementById('pauseBtn'),
+      playBtn: document.getElementById('playBtn')
+    };
+
+    const ctx = els.canvas.getContext('2d');
+
+    const player = {
+      frames: [],
+      delays: [],
+      width: 0,
+      height: 0,
+      index: 0,
+      speed: 1,
+      playing: false,
+      lastTime: 0,
+      rafId: null,
+      objectUrl: null,
+
+      reset() {
+        this.pause();
+        this.frames.forEach(frame => frame.close && frame.close());
+        if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);
+        this.frames = [];
+        this.delays = [];
+        this.width = 0;
+        this.height = 0;
+        this.index = 0;
+        this.objectUrl = null;
+        els.canvas.style.display = 'none';
+        els.emptyState.style.display = 'grid';
+        setControls(false);
+        updateProgress();
+      },
+
+      async load(file) {
+        this.reset();
+        setMessage('GIF를 분석하는 중입니다. 잠시만 기다려주세요.');
+        els.fileName.textContent = file.name;
+        els.sizeInfo.textContent = formatBytes(file.size);
+        els.stateInfo.textContent = '로딩';
+
+        const buffer = await file.arrayBuffer();
+        if ('ImageDecoder' in window) {
+          await this.loadWithImageDecoder(buffer);
+        } else {
+          await this.loadWithGifuct(buffer);
+        }
+
+        if (!this.frames.length) throw new Error('프레임을 읽지 못했습니다. 다른 GIF 파일을 사용해 주세요.');
+
+        els.canvas.width = this.width;
+        els.canvas.height = this.height;
+        els.canvas.style.display = 'block';
+        els.emptyState.style.display = 'none';
+        setControls(true);
+        this.renderFrame(0);
+        setMessage('GIF 로딩 완료. Play 버튼을 누르면 애니메이션이 진행됩니다.');
+        els.stateInfo.textContent = '정지';
+      },
+
+      async loadWithImageDecoder(buffer) {
+        const decoder = new ImageDecoder({ data: buffer, type: 'image/gif' });
+        await decoder.tracks.ready;
+        const track = decoder.tracks.selectedTrack;
+        const frameCount = track.frameCount || 1;
+        for (let i = 0; i < frameCount; i++) {
+          const result = await decoder.decode({ frameIndex: i });
+          const image = result.image;
+          this.frames.push(image);
+          this.delays.push(Math.max(20, (image.duration || 100000) / 1000));
+          if (i === 0) {
+            this.width = image.displayWidth;
+            this.height = image.displayHeight;
+          }
+        }
+        decoder.close();
+      },
+
+      async loadWithGifuct(buffer) {
+        await loadScript('https://cdn.jsdelivr.net/npm/gifuct-js@2.1.2/dist/gifuct.min.js');
+        const gif = window.gifuct.parseGIF(buffer);
+        const rawFrames = window.gifuct.decompressFrames(gif, true);
+        const canvas = document.createElement('canvas');
+        const temp = document.createElement('canvas');
+        const c = canvas.getContext('2d');
+        const t = temp.getContext('2d');
+        this.width = gif.lsd.width;
+        this.height = gif.lsd.height;
+        canvas.width = temp.width = this.width;
+        canvas.height = temp.height = this.height;
+
+        rawFrames.forEach(frame => {
+          const dims = frame.dims;
+          const img = new ImageData(frame.patch, dims.width, dims.height);
+          temp.width = this.width;
+          temp.height = this.height;
+          t.clearRect(0, 0, this.width, this.height);
+          t.putImageData(img, dims.left, dims.top);
+          c.drawImage(temp, 0, 0);
+          const bitmapCanvas = document.createElement('canvas');
+          bitmapCanvas.width = this.width;
+          bitmapCanvas.height = this.height;
+          bitmapCanvas.getContext('2d').drawImage(canvas, 0, 0);
+          this.frames.push(bitmapCanvas);
+          this.delays.push(Math.max(20, frame.delay || 100));
+        });
+      },
+
+      renderFrame(index) {
+        if (!this.frames.length) return;
+        this.index = clamp(index, 0, this.frames.length - 1);
+        ctx.clearRect(0, 0, els.canvas.width, els.canvas.height);
+        ctx.drawImage(this.frames[this.index], 0, 0, this.width, this.height);
+        updateProgress();
+      },
+
+      play() {
+        if (!this.frames.length || this.playing) return;
+        this.playing = true;
+        this.lastTime = performance.now();
+        els.stateInfo.textContent = '재생';
+        this.tick(this.lastTime);
+      },
+
+      pause() {
+        this.playing = false;
+        if (this.rafId) cancelAnimationFrame(this.rafId);
+        this.rafId = null;
+        if (this.frames.length) els.stateInfo.textContent = '정지';
+      },
+
+      tick(now) {
+        if (!this.playing) return;
+        const delay = this.delays[this.index] / this.speed;
+        if (now - this.lastTime >= delay) {
+          this.index = (this.index + 1) % this.frames.length;
+          this.renderFrame(this.index);
+          this.lastTime = now;
+        }
+        this.rafId = requestAnimationFrame(time => this.tick(time));
+      },
+
+      seekByRatio(ratio) {
+        if (!this.frames.length) return;
+        const target = Math.round(clamp(ratio, 0, 1) * (this.frames.length - 1));
+        this.renderFrame(target);
+        this.lastTime = performance.now();
+      }
+    };
+
+    function setControls(enabled) {
+      els.pauseBtn.disabled = !enabled;
+      els.playBtn.disabled = !enabled;
+      els.speedSelect.disabled = !enabled;
+    }
+
+    function updateProgress() {
+      const total = player.frames.length;
+      const current = total ? player.index + 1 : 0;
+      const ratio = total > 1 ? player.index / (total - 1) : 0;
+      const percent = Math.round(ratio * 100);
+      els.progressFill.style.transform = `scaleX(${ratio})`;
+      els.progressTrack.setAttribute('aria-valuenow', String(percent));
+      els.frameInfo.textContent = `${current} / ${total}`;
+      els.timeLabel.textContent = `Frame ${current} / ${total}`;
+      els.percentLabel.textContent = `${percent}%`;
+    }
+
+    function setMessage(text, isError = false) {
+      els.message.textContent = text;
+      els.message.classList.toggle('error', isError);
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes) return '0 B';
+      const units = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+      return `${(bytes / Math.pow(1024, i)).toFixed(i ? 1 : 0)} ${units[i]}`;
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function loadScript(src) {
+      return new Promise((resolve, reject) => {
+        const existing = document.querySelector(`script[src="${src}"]`);
+        if (existing) return resolve();
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('GIF fallback decoder를 불러오지 못했습니다. 최신 Chrome 또는 Edge에서 다시 시도하세요.'));
+        document.head.appendChild(script);
+      });
+    }
+
+    async function handleFile(file) {
+      if (!file) return;
+      if (file.type !== 'image/gif' && !file.name.toLowerCase().endsWith('.gif')) {
+        setMessage('Animated GIF 파일만 업로드할 수 있습니다.', true);
+        return;
+      }
+      try {
+        await player.load(file);
+      } catch (error) {
+        player.reset();
+        els.fileName.textContent = file.name;
+        els.sizeInfo.textContent = formatBytes(file.size);
+        els.stateInfo.textContent = '오류';
+        setMessage(error.message || 'GIF 파일을 처리하지 못했습니다.', true);
+      }
+    }
+
+    els.fileInput.addEventListener('change', event => handleFile(event.target.files[0]));
+
+    ['dragenter', 'dragover'].forEach(type => {
+      els.dropZone.addEventListener(type, event => {
+        event.preventDefault();
+        els.dropZone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(type => {
+      els.dropZone.addEventListener(type, event => {
+        event.preventDefault();
+        els.dropZone.classList.remove('dragover');
+      });
+    });
+
+    els.dropZone.addEventListener('drop', event => handleFile(event.dataTransfer.files[0]));
+    els.playBtn.addEventListener('click', () => player.play());
+    els.pauseBtn.addEventListener('click', () => player.pause());
+
+    els.speedSelect.addEventListener('change', event => {
+      player.speed = Number(event.target.value) || 1;
+      player.lastTime = performance.now();
+    });
+
+    function seekFromPointer(event) {
+      const rect = els.progressTrack.getBoundingClientRect();
+      const ratio = (event.clientX - rect.left) / rect.width;
+      player.seekByRatio(ratio);
+    }
+
+    els.progressTrack.addEventListener('click', seekFromPointer);
+    els.progressTrack.addEventListener('keydown', event => {
+      if (!player.frames.length) return;
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        player.renderFrame(player.index - 1);
+      }
+      if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        player.renderFrame(player.index + 1);
+      }
+    });
+
+    window.addEventListener('keydown', event => {
+      if (!player.frames.length) return;
+      if (event.target.tagName === 'SELECT' || event.target.tagName === 'INPUT') return;
+      if (event.code === 'Space') {
+        event.preventDefault();
+        player.playing ? player.pause() : player.play();
+      }
+      if (event.key === 'ArrowLeft') player.renderFrame(player.index - 1);
+      if (event.key === 'ArrowRight') player.renderFrame(player.index + 1);
+    });
+
+    setControls(false);
+    updateProgress();
+  </script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="GIF 메이커">
+  <rect width="512" height="512" rx="112" fill="#176b5f"/>
+  <rect x="92" y="92" width="328" height="328" rx="48" fill="#fff"/>
+  <path d="M126 334l80-90 54 58 48-52 78 84v38H126z" fill="#9bd5c9"/>
+  <circle cx="328" cy="186" r="42" fill="#f4b942"/>
+  <text x="256" y="410" fill="#0f5047" font-family="Arial,sans-serif" font-size="78" font-weight="700" text-anchor="middle">GIF</text>
+</svg>
