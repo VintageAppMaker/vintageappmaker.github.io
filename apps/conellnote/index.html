@@ -39,7 +39,7 @@
 <div class="sheet-scrim" id="scrim"></div><section aria-modal="true" class="bottom-sheet" id="sheet"><div class="sheet-head"><h2 id="sheetTitle">편집</h2><button class="icon-button" id="closeSheet">✕</button></div><div id="sheetBody"></div></section><div class="dialog-scrim" id="emojiDialog"><div class="dialog-card"><div class="dialog-head"><h3>이모지 선택</h3><button class="icon-button" id="closeEmojiDialog">✕</button></div><div class="emoji-grid" id="emojiGrid"></div></div></div><div class="dialog-scrim" id="jsonStringDialog"><div class="dialog-card"><div class="dialog-head"><h3>JSON 문자열 가져오기</h3><button class="icon-button" id="closeJsonStringDialog">✕</button></div><div class="field"><label for="jsonStringInput">JSON 문자열</label><textarea id="jsonStringInput" spellcheck="false" placeholder='{"title":{"text":"..."}}'></textarea></div><div class="dialog-actions"><button class="md-button md-button--text" id="cancelJsonString">취소</button><button class="md-button" id="applyJsonString">적용</button></div></div></div><div class="toast" id="toast">완료</div>
 <script>
 const defaultData={title:{text:'코넬노트 웹앱',color:'#263535',bg:'#fff6c9'},keyword:{text:'UI\nKey\nWord',color:'#263535',bg:'#fff6c9'},note:{text:'노트 영역을 클릭해 내용을 입력합니다.\n색상과 배경색도 함께 바꿀 수 있습니다.',color:'#263535',bg:'#fffbe0'},summary:{color:'#263535',bg:'#fff2bd',items:[{id:crypto.randomUUID(),text:'Bottom Sheet Dialog로 입력',children:[]},{id:crypto.randomUUID(),text:'Font는 Google Poor Story',children:[]},{id:crypto.randomUUID(),text:'Outline Tree 추가 / 삭제 / 업데이트',children:[{id:crypto.randomUUID(),text:'요약 영역은 계층 구조',children:[]}]},{id:crypto.randomUUID(),text:'JSON Load / Save 지원',children:[]}]}};
-let data=normalizeData(JSON.parse(localStorage.getItem('geudae-note-data')||'null')||defaultData);if(data?.title?.text==='그대 노트 웹앱'||data?.title?.text==='그대 노트'){data.title.text='코넬노트 웹앱'};let current='title';
+let data=normalizeData(JSON.parse(localStorage.getItem('geudae-note-data')||'null')||defaultData);if(data?.title?.text==='그대 노트 웹앱'||data?.title?.text==='그대 노트'){data.title.text='코넬노트 웹앱'};let current='title';let cloudItems=[];let currentCloudId=localStorage.getItem('cornellnote-current-cloud-id')||'';
 const $=s=>document.querySelector(s), $$=s=>document.querySelectorAll(s);function esc(s){return String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
 function render(){ $('#titleText').textContent=data.title.text; $('#keywordText').textContent=data.keyword.text; $('#noteText').textContent=data.note.text; ['title','keyword','note','summary'].forEach(k=>{const el=document.querySelector(`[data-region="${k}"]`);el.style.color=data[k].color;el.style.background=data[k].bg}); $('#summaryTree').innerHTML=treeHtml(data.summary.items); const jp=$('#jsonPreview'); if(jp) jp.value=JSON.stringify(data,null,2); localStorage.setItem('geudae-note-data',JSON.stringify(data)); $('#saveState').textContent='자동 저장됨 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});} 
 function inlineHtml(s){
@@ -108,6 +108,22 @@ function menuSheetHtml(){return `
   </section>
   <div class="menu-divider"></div>
   <section class="menu-section">
+    <h3 class="menu-section-title">서버</h3>
+    <div class="field">
+      <label for="cloudNoteSelect">저장된 서버 노트</label>
+      <select id="cloudNoteSelect"><option value="">목록 읽기를 누르세요</option></select>
+    </div>
+    <div class="toolbar">
+      <button class="md-button md-button--tonal" data-menu-action="cloud-list">목록 읽기</button>
+      <button class="md-button md-button--tonal" data-menu-action="cloud-load">불러오기</button>
+      <button class="md-button" data-menu-action="cloud-create">추가</button>
+      <button class="md-button md-button--tonal" data-menu-action="cloud-update">수정</button>
+      <button class="md-button md-button--text" data-menu-action="cloud-delete">삭제</button>
+      <button class="md-button md-button--tonal" data-menu-action="cloud-settings">서버 설정</button>
+    </div>
+  </section>
+  <div class="menu-divider"></div>
+  <section class="menu-section">
     <h3 class="menu-section-title">초기화</h3>
     <div class="toolbar">
       <button class="md-button md-button--text" data-menu-action="reset">초기화</button>
@@ -120,6 +136,13 @@ function bindMenuSheet(){
   const loadBtn=document.querySelector('[data-menu-action="load"]'); if(loadBtn) loadBtn.onclick=()=>$('#loadJsonInput').click();
   const loadStringBtn=document.querySelector('[data-menu-action="load-string"]'); if(loadStringBtn) loadStringBtn.onclick=openJsonStringDialog;
   const copyBtn=document.querySelector('[data-menu-action="copy"]'); if(copyBtn) copyBtn.onclick=async()=>{await navigator.clipboard.writeText(JSON.stringify(data,null,2));toast('JSON을 복사했습니다')};
+  renderCloudSelect();
+  const cloudListBtn=document.querySelector('[data-menu-action="cloud-list"]'); if(cloudListBtn) cloudListBtn.onclick=loadCloudList;
+  const cloudLoadBtn=document.querySelector('[data-menu-action="cloud-load"]'); if(cloudLoadBtn) cloudLoadBtn.onclick=loadSelectedCloudNote;
+  const cloudCreateBtn=document.querySelector('[data-menu-action="cloud-create"]'); if(cloudCreateBtn) cloudCreateBtn.onclick=createCloudNote;
+  const cloudUpdateBtn=document.querySelector('[data-menu-action="cloud-update"]'); if(cloudUpdateBtn) cloudUpdateBtn.onclick=updateCloudNote;
+  const cloudDeleteBtn=document.querySelector('[data-menu-action="cloud-delete"]'); if(cloudDeleteBtn) cloudDeleteBtn.onclick=deleteCloudNote;
+  const cloudSettingsBtn=document.querySelector('[data-menu-action="cloud-settings"]'); if(cloudSettingsBtn) cloudSettingsBtn.onclick=openCloudSettings;
   const resetBtn=document.querySelector('[data-menu-action="reset"]'); if(resetBtn) resetBtn.onclick=()=>{if(confirm('초기화할까요?')){data=structuredClone(defaultData);closeSheet();render();toast('초기화했습니다')}};
 }
 
@@ -147,6 +170,19 @@ function applyJsonData(jsonText){const next=JSON.parse(jsonText);if(!next||typeo
 function openJsonStringDialog(){$('#jsonStringInput').value=JSON.stringify(data,null,2);$('#jsonStringDialog').classList.add('open');setTimeout(()=>$('#jsonStringInput').focus(),0)}
 function closeJsonStringDialog(){$('#jsonStringDialog').classList.remove('open')}
 function applyJsonString(){try{applyJsonData($('#jsonStringInput').value);closeJsonStringDialog();closeSheet();toast('JSON 문자열을 적용했습니다')}catch{alert('JSON 형식이 올바르지 않습니다')}}
+function getCloudConfig(){try{return JSON.parse(localStorage.getItem('cornellnote-cloud-config')||'{}')}catch{return {}}}
+function setCloudConfig(config){localStorage.setItem('cornellnote-cloud-config',JSON.stringify(config))}
+function openCloudSettings(){const config=getCloudConfig();$('#sheetTitle').textContent='서버 설정';$('#sheetBody').innerHTML=`<div class="field"><label for="cloudApiUrl">서버 API 주소</label><input id="cloudApiUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec" value="${esc(config.apiUrl||'')}"></div><div class="field"><label for="cloudPassword">패스워드</label><input id="cloudPassword" type="password" value="${esc(config.password||'')}"></div><div class="toolbar"><button class="md-button" id="saveCloudSettings">설정 저장</button><button class="md-button md-button--tonal" id="testCloudSettings">연결 테스트</button></div><p class="hint">Google Apps Script 웹앱 배포 URL과 Passwords 시트에 등록된 패스워드를 저장합니다.</p>`;$('#saveCloudSettings').onclick=()=>{setCloudConfig({apiUrl:$('#cloudApiUrl').value.trim(),password:$('#cloudPassword').value});toast('서버 설정을 저장했습니다')};$('#testCloudSettings').onclick=async()=>{setCloudConfig({apiUrl:$('#cloudApiUrl').value.trim(),password:$('#cloudPassword').value});try{const result=await cloudRequest('ping',{},'GET');toast(result.message||'연결되었습니다')}catch(error){alert(error.message)}}}
+function selectedCloudId(){return $('#cloudNoteSelect')?.value||currentCloudId||''}
+function renderCloudSelect(){const select=$('#cloudNoteSelect');if(!select)return;select.innerHTML=cloudItems.length?'<option value="">서버 노트 선택</option>'+cloudItems.map(item=>`<option value="${esc(item.id)}"${item.id===currentCloudId?' selected':''}>${esc(item.title||'제목 없음')} · ${esc(item.updatedAt||'')}</option>`).join(''):'<option value="">목록 읽기를 누르세요</option>';select.onchange=()=>{currentCloudId=select.value;localStorage.setItem('cornellnote-current-cloud-id',currentCloudId)}}
+function cloudPayload(id){const note=structuredClone(data);note.id=id||'';note.meta={title:data.title?.text||'코넬노트',tags:[],updatedAt:new Date().toISOString()};return note}
+async function cloudRequest(action,payload={},method='POST'){const config=getCloudConfig();if(!config.apiUrl||!config.password)throw new Error('서버 설정이 필요합니다.');if(method==='GET'){const url=new URL(config.apiUrl);url.searchParams.set('action',action);url.searchParams.set('password',config.password);Object.entries(payload).forEach(([key,value])=>url.searchParams.set(key,value));const response=await fetch(url.toString());return parseCloudResponse(response)}const response=await fetch(config.apiUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,password:config.password,...payload})});return parseCloudResponse(response)}
+async function parseCloudResponse(response){const text=await response.text();let json;try{json=JSON.parse(text)}catch{throw new Error('서버 응답이 JSON이 아닙니다.')}if(!json.ok)throw new Error(json.error||'서버 요청 실패');return json}
+async function loadCloudList(){try{$('#saveState').textContent='서버 목록 읽는 중...';const result=await cloudRequest('list',{},'GET');cloudItems=result.items||[];renderCloudSelect();$('#saveState').textContent='서버 목록 '+cloudItems.length+'건';toast('서버 목록을 읽었습니다')}catch(error){$('#saveState').textContent='서버 목록 실패';alert(error.message)}}
+async function loadSelectedCloudNote(){const id=selectedCloudId();if(!id){alert('불러올 서버 노트를 선택하세요.');return}try{$('#saveState').textContent='서버 노트 읽는 중...';const result=await cloudRequest('get',{id},'GET');data=normalizeData(result.note);currentCloudId=id;localStorage.setItem('cornellnote-current-cloud-id',id);render();renderCloudSelect();toast('서버 노트를 불러왔습니다')}catch(error){$('#saveState').textContent='서버 읽기 실패';alert(error.message)}}
+async function createCloudNote(){try{$('#saveState').textContent='서버 추가 중...';const result=await cloudRequest('create',{note:cloudPayload('')});currentCloudId=result.note?.id||'';localStorage.setItem('cornellnote-current-cloud-id',currentCloudId);await loadCloudList();$('#saveState').textContent='서버 추가됨 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});toast('서버에 추가했습니다')}catch(error){$('#saveState').textContent='서버 추가 실패';alert(error.message)}}
+async function updateCloudNote(){const id=selectedCloudId();if(!id){alert('수정할 서버 노트를 선택하세요.');return}try{$('#saveState').textContent='서버 수정 중...';await cloudRequest('update',{note:cloudPayload(id)});currentCloudId=id;localStorage.setItem('cornellnote-current-cloud-id',id);await loadCloudList();$('#saveState').textContent='서버 수정됨 '+new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});toast('서버 노트를 수정했습니다')}catch(error){$('#saveState').textContent='서버 수정 실패';alert(error.message)}}
+async function deleteCloudNote(){const id=selectedCloudId();if(!id){alert('삭제할 서버 노트를 선택하세요.');return}if(!confirm('선택한 서버 노트를 삭제할까요?'))return;try{$('#saveState').textContent='서버 삭제 중...';await cloudRequest('delete',{id});currentCloudId='';localStorage.removeItem('cornellnote-current-cloud-id');await loadCloudList();toast('서버 노트를 삭제했습니다')}catch(error){$('#saveState').textContent='서버 삭제 실패';alert(error.message)}}
 function toast(msg){$('#toast').textContent=msg;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),1200)}
 $$('.region').forEach(el=>el.onclick=()=>openSheet(el.dataset.region)); $$('[data-region-open]').forEach(b=>b.onclick=()=>openSheet(b.dataset.regionOpen)); $('#closeSheet').onclick=closeSheet; $('#scrim').onclick=closeSheet; $('#menuBtn').onclick=openMenuSheet; $('#closeEmojiDialog').onclick=closeEmojiDialog; $('#emojiDialog').onclick=e=>{if(e.target.id==='emojiDialog')closeEmojiDialog()}; $('#closeJsonStringDialog').onclick=closeJsonStringDialog; $('#cancelJsonString').onclick=closeJsonStringDialog; $('#jsonStringDialog').onclick=e=>{if(e.target.id==='jsonStringDialog')closeJsonStringDialog()}; $('#applyJsonString').onclick=applyJsonString;
 const saveJsonBtn=$('#saveJsonBtn'); if(saveJsonBtn) saveJsonBtn.onclick=saveJsonFile;
