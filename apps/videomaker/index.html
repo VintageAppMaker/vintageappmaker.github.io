@@ -86,6 +86,23 @@
       line-height: 1;
     }
 
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .menu-button {
+      width: 38px;
+      min-height: 38px;
+      padding: 0;
+      display: inline-grid;
+      place-items: center;
+      font-size: 20px;
+      line-height: 1;
+    }
+
     .header-actions {
       display: flex;
       align-items: center;
@@ -251,9 +268,10 @@
       width: 100%;
       height: 100%;
       display: block;
-      object-fit: cover;
+      object-fit: contain;
       user-select: none;
       pointer-events: none;
+      background: #111;
     }
 
     .crop-marker {
@@ -411,6 +429,23 @@
       gap: 14px;
     }
 
+    .preview-bottom-sheet {
+      width: min(980px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+    }
+
+    .sheet-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .preview-sheet-body > .right {
+      padding: 0;
+    }
+
     .dialog h2 {
       margin: 0;
       font-size: 20px;
@@ -446,6 +481,24 @@
     .format-choice span {
       color: var(--muted);
       font-size: 12px;
+    }
+
+    .custom-format {
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .custom-format-title {
+      font-weight: 700;
+    }
+
+    .custom-format-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+      gap: 10px;
+      align-items: end;
     }
 
     .dialog-actions {
@@ -488,13 +541,17 @@
       button { width: 100%; }
       .scene-actions, .controls, .export-options, .dialog-actions, .list-actions, .crop-actions { width: 100%; }
       .format-options { grid-template-columns: 1fr; }
+      .custom-format-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
   <div class="app">
     <header>
-      <h1>HTML 2 MP4</h1>
+      <div class="brand">
+        <button id="previewMenuButton" class="ghost menu-button" type="button" aria-label="미리보기 메뉴 열기">☰</button>
+        <h1>HTML 2 MP4</h1>
+      </div>
       <div class="header-actions">
         <button id="formatButton" class="ghost" type="button">판형: 가로형</button>
         <button id="addScene" class="primary" type="button">장면추가</button>
@@ -530,6 +587,7 @@
             <select id="resolution">
               <option value="1280x720">1280 x 720</option>
               <option value="1080x1920">1080 x 1920</option>
+              <option value="custom">사용자 지정</option>
             </select>
           </label>
           <label>FPS
@@ -567,6 +625,21 @@
           <option value="none">없음</option>
         </select>
       </label>
+      <label>자막 배경
+        <select id="modalCaptionBackground">
+          <option value="show">표시</option>
+          <option value="hide">없음</option>
+        </select>
+      </label>
+      <label>자막 크기(px)
+        <input id="modalCaptionFontSize" type="number" min="16" max="180" step="1">
+      </label>
+      <label>자막 위치
+        <select id="modalCaptionPosition">
+          <option value="bottom">하단</option>
+          <option value="middle">중단</option>
+        </select>
+      </label>
       <label>페이지 전환
         <select id="modalTransition">
           <option value="fade">페이드</option>
@@ -594,9 +667,32 @@
           <span>1280 x 720</span>
         </button>
       </div>
+      <div class="custom-format">
+        <div class="custom-format-title">수동 입력</div>
+        <div class="custom-format-grid">
+          <label>가로(px)
+            <input id="customFormatWidth" type="number" min="240" max="7680" step="1" value="1280">
+          </label>
+          <label>세로(px)
+            <input id="customFormatHeight" type="number" min="240" max="7680" step="1" value="720">
+          </label>
+          <button id="applyCustomFormat" class="primary" type="button">적용</button>
+        </div>
+        <p class="hint">입력한 크기가 미리보기와 다운로드 해상도에 적용됩니다.</p>
+      </div>
       <div class="dialog-actions">
         <button id="closeFormatSheet" class="ghost" type="button">닫기</button>
       </div>
+    </div>
+  </div>
+
+  <div id="previewSheet" class="sheet-modal" role="dialog" aria-modal="true" aria-labelledby="previewSheetTitle">
+    <div class="bottom-sheet preview-bottom-sheet">
+      <div class="sheet-header">
+        <h2 id="previewSheetTitle">미리보기와 다운로드</h2>
+        <button id="closePreviewSheet" class="ghost" type="button">닫기</button>
+      </div>
+      <div id="previewSheetBody" class="preview-sheet-body"></div>
     </div>
   </div>
 
@@ -605,6 +701,9 @@
 
   <script>
     const sceneList = document.getElementById("sceneList");
+    const appMain = document.querySelector("main");
+    const rightPanel = document.querySelector(".right");
+    const previewMenuButton = document.getElementById("previewMenuButton");
     const addSceneButton = document.getElementById("addScene");
     const formatButton = document.getElementById("formatButton");
     const saveListButton = document.getElementById("saveList");
@@ -623,6 +722,9 @@
     const modalDuration = document.getElementById("modalDuration");
     const modalImageEffect = document.getElementById("modalImageEffect");
     const modalTextEffect = document.getElementById("modalTextEffect");
+    const modalCaptionBackground = document.getElementById("modalCaptionBackground");
+    const modalCaptionFontSize = document.getElementById("modalCaptionFontSize");
+    const modalCaptionPosition = document.getElementById("modalCaptionPosition");
     const modalTransition = document.getElementById("modalTransition");
     const saveSettingsButton = document.getElementById("saveSettings");
     const cancelSettingsButton = document.getElementById("cancelSettings");
@@ -630,10 +732,17 @@
     const formatSheet = document.getElementById("formatSheet");
     const formatChoices = [...document.querySelectorAll(".format-choice")];
     const closeFormatSheetButton = document.getElementById("closeFormatSheet");
+    const customFormatWidth = document.getElementById("customFormatWidth");
+    const customFormatHeight = document.getElementById("customFormatHeight");
+    const applyCustomFormatButton = document.getElementById("applyCustomFormat");
+    const previewSheet = document.getElementById("previewSheet");
+    const previewSheetBody = document.getElementById("previewSheetBody");
+    const closePreviewSheetButton = document.getElementById("closePreviewSheet");
 
     const formatPresets = {
       landscape: { label: "가로형", resolution: "1280x720" },
-      portrait: { label: "세로형", resolution: "1080x1920" }
+      portrait: { label: "세로형", resolution: "1080x1920" },
+      custom: { label: "사용자 지정", resolution: "1280x720" }
     };
 
     let scenes = [];
@@ -661,6 +770,9 @@
       duration: 3,
       imageEffect: "kenburns",
       textEffect: "fadeUp",
+      captionBackground: "show",
+      captionFontSize: 36,
+      captionPosition: "bottom",
       transition: "fade",
       cropX: 0.5,
       cropY: 0.5,
@@ -672,6 +784,7 @@
     }
 
     function openFormatSheet() {
+      syncCustomInputs();
       formatSheet.classList.add("open");
     }
 
@@ -679,18 +792,86 @@
       formatSheet.classList.remove("open");
     }
 
-    function setCardFormat(format, redraw = true) {
+    function redrawCurrentScene() {
+      if (scenes.length) drawScene(scenes[0], 0, 0);
+      else drawEmpty();
+    }
+
+    function openPreviewSheet() {
+      previewSheetBody.appendChild(rightPanel);
+      previewSheet.classList.add("open");
+      redrawCurrentScene();
+    }
+
+    function closePreviewSheet() {
+      appMain.appendChild(rightPanel);
+      previewSheet.classList.remove("open");
+      redrawCurrentScene();
+    }
+
+    function getFormatResolution(format = cardFormat) {
+      return formatPresets[format]?.resolution || formatPresets.landscape.resolution;
+    }
+
+    function parseResolution(value) {
+      const match = String(value || "").match(/^(\d+)x(\d+)$/);
+      if (!match) return [1280, 720];
+      return [Number(match[1]), Number(match[2])];
+    }
+
+    function syncCustomInputs() {
+      const [width, height] = parseResolution(getFormatResolution());
+      customFormatWidth.value = width;
+      customFormatHeight.value = height;
+    }
+
+    function updatePreviewShape() {
+      const [width, height] = parseResolution(getFormatResolution());
+      previewBox.classList.toggle("portrait", height > width);
+      previewBox.style.aspectRatio = `${width} / ${height}`;
+    }
+
+    function updateCropFrames() {
+      const [width, height] = parseResolution(getFormatResolution());
+      document.querySelectorAll(".crop-frame").forEach((frame) => {
+        frame.classList.toggle("portrait", height > width);
+        frame.style.aspectRatio = `${width} / ${height}`;
+      });
+    }
+
+    function setCardFormat(format, redraw = true, resolutionOverride = "") {
       if (!formatPresets[format]) return;
+      if (format === "custom" && resolutionOverride) {
+        formatPresets.custom.resolution = resolutionOverride;
+      }
       cardFormat = format;
-      resolutionSelect.value = formatPresets[format].resolution;
+      resolutionSelect.value = format === "custom" ? "custom" : formatPresets[format].resolution;
       formatButton.textContent = `판형: ${formatPresets[format].label}`;
-      previewBox.classList.toggle("portrait", format === "portrait");
+      updatePreviewShape();
+      syncCustomInputs();
       formatChoices.forEach((button) => {
         button.classList.toggle("selected", button.dataset.format === format);
       });
       if (redraw) {
         renderSceneList();
+      } else {
+        updateCropFrames();
+        setCanvasResolution();
       }
+    }
+
+    function applyCustomFormat() {
+      const width = Math.round(Number(customFormatWidth.value));
+      const height = Math.round(Number(customFormatHeight.value));
+      if (!Number.isFinite(width) || !Number.isFinite(height) || width < 240 || height < 240) {
+        setStatus("가로와 세로를 240px 이상으로 입력하세요.");
+        return;
+      }
+      const safeWidth = Math.min(7680, width);
+      const safeHeight = Math.min(7680, height);
+      setCardFormat("custom", true, `${safeWidth}x${safeHeight}`);
+      closeFormatSheet();
+      setStatus(`${safeWidth} x ${safeHeight} 판형으로 변경했습니다.`);
     }
 
     function renderSceneList() {
@@ -816,7 +997,9 @@
       editor.className = "crop-editor";
 
       const frame = document.createElement("div");
-      frame.className = `crop-frame ${cardFormat === "portrait" ? "portrait" : ""}`;
+      const [formatWidth, formatHeight] = parseResolution(getFormatResolution());
+      frame.className = `crop-frame ${formatHeight > formatWidth ? "portrait" : ""}`;
+      frame.style.aspectRatio = `${formatWidth} / ${formatHeight}`;
 
       const img = document.createElement("img");
       img.src = scene.imageSrc;
@@ -868,7 +1051,7 @@
 
       const hint = document.createElement("p");
       hint.className = "hint";
-      hint.textContent = "보일 중심 영역을 클릭하거나 드래그하세요.";
+      hint.textContent = "이미지 전체가 보이는 상태에서 배치 기준점을 조정합니다.";
 
       const resetButton = document.createElement("button");
       resetButton.type = "button";
@@ -888,6 +1071,12 @@
 
     function clamp01(value) {
       return Math.min(1, Math.max(0, Number(value) || 0));
+    }
+
+    function clampNumber(value, min, max, fallback) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return fallback;
+      return Math.min(max, Math.max(min, number));
     }
 
     function escapeHtml(value) {
@@ -952,6 +1141,9 @@
       modalDuration.value = scene.duration;
       modalImageEffect.value = scene.imageEffect;
       modalTextEffect.value = scene.textEffect;
+      modalCaptionBackground.value = scene.captionBackground || "show";
+      modalCaptionFontSize.value = clampNumber(scene.captionFontSize, 16, 180, 36);
+      modalCaptionPosition.value = scene.captionPosition || "bottom";
       modalTransition.value = scene.transition;
       modal.classList.add("open");
     }
@@ -967,6 +1159,9 @@
       scene.duration = Math.max(0.5, Number(modalDuration.value) || 3);
       scene.imageEffect = modalImageEffect.value;
       scene.textEffect = modalTextEffect.value;
+      scene.captionBackground = modalCaptionBackground.value;
+      scene.captionFontSize = clampNumber(modalCaptionFontSize.value, 16, 180, 36);
+      scene.captionPosition = modalCaptionPosition.value;
       scene.transition = modalTransition.value;
       closeSettings();
       renderSceneList();
@@ -974,7 +1169,7 @@
     }
 
     function setCanvasResolution() {
-      const [width, height] = formatPresets[cardFormat].resolution.split("x").map(Number);
+      const [width, height] = parseResolution(getFormatResolution());
       if (canvas.width !== width) canvas.width = width;
       if (canvas.height !== height) canvas.height = height;
     }
@@ -989,53 +1184,53 @@
       ctx.fillText("장면을 추가하세요", canvas.width / 2, canvas.height / 2);
     }
 
-    function drawCoverImage(img, progress, effect, cropX = 0.5, cropY = 0.5) {
+    function drawContainImage(img, progress, effect, cropX = 0.5, cropY = 0.5) {
       const cw = canvas.width;
       const ch = canvas.height;
-      const imageRatio = img.width / img.height;
-      const canvasRatio = cw / ch;
-      let drawW = cw;
-      let drawH = ch;
-      if (imageRatio > canvasRatio) drawW = ch * imageRatio;
-      else drawH = cw / imageRatio;
-
-      let scale = 1;
-      let offsetX = 0;
-      if (effect === "kenburns") scale = 1 + progress * 0.08;
-      if (effect === "panLeft") offsetX = -cw * 0.06 * progress;
-      if (effect === "panRight") offsetX = cw * 0.06 * progress;
-
-      drawW *= scale;
-      drawH *= scale;
-      const minX = Math.min(0, cw - drawW);
-      const minY = Math.min(0, ch - drawH);
-      const x = Math.min(0, Math.max(minX, (cw - drawW) * clamp01(cropX) + offsetX));
-      const y = Math.min(0, Math.max(minY, (ch - drawH) * clamp01(cropY)));
+      const scale = Math.min(cw / img.width, ch / img.height);
+      const drawW = img.width * scale;
+      const drawH = img.height * scale;
+      const extraX = cw - drawW;
+      const extraY = ch - drawH;
+      let positionX = clamp01(cropX);
+      if (effect === "panLeft" && extraX > 0) positionX = 1 - Math.min(1, progress);
+      if (effect === "panRight" && extraX > 0) positionX = Math.min(1, progress);
+      const x = extraX * positionX;
+      const y = extraY * clamp01(cropY);
       ctx.drawImage(img, x, y, drawW, drawH);
     }
 
-    function drawCaption(text, progress, effect) {
+    function drawCaption(text, progress, effect, background = "show", fontSize = 36, position = "bottom") {
       if (!text.trim()) return;
       const cw = canvas.width;
       const ch = canvas.height;
+      const safeFontSize = clampNumber(fontSize, 16, 180, 36);
       const visibleText = effect === "type"
         ? text.slice(0, Math.ceil(text.length * Math.min(1, progress * 1.5)))
         : text;
       const alpha = effect === "none" || effect === "type" ? 1 : Math.min(1, progress * 2.4);
       const lift = effect === "fadeUp" ? (1 - Math.min(1, progress * 2)) * 28 : 0;
 
-      const lines = wrapText(visibleText, cw * 0.76, Math.max(28, cw * 0.028));
-      const lineHeight = Math.max(38, cw * 0.038);
+      const lines = wrapText(visibleText, cw * 0.76, safeFontSize);
+      const lineHeight = Math.max(safeFontSize * 1.32, safeFontSize + 8);
       const boxHeight = lines.length * lineHeight + 34;
-      const boxY = ch - boxHeight - ch * 0.07 + lift;
+      const boxY = position === "middle"
+        ? (ch - boxHeight) / 2 + lift
+        : ch - boxHeight - ch * 0.07 + lift;
 
       ctx.save();
       ctx.globalAlpha = alpha;
-      ctx.fillStyle = "rgba(0,0,0,.68)";
-      roundedRect(cw * 0.08, boxY, cw * 0.84, boxHeight, 8);
-      ctx.fill();
+      if (background !== "hide") {
+        ctx.fillStyle = "rgba(0,0,0,.68)";
+        roundedRect(cw * 0.08, boxY, cw * 0.84, boxHeight, 8);
+        ctx.fill();
+      } else {
+        ctx.shadowColor = "rgba(0,0,0,.78)";
+        ctx.shadowBlur = Math.max(6, safeFontSize * 0.18);
+        ctx.shadowOffsetY = Math.max(2, safeFontSize * 0.08);
+      }
       ctx.fillStyle = "#fff";
-      ctx.font = `700 ${Math.max(28, cw * 0.028)}px Malgun Gothic, sans-serif`;
+      ctx.font = `700 ${safeFontSize}px Malgun Gothic, sans-serif`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       lines.forEach((line, index) => {
@@ -1082,13 +1277,20 @@
       ctx.fillStyle = "#111";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       if (scene && scene.loadedImage) {
-        drawCoverImage(scene.loadedImage, progress, scene.imageEffect, scene.cropX, scene.cropY);
+        drawContainImage(scene.loadedImage, progress, scene.imageEffect, scene.cropX, scene.cropY);
       }
       if (transitionProgress > 0 && scene.transition === "fade") {
         ctx.fillStyle = `rgba(0,0,0,${transitionProgress})`;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
-      drawCaption((scene && scene.caption) || "", progress, (scene && scene.textEffect) || "fadeUp");
+      drawCaption(
+        (scene && scene.caption) || "",
+        progress,
+        (scene && scene.textEffect) || "fadeUp",
+        (scene && scene.captionBackground) || "show",
+        (scene && scene.captionFontSize) || 36,
+        (scene && scene.captionPosition) || "bottom"
+      );
     }
 
     function play(record = false) {
@@ -1234,7 +1436,7 @@
         version: 1,
         savedAt: new Date().toISOString(),
         cardFormat,
-        resolution: resolutionSelect.value,
+        resolution: getFormatResolution(),
         fps: fpsSelect.value,
         scenes: scenes.map((scene) => ({
           imageSrc: scene.imageSrc,
@@ -1243,6 +1445,9 @@
           duration: scene.duration,
           imageEffect: scene.imageEffect,
           textEffect: scene.textEffect,
+          captionBackground: scene.captionBackground,
+          captionFontSize: scene.captionFontSize,
+          captionPosition: scene.captionPosition,
           transition: scene.transition,
           cropX: scene.cropX,
           cropY: scene.cropY
@@ -1280,6 +1485,9 @@
             duration: Math.max(0.5, Number(item.duration) || 3),
             imageEffect: item.imageEffect || "kenburns",
             textEffect: item.textEffect || "fadeUp",
+            captionBackground: item.captionBackground === "hide" ? "hide" : "show",
+            captionFontSize: clampNumber(item.captionFontSize, 16, 180, 36),
+            captionPosition: item.captionPosition === "middle" ? "middle" : "bottom",
             transition: item.transition || "fade",
             cropX: clamp01(item.cropX ?? 0.5),
             cropY: clamp01(item.cropY ?? 0.5),
@@ -1290,7 +1498,8 @@
         }));
         scenes = importedScenes;
         const importedFormat = data.cardFormat || (data.resolution === "1080x1920" ? "portrait" : "landscape");
-        setCardFormat(importedFormat, false);
+        const importedResolution = typeof data.resolution === "string" ? data.resolution : "";
+        setCardFormat(importedFormat, false, importedFormat === "custom" ? importedResolution : "");
         if (data.fps) fpsSelect.value = data.fps;
         renderSceneList();
         setStatus(`${scenes.length}개 장면을 가져왔습니다.`);
@@ -1313,9 +1522,11 @@
     listFilePicker.addEventListener("change", () => {
       importSceneList(listFilePicker.files[0]);
     });
+    previewMenuButton.addEventListener("click", openPreviewSheet);
     addSceneButton.addEventListener("click", () => addScene());
     formatButton.addEventListener("click", openFormatSheet);
     closeFormatSheetButton.addEventListener("click", closeFormatSheet);
+    applyCustomFormatButton.addEventListener("click", applyCustomFormat);
     formatChoices.forEach((button) => {
       button.addEventListener("click", () => {
         setCardFormat(button.dataset.format);
@@ -1339,7 +1550,16 @@
     formatSheet.addEventListener("click", (event) => {
       if (event.target === formatSheet) closeFormatSheet();
     });
+    closePreviewSheetButton.addEventListener("click", closePreviewSheet);
+    previewSheet.addEventListener("click", (event) => {
+      if (event.target === previewSheet) closePreviewSheet();
+    });
     resolutionSelect.addEventListener("change", () => {
+      if (resolutionSelect.value === "custom") {
+        openFormatSheet();
+        setCardFormat("custom");
+        return;
+      }
       setCardFormat(resolutionSelect.value === "1080x1920" ? "portrait" : "landscape");
     });
 
