@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Timebox OS">
+  <rect width="512" height="512" rx="96" fill="#292929"/>
+  <rect x="92" y="84" width="328" height="344" rx="20" fill="#f4f2ea"/>
+  <rect x="92" y="84" width="328" height="56" rx="20" fill="#d7d7d3"/>
+  <path d="M132 180h248M132 236h248M132 292h248M132 348h180" stroke="#292929" stroke-width="20" stroke-linecap="round"/>
+  <rect x="132" y="166" width="64" height="28" fill="#292929"/>
+  <rect x="132" y="278" width="64" height="28" fill="#292929"/>
+  <path d="M360 344l28 28 54-66" fill="none" stroke="#292929" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

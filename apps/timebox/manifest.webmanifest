@@ -1,0 +1,35 @@
+{
+  "name": "Timebox OS",
+  "short_name": "Timebox",
+  "description": "Local-first daily timeboxing planner.",
+  "lang": "ko",
+  "dir": "ltr",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#d7d7d3",
+  "theme_color": "#292929",
+  "categories": ["productivity", "utilities"],
+  "icons": [
+    {
+      "src": "./icons/timebox-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/timebox-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/timebox-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
