@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#708169" />
+    <meta name="description" content="하루 마음 상태와 회복 행동을 기록하는 수행노트" />
+    <meta name="application-name" content="마음회복 노트" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="마음회복 노트" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="msapplication-TileColor" content="#708169" />
+    <meta name="msapplication-TileImage" content="./icons/icon-192.png" />
+    <link rel="manifest" href="./manifest.webmanifest" type="application/manifest+json" />
+    <link rel="icon" href="./icons/icon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+    <title>마음회복 1일 수행노트</title>
+    <style>
+      :root {
+        --ink: #34352f;
+        --muted: #77776c;
+        --sage: #708169;
+        --sage2: #e8eee3;
+        --paper: #fffdf4;
+        --line: #9b9a8e;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family:
+          "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+        background:
+          radial-gradient(circle at 20% 10%, #eee9df 0 2px, transparent 3px),
+          linear-gradient(120deg, #d6cec0, #e6e0d5 45%, #cfc7b8);
+        background-size:
+          22px 22px,
+          auto;
+        min-height: 100vh;
+      }
+      button,
+      input,
+      textarea,
+      select {
+        font: inherit;
+        color: inherit;
+      }
+      button {
+        cursor: pointer;
+      }
+      .app {
+        padding: 18px 18px 50px;
+      }
+      .toolbar {
+        max-width: 1060px;
+        margin: 0 auto 12px;
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: center;
+        padding: 10px 14px;
+        border: 1px solid #ffffff70;
+        border-radius: 16px;
+        background: #f8f5edee;
+        box-shadow: 0 4px 20px #42392315;
+        position: sticky;
+        top: 8px;
+        z-index: 10;
+      }
+      .brand {
+        font-weight: 800;
+        white-space: nowrap;
+      }
+      .brand b {
+        display: inline-grid;
+        place-items: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: var(--sage);
+        color: #fff;
+        margin-right: 8px;
+      }
+      .tools {
+        display: flex;
+        gap: 7px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+      .tool {
+        border: 1px solid #b9b7aa;
+        background: #fffdf8;
+        border-radius: 9px;
+        padding: 9px 12px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .tool.primary {
+        background: var(--sage);
+        color: #fff;
+        border-color: var(--sage);
+      }
+      .tool input {
+        border: 0;
+        background: transparent;
+      }
+      .status {
+        max-width: 980px;
+        margin: 0 auto 10px;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: center;
+        font-size: 12px;
+        color: #65655d;
+      }
+      .status label {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .status select {
+        padding: 5px;
+        border: 1px solid #bbb;
+        border-radius: 7px;
+        background: #faf8f1;
+      }
+      .paper {
+        max-width: 980px;
+        margin: auto;
+        background: var(--paper);
+        padding: 48px 56px 42px;
+        border-radius: 5px 24px 24px 5px;
+        box-shadow: 0 18px 55px #3830222b;
+        position: relative;
+      }
+      .head {
+        text-align: center;
+        margin-bottom: 22px;
+      }
+      .head .eyebrow {
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        color: #7d755f;
+        margin: 0 0 8px;
+      }
+      .head h1 {
+        font-family: "Batang", serif;
+        font-size: clamp(27px, 4vw, 42px);
+        margin: 0;
+      }
+      .date-view {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .section {
+        border: 1px solid #8b8c80;
+        border-radius: 13px;
+        padding: 20px 22px;
+        margin: 13px 0;
+        background: #fffefa;
+      }
+      .title {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-bottom: 15px;
+      }
+      .title i {
+        display: grid;
+        place-items: center;
+        width: 31px;
+        height: 31px;
+        border-radius: 50%;
+        background: var(--sage);
+        color: #fff;
+        font-family: serif;
+        font-size: 20px;
+        font-style: normal;
+      }
+      .title h2 {
+        font:
+          700 20px "Batang",
+          serif;
+        margin: 0;
+      }
+      .title small {
+        margin-left: auto;
+        color: var(--muted);
+      }
+      .state {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+      }
+      .compact {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 7px;
+        align-items: center;
+        padding: 4px 10px;
+        border-right: 1px dotted #aaa;
+      }
+      .compact:last-child {
+        border: 0;
+      }
+      .compact input {
+        width: 100%;
+        min-width: 0;
+        border: 0;
+        border-bottom: 1px solid var(--line);
+        background: transparent;
+        text-align: center;
+      }
+      .compact em {
+        font-size: 12px;
+        font-style: normal;
+        color: var(--muted);
+      }
+      .senses {
+        display: grid;
+        grid-template-columns: 1.3fr 1fr 1fr;
+        gap: 18px;
+      }
+      .lines {
+        border-right: 1px dashed #bbb;
+        padding-right: 18px;
+      }
+      .lines:last-child {
+        border: 0;
+      }
+      .lines b {
+        display: block;
+        text-align: center;
+        font-size: 13px;
+      }
+      .lines label {
+        display: grid;
+        grid-template-columns: 18px 1fr;
+        align-items: center;
+      }
+      .lines input,
+      .line input {
+        width: 100%;
+        border: 0;
+        border-bottom: 1px solid #aaa;
+        background: transparent;
+        padding: 7px 4px;
+      }
+      .worry-list {
+        display: grid;
+        gap: 16px;
+      }
+      .worry {
+        border: 1px solid #b4b2a7;
+        border-radius: 12px;
+        padding: 13px;
+      }
+      .worry-head {
+        display: flex;
+        justify-content: space-between;
+        color: var(--sage);
+        margin-bottom: 10px;
+      }
+      .worry-head button {
+        border: 0;
+        background: transparent;
+        color: #a15d54;
+        text-decoration: underline;
+        font-size: 11px;
+      }
+      .pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border: 1px solid #8e9085;
+        border-radius: 9px;
+        overflow: hidden;
+      }
+      .pair label {
+        display: flex;
+        flex-direction: column;
+      }
+      .pair label + label {
+        border-left: 1px solid #8e9085;
+      }
+      .pair span {
+        text-align: center;
+        padding: 8px;
+        background: var(--sage2);
+        font-weight: 700;
+      }
+      .pair label + label span {
+        background: #f2ead7;
+      }
+      .pair textarea {
+        border: 0;
+        resize: vertical;
+        min-height: 100px;
+        padding: 12px;
+        background: repeating-linear-gradient(transparent 0 30px, #bbb 31px);
+        line-height: 31px;
+      }
+      .control-label {
+        font-size: 12px;
+        font-weight: 700;
+        margin: 11px 2px 0;
+      }
+      .controls {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 9px;
+        margin-top: 7px;
+      }
+      .controls button {
+        border: 1px solid #b5b4a8;
+        border-radius: 10px;
+        background: #faf9f3;
+        padding: 10px;
+        text-align: left;
+      }
+      .controls button b,
+      .controls button small {
+        display: block;
+      }
+      .controls button small {
+        color: var(--muted);
+        margin-top: 3px;
+      }
+      .controls button.selected {
+        border-color: var(--sage);
+        background: var(--sage2);
+        box-shadow: inset 0 0 0 1px var(--sage);
+      }
+      .controls button.selected b:before {
+        content: "● ";
+        color: var(--sage);
+      }
+      .add {
+        width: 100%;
+        margin-top: 13px;
+        border: 1px dashed var(--sage);
+        border-radius: 10px;
+        background: #f3f6ef;
+        color: #56694f;
+        padding: 11px;
+        font-weight: 800;
+      }
+      .line {
+        display: grid;
+        grid-template-columns: 125px 1fr;
+        align-items: center;
+        gap: 10px;
+      }
+      .action-row {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 24px;
+        margin-top: 14px;
+      }
+      .action-row label {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+      .action-row input {
+        border: 0;
+        border-bottom: 1px solid var(--line);
+        background: transparent;
+      }
+      .duration {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 0;
+      }
+      .duration button {
+        border: 1px solid #bbb;
+        border-radius: 8px;
+        background: #faf9f3;
+        padding: 7px 13px;
+      }
+      .duration button.selected {
+        background: var(--sage);
+        color: #fff;
+      }
+      .evening {
+        display: grid;
+        gap: 5px;
+      }
+      .foot {
+        text-align: center;
+        font:
+          20px "Batang",
+          serif;
+        margin-top: 24px;
+      }
+      .foot:before {
+        content: "❦";
+        display: block;
+        color: var(--sage);
+        margin-bottom: 10px;
+      }
+      .delete-day {
+        display: block;
+        margin: 15px auto 0;
+        border: 0;
+        background: transparent;
+        color: #9b5b52;
+        font-size: 11px;
+        text-decoration: underline;
+      }
+      @media (max-width: 760px) {
+        .app {
+          padding: 8px 0 30px;
+        }
+        .toolbar {
+          top: 0;
+          border-radius: 0;
+          align-items: flex-start;
+          padding: 8px;
+        }
+        .brand span {
+          display: none;
+        }
+        .tools {
+          gap: 4px;
+        }
+        .tool {
+          font-size: 11px;
+          padding: 8px;
+        }
+        .date-label span {
+          display: none;
+        }
+        .status {
+          padding: 0 10px;
+        }
+        .paper {
+          border-radius: 0;
+          padding: 32px 15px;
+        }
+        .section {
+          padding: 15px 13px;
+        }
+        .state {
+          grid-template-columns: 1fr 1fr;
+        }
+        .senses {
+          grid-template-columns: 1fr;
+        }
+        .lines {
+          border: 0;
+          border-bottom: 1px dashed #bbb;
+          padding: 0 0 10px;
+        }
+        .pair {
+          grid-template-columns: 1fr;
+        }
+        .pair label + label {
+          border-left: 0;
+          border-top: 1px solid #999;
+        }
+        .controls {
+          grid-template-columns: 1fr;
+        }
+        .title {
+          flex-wrap: wrap;
+        }
+        .title small {
+          width: 100%;
+          margin-left: 40px;
+        }
+        .action-row {
+          grid-template-columns: 1fr;
+        }
+        .line {
+          grid-template-columns: 100px 1fr;
+        }
+        .duration {
+          flex-wrap: wrap;
+        }
+      }
+      @media print {
+        body {
+          background: #fff;
+        }
+        .toolbar,
+        .status,
+        .delete-day {
+          display: none;
+        }
+        .app {
+          padding: 0;
+        }
+        .paper {
+          box-shadow: none;
+          margin: 0;
+          max-width: none;
+          padding: 20px;
+        }
+        .section {
+          break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <nav class="toolbar">
+        <div class="brand"><b>葉</b><span>마음회복 노트</span></div>
+        <div class="tools">
+          <label class="tool date-label"
+            ><span>날짜 </span><input id="date" type="date" /></label
+          ><button class="tool" id="exportJson">JSON 내보내기</button
+          ><button class="tool" id="importJson">JSON 가져오기</button
+          ><button class="tool primary" id="exportHtml">HTML 출력</button
+          ><input
+            id="file"
+            type="file"
+            accept=".json,application/json"
+            hidden
+          />
+        </div>
+      </nav>
+      <div class="status">
+        <span id="notice">오늘 기록을 시작해 보세요</span
+        ><label
+          >저장된 날짜
+          <select id="dates"></select
+        ></label>
+      </div>
+      <article class="paper">
+        <header class="head">
+          <p class="eyebrow">하루 10분 · 한 페이지 · 행동 하나</p>
+          <h1>중년 마음회복 1일 수행노트</h1>
+          <p class="date-view" id="dateView"></p>
+        </header>
+        <section class="section">
+          <div class="title">
+            <i>1</i>
+            <h2>지금 상태</h2>
+          </div>
+          <div class="state">
+            <label class="compact"
+              ><span>수면</span
+              ><input data-field="sleep" inputmode="decimal" /><em
+                >시간</em
+              ></label
+            ><label class="compact"
+              ><span>불안</span
+              ><input data-field="anxiety" type="number" min="0" max="10" /><em
+                >/10</em
+              ></label
+            ><label class="compact"
+              ><span>초조</span
+              ><input
+                data-field="agitation"
+                type="number"
+                min="0"
+                max="10"
+              /><em>/10</em></label
+            ><label class="compact"
+              ><span>무기력</span
+              ><input data-field="lethargy" type="number" min="0" max="10" /><em
+                >/10</em
+              ></label
+            >
+          </div>
+        </section>
+        <section class="section">
+          <div class="title">
+            <i>2</i>
+            <h2>감각 확인</h2>
+            <small>보이는 것 3 · 들리는 것 2 · 몸의 감각 1</small>
+          </div>
+          <div class="senses">
+            <div class="lines">
+              <b>보이는 것</b
+              ><label>1<input data-array="seen" data-i="0" /></label
+              ><label>2<input data-array="seen" data-i="1" /></label
+              ><label>3<input data-array="seen" data-i="2" /></label>
+            </div>
+            <div class="lines">
+              <b>들리는 것</b
+              ><label>1<input data-array="heard" data-i="0" /></label
+              ><label>2<input data-array="heard" data-i="1" /></label>
+            </div>
+            <div class="lines">
+              <b>몸의 감각</b><label>1<input data-field="body" /></label>
+            </div>
+          </div>
+        </section>
+        <section class="section">
+          <div class="title">
+            <i>3</i>
+            <h2>걱정 분류</h2>
+            <small>사실마다 해석과 처리방식을 한 묶음으로 기록합니다</small>
+          </div>
+          <div id="worries" class="worry-list"></div>
+          <button class="add" id="addWorry">＋ 확인된 사실 추가</button>
+        </section>
+        <section class="section">
+          <div class="title">
+            <i>4</i>
+            <h2>가장 작은 행동</h2>
+            <small>기분을 기다리지 않고, 정한 시각에 5분만</small>
+          </div>
+          <label class="line"
+            ><b>오늘의 행동</b
+            ><input data-field="action" placeholder="작고 구체적인 동사로 적기"
+          /></label>
+          <div class="action-row">
+            <label
+              ><b>시작 시각</b><input data-field="startTime" type="time"
+            /></label>
+            <fieldset class="duration">
+              <legend>소요 시간</legend>
+              <button data-duration="5">5분</button
+              ><button data-duration="10">10분</button
+              ><button data-duration="20">20분</button>
+            </fieldset>
+          </div>
+        </section>
+        <section class="section">
+          <div class="title">
+            <i>5</i>
+            <h2>저녁 회복</h2>
+          </div>
+          <div class="evening">
+            <label class="line"
+              ><b>해낸 것</b><input data-field="achieved" /></label
+            ><label class="line"
+              ><b>견딘 것</b><input data-field="endured" /></label
+            ><label class="line"
+              ><b>나를 위해 한 것</b><input data-field="selfCare" /></label
+            ><label class="line"
+              ><b>내일로 넘길 것</b><input data-field="tomorrow"
+            /></label>
+          </div>
+        </section>
+        <footer class="foot">한 걸음을 했으면 충분하다.</footer>
+        <button class="delete-day" id="deleteDay">이 날짜 기록 삭제</button>
+      </article>
+    </main>
+    <script>
+      (() => {
+        "use strict";
+        const KEY = "mind-recovery-note-v1",
+          q = (s) => document.querySelector(s),
+          qa = (s) => [...document.querySelectorAll(s)],
+          pad = (n) => String(n).padStart(2, "0"),
+          today = () => {
+            const d = new Date();
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+          },
+          id = () =>
+            `w_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          newWorry = () => ({
+            id: id(),
+            fact: "",
+            interpretation: "",
+            control: "",
+          }),
+          blank = (date) => ({
+            date,
+            sleep: "",
+            anxiety: "",
+            agitation: "",
+            lethargy: "",
+            seen: ["", "", ""],
+            heard: ["", ""],
+            body: "",
+            worries: [newWorry()],
+            action: "",
+            startTime: "",
+            duration: "5",
+            achieved: "",
+            endured: "",
+            selfCare: "",
+            tomorrow: "",
+            updatedAt: new Date().toISOString(),
+          });
+        let archive = {},
+          date = today(),
+          entry = blank(date),
+          timer;
+        const normalize = (d, v = {}) => {
+          let worries =
+            Array.isArray(v.worries) && v.worries.length
+              ? v.worries.map((w) => ({
+                  id: w.id || id(),
+                  fact: String(w.fact || ""),
+                  interpretation: String(w.interpretation || ""),
+                  control: ["now", "later", "release"].includes(w.control)
+                    ? w.control
+                    : "",
+                }))
+              : [
+                  {
+                    id: id(),
+                    fact: String(v.fact || ""),
+                    interpretation: String(v.interpretation || ""),
+                    control: ["now", "later", "release"].includes(v.control)
+                      ? v.control
+                      : "",
+                  },
+                ];
+          return { ...blank(d), ...v, date: d, worries };
+        };
+        const esc = (s) =>
+          String(s).replace(
+            /[&<>"']/g,
+            (c) =>
+              ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+              })[c],
+          );
+        const notice = (s) => (q("#notice").textContent = s);
+        const save = () => {
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            entry.updatedAt = new Date().toISOString();
+            archive[date] = entry;
+            localStorage.setItem(KEY, JSON.stringify(archive));
+            renderDates();
+            notice("자동 저장됨");
+          }, 350);
+        };
+        function load() {
+          try {
+            const raw = JSON.parse(localStorage.getItem(KEY) || "{}");
+            archive = Object.fromEntries(
+              Object.entries(raw).map(([d, v]) => [d, normalize(d, v)]),
+            );
+          } catch {
+            archive = {};
+            notice("저장 자료를 읽지 못했습니다");
+          }
+          setDate(today());
+        }
+        function setDate(d) {
+          date = d;
+          entry = archive[d] ? normalize(d, archive[d]) : blank(d);
+          q("#date").value = d;
+          q("#dateView").textContent = d;
+          render();
+        }
+        function render() {
+          qa("[data-field]").forEach(
+            (el) => (el.value = entry[el.dataset.field] || ""),
+          );
+          qa("[data-array]").forEach(
+            (el) =>
+              (el.value = (entry[el.dataset.array] || [])[+el.dataset.i] || ""),
+          );
+          qa("[data-duration]").forEach((b) =>
+            b.classList.toggle(
+              "selected",
+              b.dataset.duration === entry.duration,
+            ),
+          );
+          q("#worries").innerHTML = entry.worries
+            .map(
+              (w, i) =>
+                `<article class="worry" data-id="${esc(w.id)}"><div class="worry-head"><b>확인된 사실 ${i + 1}</b><button data-remove="${esc(w.id)}">삭제</button></div><div class="pair"><label><span>확인된 사실</span><textarea data-worry="fact" placeholder="실제로 확인한 내용만 적기">${esc(w.fact)}</textarea></label><label><span>짝이 되는 해석·예측</span><textarea data-worry="interpretation" placeholder="이 사실에 내가 붙인 의미와 예상">${esc(w.interpretation)}</textarea></label></div><div class="control-label">이 확인된 사실을 어떻게 처리할까요?</div><div class="controls"><button data-control="now" class="${w.control === "now" ? "selected" : ""}"><b>지금 행동</b><small>오늘 할 수 있는 한 걸음</small></button><button data-control="later" class="${w.control === "later" ? "selected" : ""}"><b>나중에 예약</b><small>날짜와 시각을 정해두기</small></button><button data-control="release" class="${w.control === "release" ? "selected" : ""}"><b>통제 불가</b><small>오늘은 여기에서 내려놓기</small></button></div></article>`,
+            )
+            .join("");
+          renderDates();
+        }
+        function renderDates() {
+          const ds = Object.keys(archive).sort().reverse();
+          q("#dates").innerHTML =
+            (!archive[date]
+              ? `<option value="${date}">${date} · 새 기록</option>`
+              : "") +
+            ds
+              .map(
+                (d) =>
+                  `<option value="${d}" ${d === date ? "selected" : ""}>${d}</option>`,
+              )
+              .join("");
+        }
+        document.addEventListener("input", (e) => {
+          const t = e.target;
+          if (t.dataset.field) {
+            entry[t.dataset.field] = t.value;
+            save();
+          }
+          if (t.dataset.array) {
+            entry[t.dataset.array][+t.dataset.i] = t.value;
+            save();
+          }
+          if (t.dataset.worry) {
+            const card = t.closest(".worry");
+            const w = entry.worries.find((x) => x.id === card.dataset.id);
+            w[t.dataset.worry] = t.value;
+            save();
+          }
+        });
+        document.addEventListener("click", (e) => {
+          const t = e.target.closest("button");
+          if (!t) return;
+          if (t.dataset.duration) {
+            entry.duration = t.dataset.duration;
+            render();
+            save();
+          }
+          if (t.dataset.control) {
+            const card = t.closest(".worry"),
+              w = entry.worries.find((x) => x.id === card.dataset.id);
+            w.control =
+              w.control === t.dataset.control ? "" : t.dataset.control;
+            render();
+            save();
+          }
+          if (t.dataset.remove) {
+            entry.worries =
+              entry.worries.length === 1
+                ? [newWorry()]
+                : entry.worries.filter((w) => w.id !== t.dataset.remove);
+            render();
+            save();
+          }
+        });
+        q("#date").onchange = (e) => setDate(e.target.value);
+        q("#dates").onchange = (e) => setDate(e.target.value);
+        q("#addWorry").onclick = () => {
+          entry.worries.push(newWorry());
+          render();
+          save();
+        };
+        q("#deleteDay").onclick = () => {
+          if (!archive[date] || !confirm(`${date} 기록을 삭제할까요?`)) return;
+          delete archive[date];
+          localStorage.setItem(KEY, JSON.stringify(archive));
+          entry = blank(date);
+          render();
+          notice("기록을 삭제했습니다");
+        };
+        const download = (name, body, type) => {
+          const a = document.createElement("a"),
+            url = URL.createObjectURL(new Blob([body], { type }));
+          a.href = url;
+          a.download = name;
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        };
+        q("#exportJson").onclick = () =>
+          download(
+            `마음회복노트_${date.replaceAll("-", "")}.json`,
+            JSON.stringify(
+              {
+                app: "중년 마음회복 1일 수행노트",
+                version: 2,
+                exportedAt: new Date().toISOString(),
+                entries: archive,
+              },
+              null,
+              2,
+            ),
+            "application/json;charset=utf-8",
+          );
+        q("#importJson").onclick = () => q("#file").click();
+        q("#file").onchange = async (e) => {
+          try {
+            const p = JSON.parse(await e.target.files[0].text()),
+              incoming = p.entries || p;
+            Object.entries(incoming).forEach(
+              ([d, v]) => (archive[d] = normalize(d, v)),
+            );
+            localStorage.setItem(KEY, JSON.stringify(archive));
+            setDate(date);
+            notice(`${Object.keys(incoming).length}일의 기록을 가져왔습니다`);
+          } catch {
+            notice("올바른 노트 JSON 파일이 아닙니다");
+          }
+          e.target.value = "";
+        };
+        q("#exportHtml").onclick = () => {
+          const labels = {
+              now: "지금 행동",
+              later: "나중에 예약",
+              release: "통제 불가",
+            },
+            li = (a) => a.map((x) => `<li>${esc(x || "—")}</li>`).join(""),
+            ws = entry.worries
+              .map(
+                (w, i) =>
+                  `<div class="box"><b>확인된 사실 ${i + 1}</b><p>${esc(w.fact || "—")}</p><b>짝이 되는 해석·예측</b><p>${esc(w.interpretation || "—")}</p><b>처리:</b> ${labels[w.control] || "—"}</div>`,
+              )
+              .join("");
+          download(
+            `마음회복노트_${date.replaceAll("-", "")}.html`,
+            `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${date} 마음회복노트</title><style>body{max-width:850px;margin:30px auto;padding:30px;background:#fffdf4;color:#34352f;font-family:system-ui}h1{text-align:center}.box{border:1px solid #999;border-radius:12px;padding:15px;margin:12px 0}p{white-space:pre-wrap;border-bottom:1px solid #bbb;min-height:24px}@media(max-width:600px){body{margin:0;padding:18px}}</style><h1>중년 마음회복 1일 수행노트</h1><p style="text-align:center">${date}</p><div class="box"><h2>1. 지금 상태</h2>수면 ${esc(entry.sleep || "—")}시간 · 불안 ${esc(entry.anxiety || "—")}/10 · 초조 ${esc(entry.agitation || "—")}/10 · 무기력 ${esc(entry.lethargy || "—")}/10</div><div class="box"><h2>2. 감각 확인</h2><b>보이는 것</b><ol>${li(entry.seen)}</ol><b>들리는 것</b><ol>${li(entry.heard)}</ol><b>몸의 감각</b><p>${esc(entry.body || "—")}</p></div><h2>3. 걱정 분류</h2>${ws}<div class="box"><h2>4. 가장 작은 행동</h2><p>${esc(entry.action || "—")}</p>시작 ${esc(entry.startTime || "—")} · ${esc(entry.duration)}분</div><div class="box"><h2>5. 저녁 회복</h2><b>해낸 것</b><p>${esc(entry.achieved || "—")}</p><b>견딘 것</b><p>${esc(entry.endured || "—")}</p><b>나를 위해 한 것</b><p>${esc(entry.selfCare || "—")}</p><b>내일로 넘길 것</b><p>${esc(entry.tomorrow || "—")}</p></div><p style="text-align:center">한 걸음을 했으면 충분하다.</p>`,
+            "text/html;charset=utf-8",
+          );
+        };
+        load();
+        if ("serviceWorker" in navigator) {
+          window.addEventListener("load", () => {
+            navigator.serviceWorker
+              .register("./sw.js", { scope: "./" })
+              .catch(() => {});
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>
