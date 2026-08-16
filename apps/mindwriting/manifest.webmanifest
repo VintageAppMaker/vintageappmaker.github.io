@@ -1,12 +1,13 @@
 {
-  "id": "/apps/mindwriting/index.html",
+  "id": "./",
   "name": "마음회복 1일 수행노트",
   "short_name": "마음회복 노트",
   "description": "하루 마음 상태와 회복 행동을 기록하는 수행노트",
   "lang": "ko-KR",
-  "start_url": "/apps/mindwriting/index.html",
-  "scope": "/apps/mindwriting/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "prefer_related_applications": false,
   "orientation": "portrait-primary",
   "background_color": "#fffdf4",
   "theme_color": "#708169",
@@ -29,12 +30,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
-    },
-    {
-      "src": "./icons/icon-180.png",
-      "sizes": "180x180",
-      "type": "image/png",
-      "purpose": "any"
     }
   ]
 }

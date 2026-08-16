@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
     <meta name="theme-color" content="#708169" />
-<meta name="background_color" content="#fffdf4" />
     <meta name="description" content="하루 마음 상태와 회복 행동을 기록하는 수행노트" />
     <meta name="application-name" content="마음회복 노트" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -16,7 +15,8 @@
     <link rel="manifest" href="./manifest.webmanifest" type="application/manifest+json" />
     <link rel="icon" href="./icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-<link rel="apple-touch-icon" href="./icons/icon-180.png" sizes="180x180" />
+    <link rel="icon" href="./icons/icon-512.png" sizes="512x512" />
+    <link rel="apple-touch-icon" href="./icons/icon-512.png" sizes="512x512" />
     <title>마음회복 1일 수행노트</title>
     <style>
       :root {
@@ -509,33 +509,6 @@
         }
       }
     </style>
-<script>
-  // Capture beforeinstallprompt to provide a custom install button
-  let deferredPrompt;
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    // Create a simple install button if not already present
-    if (!document.getElementById('installBtn')) {
-      const btn = document.createElement('button');
-      btn.id = 'installBtn';
-      btn.className = 'tool primary';
-      btn.textContent = '앱 설치';
-      btn.style.position = 'fixed';
-      btn.style.bottom = '1rem';
-      btn.style.right = '1rem';
-      document.body.appendChild(btn);
-      btn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-          deferredPrompt.prompt();
-          const { outcome } = await deferredPrompt.userChoice;
-          console.log('install outcome:', outcome);
-          deferredPrompt = null;
-        }
-      });
-    }
-  });
-</script>
   </head>
   <body>
     <main class="app">
@@ -544,6 +517,7 @@
         <div class="tools">
           <label class="tool date-label"
             ><span>날짜 </span><input id="date" type="date" /></label
+          ><button class="tool primary" id="installApp">앱 설치</button
           ><button class="tool" id="exportJson">JSON 내보내기</button
           ><button class="tool" id="importJson">JSON 가져오기</button
           ><button class="tool primary" id="exportHtml">HTML 출력</button
@@ -932,14 +906,81 @@
             "text/html;charset=utf-8",
           );
         };
-        load();
-        if ("serviceWorker" in navigator) {
-          window.addEventListener("load", () => {
-            navigator.serviceWorker
-              .register("./sw.js", { scope: "./" })
-              .catch(() => {});
+        function setupInstallPrompt() {
+          const installButton = q("#installApp");
+          let installPrompt = null;
+          const isStandalone = () =>
+            window.matchMedia("(display-mode: standalone)").matches ||
+            window.navigator.standalone === true;
+          const isInstallableOrigin = () =>
+            location.protocol === "https:" ||
+            ["localhost", "127.0.0.1", "[::1]"].includes(location.hostname);
+          const refreshButton = () => {
+            installButton.hidden = isStandalone();
+            installButton.textContent = installPrompt ? "앱 설치" : "설치 안내";
+          };
+          const installHelp = () => {
+            if (isStandalone()) {
+              notice("이미 앱으로 실행 중입니다");
+              return;
+            }
+            if (!isInstallableOrigin()) {
+              alert(
+                "PWA 설치는 HTTPS 또는 http://localhost, http://127.0.0.1 에서만 가능합니다.\n\n현재 페이지를 file:// 로 열었다면 로컬 서버나 GitHub Pages HTTPS 주소로 다시 열어 주세요.",
+              );
+              return;
+            }
+            alert(
+              "Chrome이 아직 설치 프롬프트를 준비하지 않았습니다.\n\n1. 페이지를 한 번 클릭하거나 입력합니다.\n2. 20-30초 정도 머문 뒤 다시 누릅니다.\n3. 그래도 안 되면 Chrome 오른쪽 위 메뉴 > 저장 및 공유 > 페이지를 앱으로 설치를 선택합니다.\n\n이미 설치된 앱이면 설치 프롬프트가 다시 뜨지 않습니다.",
+            );
+          };
+
+          window.addEventListener("beforeinstallprompt", (event) => {
+            event.preventDefault();
+            installPrompt = event;
+            refreshButton();
           });
+          window.addEventListener("appinstalled", () => {
+            installPrompt = null;
+            refreshButton();
+            notice("앱 설치가 완료되었습니다");
+          });
+          installButton.onclick = async () => {
+            if (!installPrompt) {
+              installHelp();
+              return;
+            }
+            installPrompt.prompt();
+            const choice = await installPrompt.userChoice;
+            installPrompt = null;
+            refreshButton();
+            notice(
+              choice.outcome === "accepted"
+                ? "앱 설치를 시작했습니다"
+                : "앱 설치를 취소했습니다",
+            );
+          };
+          refreshButton();
         }
+
+        function registerServiceWorker() {
+          if (!("serviceWorker" in navigator)) {
+            notice("이 브라우저는 서비스워커를 지원하지 않습니다");
+            return;
+          }
+          navigator.serviceWorker
+            .register("./sw.js", { scope: "./" })
+            .then((registration) => {
+              registration.update();
+              return navigator.serviceWorker.ready;
+            })
+            .then(() => notice("오프라인 사용 준비됨"))
+            .catch(() => notice("서비스워커 등록에 실패했습니다"));
+        }
+
+        load();
+        setupInstallPrompt();
+        registerServiceWorker();
       })();
     </script>
   </body>
