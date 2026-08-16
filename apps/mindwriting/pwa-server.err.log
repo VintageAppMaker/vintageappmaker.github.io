@@ -1,0 +1,7 @@
+127.0.0.1 - - [16/Aug/2026 09:12:45] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [16/Aug/2026 09:12:45] "GET /index.html HTTP/1.1" 200 -
+127.0.0.1 - - [16/Aug/2026 09:12:45] "GET /manifest.webmanifest HTTP/1.1" 200 -
+127.0.0.1 - - [16/Aug/2026 09:12:45] "GET /sw.js HTTP/1.1" 200 -
+127.0.0.1 - - [16/Aug/2026 09:12:45] "GET /icons/icon-192.png HTTP/1.1" 200 -
+127.0.0.1 - - [16/Aug/2026 09:12:45] "GET /icons/icon-512.png HTTP/1.1" 200 -
+127.0.0.1 - - [16/Aug/2026 09:12:45] "GET /icons/icon-maskable-512.png HTTP/1.1" 200 -

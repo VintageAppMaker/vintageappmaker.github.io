@@ -2,8 +2,9 @@
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
     <meta name="theme-color" content="#708169" />
+<meta name="background_color" content="#fffdf4" />
     <meta name="description" content="하루 마음 상태와 회복 행동을 기록하는 수행노트" />
     <meta name="application-name" content="마음회복 노트" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -15,6 +16,7 @@
     <link rel="manifest" href="./manifest.webmanifest" type="application/manifest+json" />
     <link rel="icon" href="./icons/icon-192.png" sizes="192x192" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+<link rel="apple-touch-icon" href="./icons/icon-180.png" sizes="180x180" />
     <title>마음회복 1일 수행노트</title>
     <style>
       :root {
@@ -507,6 +509,33 @@
         }
       }
     </style>
+<script>
+  // Capture beforeinstallprompt to provide a custom install button
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Create a simple install button if not already present
+    if (!document.getElementById('installBtn')) {
+      const btn = document.createElement('button');
+      btn.id = 'installBtn';
+      btn.className = 'tool primary';
+      btn.textContent = '앱 설치';
+      btn.style.position = 'fixed';
+      btn.style.bottom = '1rem';
+      btn.style.right = '1rem';
+      document.body.appendChild(btn);
+      btn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          console.log('install outcome:', outcome);
+          deferredPrompt = null;
+        }
+      });
+    }
+  });
+</script>
   </head>
   <body>
     <main class="app">
