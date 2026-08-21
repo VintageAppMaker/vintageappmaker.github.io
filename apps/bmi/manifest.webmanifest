@@ -1,0 +1,21 @@
+{
+  "name": "BMI 무지노트",
+  "short_name": "BMI노트",
+  "description": "키와 몸무게를 기록하고 BMI 변화를 확인하는 무지노트 스타일 앱",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fbfaf3",
+  "theme_color": "#477664",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "lifestyle", "utilities"]
+}
