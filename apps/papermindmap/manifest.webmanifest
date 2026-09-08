@@ -1,0 +1,26 @@
+{
+  "name": "연필 생각지도",
+  "short_name": "생각지도",
+  "description": "손그림 종이 느낌의 마인드맵 작성 도구",
+  "lang": "ko",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#c9b895",
+  "background_color": "#cdbd98",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/maskable-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="연필 생각지도">
+  <rect width="180" height="180" rx="34" fill="#cdbd98"/>
+  <ellipse cx="90" cy="91" rx="40" ry="26" fill="#ded1af" stroke="#292923" stroke-width="6" transform="rotate(-5 90 91)"/>
+  <ellipse cx="52" cy="58" rx="25" ry="16" fill="#ded1af" stroke="#9b493c" stroke-width="5" transform="rotate(7 52 58)"/>
+  <ellipse cx="128" cy="63" rx="27" ry="16" fill="#ded1af" stroke="#49677a" stroke-width="5" transform="rotate(-8 128 63)"/>
+  <ellipse cx="127" cy="126" rx="27" ry="16" fill="#ded1af" stroke="#65704a" stroke-width="5" transform="rotate(6 127 126)"/>
+  <path d="M66 77c-9-7-17-13-24-16M113 77c8-6 16-10 25-13M112 107c8 7 15 12 23 17" fill="none" stroke="#292923" stroke-width="4.5" stroke-linecap="round" opacity=".72"/>
+  <path d="M73 93c12-7 26-9 40-5M78 103c9 3 20 3 34 0" fill="none" stroke="#292923" stroke-width="5" stroke-linecap="round"/>
+</svg>
