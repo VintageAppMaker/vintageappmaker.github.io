@@ -1,0 +1,26 @@
+{
+  "name": "남광쉐르빌 매뉴얼",
+  "short_name": "남광쉐르빌",
+  "description": "남광쉐르빌 입주민을 위한 건물 관리 매뉴얼",
+  "lang": "ko",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#ecebe7",
+  "theme_color": "#ecebe7",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
