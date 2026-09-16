@@ -2,7 +2,7 @@
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="theme-color" content="#708169" />
     <meta name="description" content="하루 마음 상태와 회복 행동을 기록하는 수행노트" />
     <meta name="application-name" content="마음회복 노트" />
@@ -104,6 +104,23 @@
         background: var(--sage);
         color: #fff;
         border-color: var(--sage);
+      }
+      .tool:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      body.readonly .paper {
+        cursor: grab;
+        user-select: none;
+        touch-action: pan-x pan-y pinch-zoom;
+      }
+      body.readonly .paper.dragging {
+        cursor: grabbing;
+      }
+      body.readonly .paper :is(input, textarea, button, select) {
+        pointer-events: none;
+        opacity: 1;
+        -webkit-text-fill-color: currentColor;
       }
       .tool input {
         border: 0;
@@ -515,6 +532,7 @@
       <nav class="toolbar">
         <div class="brand"><b>葉</b><span>마음회복 노트</span></div>
         <div class="tools">
+          <button class="tool" id="readonly" type="button" aria-pressed="false">readonly</button>
           <label class="tool date-label"
             ><span>날짜 </span><input id="date" type="date" /></label
           ><button class="tool primary" id="installApp">앱 설치</button
@@ -690,6 +708,7 @@
         let archive = {},
           date = today(),
           entry = blank(date),
+          readOnly = false,
           timer;
         const normalize = (d, v = {}) => {
           let worries =
@@ -726,8 +745,46 @@
                 "'": "&#39;",
               })[c],
           );
-        const notice = (s) => (q("#notice").textContent = s);
+        const notice = (s) => (q("#notice").textContent = readOnly
+          ? "읽기 전용 · 확대/축소 및 스크롤·드래그로 이동 가능"
+          : s);
+        function applyReadOnly() {
+          document.body.classList.toggle("readonly", readOnly);
+          q("#readonly").setAttribute("aria-pressed", String(readOnly));
+          q("#readonly").classList.toggle("primary", readOnly);
+          q("#readonly").textContent = readOnly ? "readonly · ON" : "readonly";
+          qa(".app input, .app textarea, .app select, .app button").forEach((el) => {
+            if (el.id !== "readonly") el.disabled = readOnly;
+          });
+        }
+        q("#readonly").onclick = () => {
+          readOnly = !readOnly;
+          applyReadOnly();
+          notice(readOnly ? "" : "편집 모드 · 자동 저장됩니다");
+        };
+        const paper = q(".paper");
+        let drag = null;
+        paper.addEventListener("pointerdown", (e) => {
+          if (!readOnly || e.pointerType !== "mouse" || e.button !== 0) return;
+          e.preventDefault();
+          drag = { id: e.pointerId, x: e.clientX, y: e.clientY,
+            left: window.scrollX, top: window.scrollY };
+          paper.setPointerCapture(e.pointerId);
+          paper.classList.add("dragging");
+        });
+        paper.addEventListener("pointermove", (e) => {
+          if (!drag || drag.id !== e.pointerId) return;
+          window.scrollTo(drag.left + drag.x - e.clientX, drag.top + drag.y - e.clientY);
+        });
+        const endDrag = () => {
+          drag = null;
+          paper.classList.remove("dragging");
+        };
+        paper.addEventListener("pointerup", endDrag);
+        paper.addEventListener("pointercancel", endDrag);
+        paper.addEventListener("lostpointercapture", endDrag);
         const save = () => {
+          if (readOnly) return;
           clearTimeout(timer);
           timer = setTimeout(() => {
             entry.updatedAt = new Date().toISOString();
@@ -777,6 +834,7 @@
             )
             .join("");
           renderDates();
+          applyReadOnly();
         }
         function renderDates() {
           const ds = Object.keys(archive).sort().reverse();
@@ -792,6 +850,7 @@
               .join("");
         }
         document.addEventListener("input", (e) => {
+          if (readOnly) return;
           const t = e.target;
           if (t.dataset.field) {
             entry[t.dataset.field] = t.value;
@@ -809,6 +868,7 @@
           }
         });
         document.addEventListener("click", (e) => {
+          if (readOnly) return;
           const t = e.target.closest("button");
           if (!t) return;
           if (t.dataset.duration) {
@@ -836,11 +896,13 @@
         q("#date").onchange = (e) => setDate(e.target.value);
         q("#dates").onchange = (e) => setDate(e.target.value);
         q("#addWorry").onclick = () => {
+          if (readOnly) return;
           entry.worries.push(newWorry());
           render();
           save();
         };
         q("#deleteDay").onclick = () => {
+          if (readOnly) return;
           if (!archive[date] || !confirm(`${date} 기록을 삭제할까요?`)) return;
           delete archive[date];
           localStorage.setItem(KEY, JSON.stringify(archive));
@@ -874,8 +936,10 @@
         q("#importJson").onclick = () => q("#file").click();
         q("#file").onchange = async (e) => {
           try {
+            if (readOnly) return;
             const p = JSON.parse(await e.target.files[0].text()),
               incoming = p.entries || p;
+            if (readOnly) return;
             Object.entries(incoming).forEach(
               ([d, v]) => (archive[d] = normalize(d, v)),
             );
