@@ -4,15 +4,22 @@
   "description": "Local-first daily timeboxing planner.",
   "lang": "ko",
   "dir": "ltr",
-  "id": "index.html",
+  "id": "/apps/timebox/",
   "start_url": "index.html",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait-primary",
   "background_color": "#d7d7d3",
   "theme_color": "#292929",
-  "categories": ["productivity", "utilities"],
+  "categories": [
+    "productivity",
+    "utilities"
+  ],
   "icons": [
     {
       "src": "./icons/timebox-icon-192.png",

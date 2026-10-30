@@ -17,5 +17,10 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["health", "lifestyle", "utilities"]
+  "categories": [
+    "health",
+    "lifestyle",
+    "utilities"
+  ],
+  "id": "/apps/bmi/"
 }

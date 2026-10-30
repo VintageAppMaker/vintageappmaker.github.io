@@ -3,7 +3,7 @@
   "short_name": "코넬노트",
   "description": "오프라인에서도 사용할 수 있는 코넬노트 웹앱",
   "lang": "ko-KR",
-  "id": "./",
+  "id": "/apps/conellnote/",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

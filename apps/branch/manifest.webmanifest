@@ -1,1 +1,21 @@
-{"id":"./index.html","name":"Branch — 아웃라인 노트","short_name":"Branch","description":"생각을 정리하는 가벼운 아웃라인 노트","lang":"ko","start_url":"./index.html","scope":"./","display":"standalone","orientation":"any","background_color":"#fafbf9","theme_color":"#fafbf9","icons":[{"src":"./icons/branch.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]}
+{
+  "id": "/apps/branch/",
+  "name": "Branch — 아웃라인 노트",
+  "short_name": "Branch",
+  "description": "생각을 정리하는 가벼운 아웃라인 노트",
+  "lang": "ko",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fafbf9",
+  "theme_color": "#fafbf9",
+  "icons": [
+    {
+      "src": "./icons/branch.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

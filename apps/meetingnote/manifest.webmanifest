@@ -9,7 +9,10 @@
   "orientation": "portrait-primary",
   "background_color": "#dedbd2",
   "theme_color": "#26384a",
-  "categories": ["productivity", "business"],
+  "categories": [
+    "productivity",
+    "business"
+  ],
   "icons": [
     {
       "src": "./icons/icon.svg",
@@ -29,5 +32,6 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "id": "/apps/meetingnote/"
 }

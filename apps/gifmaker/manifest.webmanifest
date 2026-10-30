@@ -1,5 +1,5 @@
 {
-  "id": "./",
+  "id": "/apps/gifmaker/",
   "name": "세로형 GIF 메이커",
   "short_name": "GIF 메이커",
   "description": "여러 이미지로 세로형 GIF를 만들고 Animated GIF를 재생하는 도구",
